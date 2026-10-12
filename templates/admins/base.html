@@ -1,0 +1,1054 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f8fafc">
+    <link rel="icon" href="{% static 'HIC_LOGO_TRANSPARENT.png' %}" type="image/png">
+
+    <title>{% block title %}HIC Faculty Evaluation{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Toastify -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        hic: {
+                            ink: "#172033",
+                            muted: "#667085",
+                            line: "#e7ebf1",
+                            canvas: "#f6f8fb",
+                            brand: "#2457c5",
+                            brandDark: "#1946a3"
+                        }
+                    },
+                    boxShadow: {
+                        soft: "0 8px 30px rgba(23, 32, 51, 0.045)"
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        :root {
+            color-scheme: light;
+            --hic-ink: #172033;
+            --hic-muted: #667085;
+            --hic-line: #e7ebf1;
+            --hic-canvas: #f6f8fb;
+            --hic-brand: #2457c5;
+            --sidebar-width: 252px;
+            --sidebar-collapsed-width: 76px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+            background: var(--hic-canvas);
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--hic-ink);
+            background: var(--hic-canvas);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                BlinkMacSystemFont, "Segoe UI", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 3px solid rgba(36, 87, 197, .22);
+            outline-offset: 2px;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+        }
+
+        .app-sidebar {
+            width: var(--sidebar-width);
+            flex: 0 0 var(--sidebar-width);
+            background: #fff;
+            border-right: 1px solid var(--hic-line);
+            transition: width .22s ease, flex-basis .22s ease, transform .22s ease;
+            z-index: 60;
+        }
+
+        .app-sidebar.is-collapsed {
+            width: var(--sidebar-collapsed-width);
+            flex-basis: var(--sidebar-collapsed-width);
+        }
+
+        .app-sidebar.is-collapsed .sidebar-copy,
+        .app-sidebar.is-collapsed .brand-copy,
+        .app-sidebar.is-collapsed .nav-section-label {
+            display: none;
+        }
+
+        .app-sidebar.is-collapsed .sidebar-link {
+            justify-content: center;
+            padding-inline: 0;
+        }
+
+        .app-sidebar.is-collapsed .sidebar-link .material-icons-outlined {
+            margin: 0;
+        }
+
+        .sidebar-link {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #596579;
+            font-size: 14px;
+            font-weight: 550;
+            transition: background .16s ease, color .16s ease;
+        }
+
+        .sidebar-link .material-icons-outlined,
+        .sidebar-link .material-icons {
+            font-size: 21px;
+            flex: 0 0 22px;
+        }
+
+        .sidebar-link:hover {
+            background: #f4f6fa;
+            color: #172033;
+        }
+
+        .sidebar-link.is-active {
+            background: #edf3ff;
+            color: #214fb2;
+        }
+
+        .sidebar-link.is-active .material-icons-outlined,
+        .sidebar-link.is-active .material-icons {
+            color: #2457c5;
+        }
+
+        .sidebar-link .sidebar-copy {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sidebar-tooltip {
+            position: absolute;
+            left: calc(100% + 10px);
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            border-radius: 7px;
+            background: #172033;
+            color: white;
+            padding: 6px 9px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .app-sidebar.is-collapsed .sidebar-link:hover .sidebar-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .app-main {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .app-topbar {
+            min-height: 70px;
+            background: rgba(255, 255, 255, .92);
+            border-bottom: 1px solid var(--hic-line);
+            backdrop-filter: blur(14px);
+        }
+
+        .page-content {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 26px 28px 40px;
+        }
+
+        .mobile-bottom-nav {
+            padding-bottom: max(6px, env(safe-area-inset-bottom));
+            background: rgba(255, 255, 255, .96);
+            border: 1px solid rgba(231, 235, 241, .95);
+            box-shadow: 0 8px 30px rgba(23, 32, 51, .12);
+            backdrop-filter: blur(18px);
+        }
+
+        .mobile-nav-link {
+            display: flex;
+            min-width: 0;
+            flex: 1;
+            min-height: 52px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            border-radius: 10px;
+            color: #778195;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .mobile-nav-link .material-icons,
+        .mobile-nav-link .material-icons-outlined {
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .mobile-nav-link.is-active {
+            color: #2457c5;
+            background: #edf3ff;
+        }
+
+        .more-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: #344054;
+            font-size: 14px;
+        }
+
+        .more-menu-item:hover {
+            background: #f6f8fb;
+            color: #2457c5;
+        }
+
+        .mobile-drawer-backdrop {
+            background: rgba(15, 23, 42, .42);
+            backdrop-filter: blur(2px);
+        }
+
+        .mobile-drawer {
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+        }
+
+        .modal-content {
+            border: 0;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .modal-footer .btn,
+        .modal-header .btn-close {
+            box-shadow: none !important;
+        }
+
+        /* ==========================================
+           SaaS Toast Notifications
+        ========================================== */
+
+        .toastify.hic-toast {
+            display: flex;
+            align-items: center;
+            width: max-content;
+            min-width: min(300px, calc(100vw - 28px));
+            max-width: min(400px, calc(100vw - 28px));
+            margin: 10px;
+            padding: 14px 14px;
+            border: 1px solid #e7ebf1;
+            border-radius: 16px;
+            background: #fff;
+            color: #172033;
+            box-shadow:
+                0 12px 32px rgba(15, 23, 42, .10),
+                0 3px 8px rgba(15, 23, 42, .035);
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.5;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            opacity: 1;
+            animation: hic-toast-enter .25s cubic-bezier(.2, .8, .2, 1) both;
+        }
+
+        .hic-toast__layout {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hic-toast__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 36px;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            font-size: 21px;
+        }
+
+        .hic-toast__content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+            gap: 2px;
+        }
+
+        .hic-toast__title {
+            display: block;
+            color: #172033;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .hic-toast__message {
+            display: block;
+            color: #667085;
+            font-size: 12px;
+            font-weight: 450;
+            line-height: 1.55;
+            overflow-wrap: anywhere;
+        }
+
+        .hic-toast .toast-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 28px;
+            width: 28px;
+            height: 28px;
+            margin-left: 8px;
+            padding: 0;
+            border-radius: 8px;
+            color: #98a2b3;
+            background: transparent;
+            font-size: 19px;
+            font-weight: 400;
+            line-height: 1;
+            opacity: 1;
+            transition: background .15s ease, color .15s ease;
+        }
+
+        .hic-toast .toast-close:hover {
+            background: #f2f4f7;
+            color: #344054;
+        }
+
+        /* Success */
+        .hic-toast--success {
+            border-color: #d1fae5 !important;
+        }
+
+        .hic-toast--success .hic-toast__icon {
+            color: #15803d;
+            background: #dcfce7;
+        }
+
+        /* Error */
+        .hic-toast--error {
+            border-color: #fee2e2 !important;
+        }
+
+        .hic-toast--error .hic-toast__icon {
+            color: #dc2626;
+            background: #fee2e2;
+        }
+
+        /* Warning */
+        .hic-toast--warning {
+            border-color: #fef3c7 !important;
+        }
+
+        .hic-toast--warning .hic-toast__icon {
+            color: #b45309;
+            background: #fef3c7;
+        }
+
+        /* Information */
+        .hic-toast--info {
+            border-color: #dbeafe !important;
+        }
+
+        .hic-toast--info .hic-toast__icon {
+            color: #2563eb;
+            background: #dbeafe;
+        }
+
+        @keyframes hic-toast-enter {
+            from {
+                opacity: 0;
+                transform: translate3d(14px, -5px, 0) scale(.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .app-sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                width: min(300px, 86vw);
+                flex-basis: auto;
+                transform: translateX(-105%);
+                box-shadow: 20px 0 50px rgba(15, 23, 42, .12);
+            }
+
+            .app-sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .app-sidebar.is-collapsed {
+                width: min(300px, 86vw);
+            }
+
+            .app-sidebar.is-collapsed .sidebar-copy,
+            .app-sidebar.is-collapsed .brand-copy,
+            .app-sidebar.is-collapsed .nav-section-label {
+                display: initial;
+            }
+
+            .app-sidebar.is-collapsed .sidebar-link {
+                justify-content: flex-start;
+                padding: 10px 12px;
+            }
+
+            .app-sidebar.is-collapsed .sidebar-tooltip {
+                display: none;
+            }
+
+            .page-content {
+                padding: 18px 14px 108px;
+            }
+
+            .app-topbar {
+                min-height: 62px;
+            }
+
+            .toastify.hic-toast {
+                width: calc(100vw - 24px);
+                min-width: 0;
+                max-width: calc(100vw - 24px);
+                margin: 6px;
+                padding: 12px;
+                border-radius: 14px;
+            }
+
+            .hic-toast__icon {
+                flex-basis: 33px;
+                width: 33px;
+                height: 33px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            #mobileDrawerBackdrop {
+                display: none !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    {% with current=request.resolver_match.url_name %}
+    <div class="app-shell flex">
+
+        <!-- Mobile drawer backdrop -->
+        <div id="mobileDrawerBackdrop" class="mobile-drawer-backdrop fixed inset-0 z-[55] hidden" aria-hidden="true">
+        </div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="app-sidebar flex min-h-screen flex-col">
+
+            <div class="flex h-[74px] items-center gap-3 border-b border-[#e7ebf1] px-4">
+                <a href="{% url 'dashboard_home' %}" class="flex min-w-0 flex-1 items-center gap-3">
+                    <img src="{% static 'HIC_LOGO_TRANSPARENT.png' %}" alt="Holy Infant College logo"
+                        class="h-10 w-10 shrink-0 object-contain">
+
+                    <div class="brand-copy min-w-0">
+                        <p class="truncate text-[14px] font-bold tracking-tight text-[#172033]">
+                            HIC Faculty Eval
+                        </p>
+                        <p class="mt-0.5 truncate text-[11px] text-[#8791a2]">
+                            Faculty Evaluation System
+                        </p>
+                    </div>
+                </a>
+
+                <button type="button" id="sidebarToggle"
+                    class="hidden rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 md:inline-flex"
+                    aria-label="Collapse sidebar" title="Collapse sidebar">
+                    <span id="sidebarToggleIcon" class="material-icons-outlined text-[20px]">
+                        chevron_left
+                    </span>
+                </button>
+
+                <button type="button" id="mobileDrawerClose"
+                    class="ml-auto rounded-lg p-2 text-slate-500 hover:bg-slate-100 md:hidden"
+                    aria-label="Close navigation">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto px-3 py-5">
+                <p class="nav-section-label mb-2 px-3 text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">
+                    Workspace
+                </p>
+
+                <a href="{% url 'dashboard_home' %}"
+                    class="sidebar-link group relative {% if current == 'dashboard_home' %}is-active{% endif %}">
+                    <span class="material-icons-outlined">space_dashboard</span>
+                    <span class="sidebar-copy">Dashboard</span>
+                    <span class="sidebar-tooltip">Dashboard</span>
+                </a>
+
+                <a href="{% url 'sections_list' %}"
+                    class="sidebar-link group relative {% if current == 'sections_list' %}is-active{% endif %}">
+                    <span class="material-icons-outlined">view_quilt</span>
+                    <span class="sidebar-copy">Sections</span>
+                    <span class="sidebar-tooltip">Sections</span>
+                </a>
+
+                <a href="{% url 'teachers_list' %}"
+                    class="sidebar-link group relative {% if current == 'teachers_list' %}is-active{% endif %}">
+                    <span class="material-icons-outlined">groups</span>
+                    <span class="sidebar-copy">Faculty</span>
+                    <span class="sidebar-tooltip">Faculty</span>
+                </a>
+
+                <a href="{% url 'courses_list' %}"
+                    class="sidebar-link group relative {% if current == 'courses_list' %}is-active{% endif %}">
+                    <span class="material-icons-outlined">school</span>
+                    <span class="sidebar-copy">Courses</span>
+                    <span class="sidebar-tooltip">Courses</span>
+                </a>
+
+                <a href="{% url 'subjects_list' %}"
+                    class="sidebar-link group relative {% if current == 'subjects_list' %}is-active{% endif %}">
+                    <span class="material-icons-outlined">menu_book</span>
+                    <span class="sidebar-copy">Subjects</span>
+                    <span class="sidebar-tooltip">Subjects</span>
+                </a>
+
+                <a href="{% url 'evaluation_periods_list' %}"
+                    class="sidebar-link group relative {% if current == 'evaluation_periods_list' %}is-active{% endif %}">
+                    <span class="material-icons-outlined">event_available</span>
+                    <span class="sidebar-copy">Evaluation Periods</span>
+                    <span class="sidebar-tooltip">Evaluation Periods</span>
+                </a>
+
+                <a href="{% url 'evaluations_list' %}"
+                    class="sidebar-link group relative {% if current == 'evaluations_list' %}is-active{% endif %}">
+                    <span class="material-icons-outlined">fact_check</span>
+                    <span class="sidebar-copy">Evaluations</span>
+                    <span class="sidebar-tooltip">Evaluations</span>
+                </a>
+            </nav>
+
+            <div class="border-t border-[#e7ebf1] p-3">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal"
+                    class="sidebar-link group relative w-full text-rose-600 hover:bg-rose-50 hover:text-rose-700">
+                    <span class="material-icons-outlined">logout</span>
+                    <span class="sidebar-copy">Sign out</span>
+                    <span class="sidebar-tooltip">Sign out</span>
+                </button>
+
+                <div class="brand-copy px-3 pb-1 pt-3 text-[10px] text-slate-400">
+                    HIC · Faculty Evaluation
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main application -->
+        <div class="app-main flex min-h-screen min-w-0 flex-col">
+
+            <!-- Topbar -->
+            <header class="app-topbar sticky top-0 z-40 flex items-center justify-between gap-3 px-4 md:px-7">
+                <div class="flex min-w-0 items-center gap-3">
+                    <button type="button" id="mobileDrawerOpen"
+                        class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm md:hidden"
+                        aria-label="Open navigation" aria-expanded="false">
+                        <span class="material-icons-outlined">menu</span>
+                    </button>
+
+                    <div class="min-w-0">
+                        <p class="truncate text-[10px] font-bold uppercase tracking-[.13em] text-slate-400">
+                            Holy Infant College of Tacloban City
+                        </p>
+                        <h1 class="truncate text-[17px] font-bold tracking-tight text-[#172033] md:text-[19px]">
+                            {% block page_title %}Dashboard Overview{% endblock %}
+                        </h1>
+                    </div>
+                </div>
+
+                <div class="flex shrink-0 items-center gap-2">
+                    <span class="hidden text-right sm:block">
+                        <span class="block max-w-[180px] truncate text-[13px] font-semibold text-slate-700">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </span>
+                        <span class="block text-[11px] text-slate-400">
+                            Administrator
+                        </span>
+                    </span>
+
+                    <button type="button" id="profileButton"
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-[#eaf0ff] text-[14px] font-bold text-[#2457c5] ring-1 ring-[#d7e3ff]"
+                        aria-label="Account options" aria-expanded="false">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </button>
+
+                    <div id="profileMenu"
+                        class="absolute right-4 top-[60px] z-50 hidden w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl md:right-7">
+                        <div class="border-b border-slate-100 px-4 py-3">
+                            <p class="truncate text-sm font-semibold text-slate-800">
+                                {{ request.user.get_full_name|default:request.user.username }}
+                            </p>
+                            <p class="truncate text-xs text-slate-500">
+                                {{ request.user.username }}
+                            </p>
+                        </div>
+
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal"
+                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-rose-600 hover:bg-rose-50">
+                            <span class="material-icons-outlined text-[19px]">logout</span>
+                            Sign out
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page content -->
+            <main id="mainContent" class="min-w-0 flex-1">
+                <div class="page-content">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+    {% endwith %}
+
+    <!-- Mobile bottom navigation -->
+    <nav class="mobile-bottom-nav fixed bottom-2 left-2 right-2 z-50 flex rounded-2xl p-1.5 md:hidden"
+        aria-label="Primary navigation">
+
+        <a href="{% url 'dashboard_home' %}"
+            class="mobile-nav-link {% if current == 'dashboard_home' %}is-active{% endif %}">
+            <span class="material-icons-outlined">space_dashboard</span>
+            <span>Home</span>
+        </a>
+
+        <a href="{% url 'teachers_list' %}"
+            class="mobile-nav-link {% if current == 'teachers_list' %}is-active{% endif %}">
+            <span class="material-icons-outlined">groups</span>
+            <span>Faculty</span>
+        </a>
+
+        <a href="{% url 'courses_list' %}"
+            class="mobile-nav-link {% if current == 'courses_list' %}is-active{% endif %}">
+            <span class="material-icons-outlined">school</span>
+            <span>Courses</span>
+        </a>
+
+        <a href="{% url 'evaluation_periods_list' %}"
+            class="mobile-nav-link {% if current == 'evaluation_periods_list' %}is-active{% endif %}">
+            <span class="material-icons-outlined">event_available</span>
+            <span>Periods</span>
+        </a>
+
+        <a href="{% url 'evaluations_list' %}"
+            class="mobile-nav-link {% if current == 'evaluations_list' %}is-active{% endif %}">
+            <span class="material-icons-outlined">fact_check</span>
+            <span>Evaluations</span>
+        </a>
+
+        <div class="relative flex min-w-0 flex-1">
+            <button type="button" id="mobileMoreButton" class="mobile-nav-link" aria-expanded="false"
+                aria-controls="mobileMoreMenu">
+                <span class="material-icons-outlined">more_horiz</span>
+                <span>More</span>
+            </button>
+
+            <div id="mobileMoreMenu"
+                class="absolute bottom-[62px] right-0 hidden w-60 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+
+                <a href="{% url 'sections_list' %}" class="more-menu-item">
+                    <span class="material-icons-outlined text-[20px]">view_quilt</span>
+                    Sections
+                </a>
+
+                <a href="{% url 'subjects_list' %}" class="more-menu-item">
+                    <span class="material-icons-outlined text-[20px]">menu_book</span>
+                    Subjects
+                </a>
+
+                <button type="button" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal"
+                    class="more-menu-item w-full text-left text-rose-600">
+                    <span class="material-icons-outlined text-[20px]">logout</span>
+                    Sign out
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Logout confirmation modal -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmTitle"
+        aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered mx-3 mx-sm-auto">
+            <div class="modal-content">
+
+                <div class="modal-header border-0 px-4 pb-2 pt-4">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-11 w-11 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+                            <span class="material-icons-outlined">logout</span>
+                        </span>
+
+                        <div>
+                            <h2 class="modal-title text-base font-bold text-slate-900" id="logoutConfirmTitle">
+                                Sign out?
+                            </h2>
+                            <p class="mt-1 text-xs text-slate-500">
+                                You can sign in again at any time.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-close ms-auto self-start" data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+                </div>
+
+                <div class="px-4 pb-2 pt-3 text-sm leading-6 text-slate-600">
+                    Are you sure you want to end your current session?
+                </div>
+
+                <div class="modal-footer border-0 px-4 pb-4 pt-3">
+                    <button type="button" class="btn btn-light rounded-3 px-4 py-2 text-sm" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <a href="{% url 'admin_logout' %}"
+                        class="btn rounded-3 bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">
+                        Sign out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toastify library -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- Centralized SaaS Toast helper -->
+    <script>
+        (function () {
+            "use strict";
+
+            const toastConfig = {
+                success: {
+                    title: "Success",
+                    icon: "check_circle",
+                    className: "hic-toast--success"
+                },
+                error: {
+                    title: "Something went wrong",
+                    icon: "error",
+                    className: "hic-toast--error"
+                },
+                warning: {
+                    title: "Attention",
+                    icon: "warning",
+                    className: "hic-toast--warning"
+                },
+                info: {
+                    title: "Notification",
+                    icon: "info",
+                    className: "hic-toast--info"
+                }
+            };
+
+            window.showToast = function (
+                message,
+                type = "success",
+                duration = 3500
+            ) {
+                if (typeof Toastify !== "function") {
+                    console.error("Toastify failed to load.");
+                    return;
+                }
+
+                const normalizedType = Object.prototype.hasOwnProperty.call(
+                    toastConfig,
+                    type
+                ) ? type : "info";
+
+                const config = toastConfig[normalizedType];
+
+                const layout = document.createElement("div");
+                layout.className = "hic-toast__layout";
+
+                const icon = document.createElement("span");
+                icon.className = "hic-toast__icon material-icons-outlined";
+                icon.textContent = config.icon;
+                icon.setAttribute("aria-hidden", "true");
+
+                const content = document.createElement("div");
+                content.className = "hic-toast__content";
+
+                const title = document.createElement("span");
+                title.className = "hic-toast__title";
+                title.textContent = config.title;
+
+                const body = document.createElement("span");
+                body.className = "hic-toast__message";
+                body.textContent = String(message ?? "");
+
+                content.append(title, body);
+                layout.append(icon, content);
+
+                Toastify({
+                    node: layout,
+                    duration: Math.max(0, Number(duration) || 3500),
+                    gravity: "top",
+                    position: "right",
+                    close: true,
+                    stopOnFocus: true,
+                    className: "hic-toast " + config.className,
+                    escapeMarkup: false,
+                    style: {
+                        background: "#ffffff",
+                        color: "#172033"
+                    },
+                    onClick: function () { }
+                }).showToast();
+            };
+
+            // Display Django messages with the same SaaS toast design.
+            {% for message in messages %}
+            window.showToast(
+                "{{ message|escapejs }}",
+                "{% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}",
+                3500
+            );
+            {% endfor %}
+        })();
+    </script>
+
+    <!-- Sidebar, mobile navigation, and profile menu -->
+    <script>
+        (function () {
+            "use strict";
+
+            const sidebar = document.getElementById("sidebar");
+            const sidebarToggle = document.getElementById("sidebarToggle");
+            const sidebarToggleIcon = document.getElementById("sidebarToggleIcon");
+            const drawerBackdrop = document.getElementById("mobileDrawerBackdrop");
+            const drawerOpen = document.getElementById("mobileDrawerOpen");
+            const drawerClose = document.getElementById("mobileDrawerClose");
+            const profileButton = document.getElementById("profileButton");
+            const profileMenu = document.getElementById("profileMenu");
+            const moreButton = document.getElementById("mobileMoreButton");
+            const moreMenu = document.getElementById("mobileMoreMenu");
+
+            function setSidebarCollapsed(collapsed) {
+                sidebar.classList.toggle("is-collapsed", collapsed);
+
+                if (sidebarToggleIcon) {
+                    sidebarToggleIcon.textContent = collapsed
+                        ? "chevron_right"
+                        : "chevron_left";
+                }
+
+                if (sidebarToggle) {
+                    sidebarToggle.setAttribute(
+                        "aria-label",
+                        collapsed ? "Expand sidebar" : "Collapse sidebar"
+                    );
+
+                    sidebarToggle.title = collapsed
+                        ? "Expand sidebar"
+                        : "Collapse sidebar";
+                }
+
+                try {
+                    localStorage.setItem(
+                        "hicSidebarCollapsed",
+                        String(collapsed)
+                    );
+                } catch (error) { }
+            }
+
+            try {
+                if (window.matchMedia("(min-width: 768px)").matches) {
+                    setSidebarCollapsed(
+                        localStorage.getItem("hicSidebarCollapsed") === "true"
+                    );
+                }
+            } catch (error) {
+                setSidebarCollapsed(false);
+            }
+
+            sidebarToggle?.addEventListener("click", function () {
+                setSidebarCollapsed(
+                    !sidebar.classList.contains("is-collapsed")
+                );
+            });
+
+            function openDrawer() {
+                sidebar.classList.add("mobile-open");
+                drawerBackdrop.classList.remove("hidden");
+                drawerOpen?.setAttribute("aria-expanded", "true");
+                document.body.classList.add("overflow-hidden");
+            }
+
+            function closeDrawer() {
+                sidebar.classList.remove("mobile-open");
+                drawerBackdrop.classList.add("hidden");
+                drawerOpen?.setAttribute("aria-expanded", "false");
+                document.body.classList.remove("overflow-hidden");
+            }
+
+            drawerOpen?.addEventListener("click", openDrawer);
+            drawerClose?.addEventListener("click", closeDrawer);
+            drawerBackdrop?.addEventListener("click", closeDrawer);
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key !== "Escape") return;
+
+                closeDrawer();
+
+                profileMenu?.classList.add("hidden");
+                moreMenu?.classList.add("hidden");
+
+                profileButton?.setAttribute("aria-expanded", "false");
+                moreButton?.setAttribute("aria-expanded", "false");
+            });
+
+            window.addEventListener("resize", function () {
+                if (window.matchMedia("(min-width: 768px)").matches) {
+                    closeDrawer();
+                }
+            });
+
+            profileButton?.addEventListener("click", function (event) {
+                event.stopPropagation();
+
+                const willOpen = profileMenu.classList.contains("hidden");
+
+                profileMenu.classList.toggle("hidden", !willOpen);
+                profileButton.setAttribute(
+                    "aria-expanded",
+                    String(willOpen)
+                );
+
+                moreMenu?.classList.add("hidden");
+                moreButton?.setAttribute("aria-expanded", "false");
+            });
+
+            moreButton?.addEventListener("click", function (event) {
+                event.stopPropagation();
+
+                const willOpen = moreMenu.classList.contains("hidden");
+
+                moreMenu.classList.toggle("hidden", !willOpen);
+                moreButton.setAttribute(
+                    "aria-expanded",
+                    String(willOpen)
+                );
+
+                profileMenu?.classList.add("hidden");
+                profileButton?.setAttribute("aria-expanded", "false");
+            });
+
+            document.addEventListener("click", function (event) {
+                if (
+                    profileMenu &&
+                    !profileMenu.contains(event.target) &&
+                    !profileButton?.contains(event.target)
+                ) {
+                    profileMenu.classList.add("hidden");
+                    profileButton?.setAttribute("aria-expanded", "false");
+                }
+
+                if (
+                    moreMenu &&
+                    !moreMenu.contains(event.target) &&
+                    !moreButton?.contains(event.target)
+                ) {
+                    moreMenu.classList.add("hidden");
+                    moreButton?.setAttribute("aria-expanded", "false");
+                }
+            });
+        })();
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

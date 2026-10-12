@@ -1,0 +1,640 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8fafc">
+
+    <title>Admin Login</title>
+
+    <script>
+        // Apply saved theme before rendering to avoid a flash.
+        (function () {
+            try {
+                const savedTheme = localStorage.getItem("theme");
+                const prefersDark = window.matchMedia(
+                    "(prefers-color-scheme: dark)"
+                ).matches;
+
+                if (savedTheme === "dark" ||
+                    (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add("dark");
+                }
+            } catch (error) {
+                // Continue with the default light theme.
+            }
+        })();
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class"
+        };
+    </script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        rel="stylesheet"
+    >
+
+    <style>
+        :root {
+            color-scheme: light;
+            --page-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        html.dark {
+            color-scheme: dark;
+            --page-bg: #09090b;
+            --card-bg: #111113;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --border-color: #27272a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: var(--page-bg);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button,
+        a,
+        input {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .login-card {
+            animation: card-enter 450ms cubic-bezier(.2, .7, .3, 1) both;
+        }
+
+        @keyframes card-enter {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .field {
+            width: 100%;
+            height: 48px;
+            padding: 0 44px 0 43px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition:
+                border-color 160ms ease,
+                box-shadow 160ms ease,
+                background 160ms ease;
+        }
+
+        .field::placeholder {
+            color: #9ca3af;
+        }
+
+        .field:focus {
+            outline: none;
+            border-color: #52525b;
+            box-shadow: 0 0 0 3px rgb(113 113 122 / 13%);
+        }
+
+        .dark .field:focus {
+            border-color: #a1a1aa;
+            box-shadow: 0 0 0 3px rgb(161 161 170 / 12%);
+        }
+
+        .field-icon {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 19px;
+            pointer-events: none;
+        }
+
+        .icon-button {
+            display: inline-flex;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            transition: background 160ms ease, color 160ms ease;
+        }
+
+        .icon-button:hover {
+            background: rgb(127 127 127 / 8%);
+            color: var(--text-primary);
+        }
+
+        .login-button {
+            min-height: 48px;
+            transition:
+                background 160ms ease,
+                transform 160ms ease,
+                opacity 160ms ease;
+        }
+
+        .login-button:hover:not(:disabled) {
+            background: #27272a;
+        }
+
+        .dark .login-button:hover:not(:disabled) {
+            background: #e4e4e7;
+        }
+
+        .login-button:active:not(:disabled) {
+            transform: scale(.99);
+        }
+
+        .login-button:disabled {
+            cursor: wait;
+            opacity: .75;
+        }
+
+        .remember-checkbox {
+            width: 17px;
+            height: 17px;
+            accent-color: #18181b;
+            cursor: pointer;
+        }
+
+        .dark .remember-checkbox {
+            accent-color: #fafafa;
+        }
+
+        .message-enter {
+            animation: message-enter 200ms ease-out;
+        }
+
+        @keyframes message-enter {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen min-h-[100svh] flex flex-col">
+
+    <!-- Top navigation -->
+    <header class="w-full px-5 sm:px-8 py-4 sm:py-5">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+
+            <a
+                href="{% url 'home' %}"
+                class="inline-flex items-center gap-2.5 rounded-lg
+                       focus-visible:outline-none focus-visible:ring-2
+                       focus-visible:ring-zinc-500"
+                aria-label="Go to home page"
+            >
+                <span class="flex items-center justify-center w-9 h-9
+                             rounded-xl bg-zinc-950 text-white
+                             dark:bg-white dark:text-zinc-950">
+                    <span class="material-icons text-[21px]">
+                        admin_panel_settings
+                    </span>
+                </span>
+
+                <span class="text-sm font-semibold tracking-tight"
+                      style="color: var(--text-primary)">
+                    Admin Portal
+                </span>
+            </a>
+
+            <button
+                type="button"
+                id="themeToggle"
+                class="icon-button"
+                onclick="toggleTheme()"
+                aria-label="Switch color theme"
+                title="Switch color theme"
+            >
+                <span id="themeIcon" class="material-icons text-[19px]">
+                    dark_mode
+                </span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main login area -->
+    <main class="flex-1 flex items-center justify-center
+                 px-4 py-8 sm:px-6 sm:py-12">
+
+        <div class="login-card w-full max-w-[420px]">
+
+            <!-- Heading -->
+            <div class="mb-7 sm:mb-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span class="text-xs font-medium tracking-wide
+                                 uppercase text-zinc-500 dark:text-zinc-400">
+                        Secure administrator access
+                    </span>
+                </div>
+
+                <h1 class="text-[27px] sm:text-3xl font-semibold
+                           tracking-[-0.8px] leading-tight">
+                    Welcome back
+                </h1>
+
+                <p class="mt-2 text-sm leading-6
+                          text-zinc-500 dark:text-zinc-400">
+                    Sign in to manage your dashboard and administration tools.
+                </p>
+            </div>
+
+            <!-- Login panel -->
+            <section
+                class="rounded-2xl border p-5 sm:p-7 shadow-sm"
+                style="
+                    background: var(--card-bg);
+                    border-color: var(--border-color);
+                    box-shadow: 0 8px 30px rgb(0 0 0 / 3%);
+                "
+                aria-label="Administrator sign in"
+            >
+
+                <!-- Error messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.tags == 'error' %}
+                            <div
+                                class="message-enter flex items-start gap-3
+                                       mb-5 p-3.5 rounded-xl border
+                                       bg-red-50 border-red-200
+                                       text-red-700
+                                       dark:bg-red-950/30
+                                       dark:border-red-900
+                                       dark:text-red-300"
+                                role="alert"
+                            >
+                                <span class="material-icons text-[19px] mt-0.5">
+                                    error_outline
+                                </span>
+
+                                <p class="text-sm leading-5">
+                                    {{ message }}
+                                </p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <form
+                    id="loginForm"
+                    method="POST"
+                    class="space-y-5"
+                    autocomplete="on"
+                >
+                    {% csrf_token %}
+
+                    <!-- Username -->
+                    <div>
+                        <label
+                            for="username"
+                            class="block text-[13px] font-medium mb-2"
+                        >
+                            Username
+                        </label>
+
+                        <div class="relative">
+                            <span class="material-icons field-icon">
+                                person_outline
+                            </span>
+
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                required
+                                autofocus
+                                autocomplete="username"
+                                autocapitalize="none"
+                                spellcheck="false"
+                                placeholder="Enter your username"
+                                value="{{ username|default:'' }}"
+                                class="field"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label
+                                for="password"
+                                class="text-[13px] font-medium"
+                            >
+                                Password
+                            </label>
+                        </div>
+
+                        <div class="relative">
+                            <span class="material-icons field-icon">
+                                lock_outline
+                            </span>
+
+                            <input
+                                type="password"
+                                name="password"
+                                id="password"
+                                required
+                                autocomplete="current-password"
+                                placeholder="Enter your password"
+                                class="field"
+                            >
+
+                            <button
+                                type="button"
+                                id="passwordToggle"
+                                onclick="togglePassword()"
+                                class="absolute right-1 top-1/2
+                                       -translate-y-1/2
+                                       w-10 h-10 inline-flex items-center
+                                       justify-center rounded-lg
+                                       text-zinc-400 hover:text-zinc-700
+                                       dark:hover:text-zinc-200
+                                       focus-visible:outline-none
+                                       focus-visible:ring-2
+                                       focus-visible:ring-zinc-400"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                            >
+                                <span
+                                    id="eyeIcon"
+                                    class="material-icons text-[19px]"
+                                >
+                                    visibility
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remember me -->
+                    <div class="flex items-center justify-between gap-3 pt-0.5">
+                        <label class="inline-flex items-center gap-2.5
+                                      cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                name="remember"
+                                id="remember"
+                                class="remember-checkbox rounded"
+                            >
+
+                            <span class="text-[13px]
+                                         text-zinc-600 dark:text-zinc-400">
+                                Remember me
+                            </span>
+                        </label>
+
+                        <span class="inline-flex items-center gap-1.5
+                                     text-xs text-zinc-400
+                                     dark:text-zinc-500">
+                            <span class="material-icons text-[14px]">
+                                verified_user
+                            </span>
+                            Protected sign in
+                        </span>
+                    </div>
+
+                    <!-- Submit -->
+                    <button
+                        id="loginBtn"
+                        type="submit"
+                        class="login-button w-full flex items-center
+                               justify-center gap-2 rounded-xl
+                               bg-zinc-950 text-white
+                               dark:bg-white dark:text-zinc-950
+                               text-sm font-semibold px-4 py-3
+                               focus-visible:outline-none
+                               focus-visible:ring-2
+                               focus-visible:ring-zinc-500
+                               focus-visible:ring-offset-2
+                               dark:focus-visible:ring-offset-zinc-900"
+                    >
+                        <span
+                            id="loginText"
+                            class="inline-flex items-center justify-center gap-2"
+                        >
+                            Sign in
+                            <span class="material-icons text-[18px]">
+                                arrow_forward
+                            </span>
+                        </span>
+
+                        <span
+                            id="spinner"
+                            class="hidden material-icons text-[19px]
+                                   animate-spin"
+                            aria-hidden="true"
+                        >
+                            autorenew
+                        </span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Supporting note -->
+            <div class="flex items-start justify-center gap-2
+                        mt-5 px-2 text-center">
+                <span class="material-icons text-[16px]
+                             text-zinc-400 mt-0.5">
+                    shield
+                </span>
+
+                <p class="text-xs leading-5
+                          text-zinc-500 dark:text-zinc-400">
+                    This area is restricted to authorized administrators.
+                </p>
+            </div>
+
+            <!-- Home link -->
+            <div class="mt-7 flex justify-center">
+                <a
+                    href="{% url 'home' %}"
+                    class="inline-flex items-center gap-2
+                           text-sm font-medium
+                           text-zinc-500 dark:text-zinc-400
+                           hover:text-zinc-950 dark:hover:text-white
+                           transition-colors rounded-lg py-2 px-3
+                           focus-visible:outline-none
+                           focus-visible:ring-2
+                           focus-visible:ring-zinc-400"
+                >
+                    <span class="material-icons text-[17px]">
+                        arrow_back
+                    </span>
+                    Back to home
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="px-5 py-4 sm:py-5">
+        <p class="text-center text-xs
+                  text-zinc-400 dark:text-zinc-500">
+            © {% now "Y" %} Admin Portal. All rights reserved.
+        </p>
+    </footer>
+
+    <script>
+        // Password visibility
+        function togglePassword() {
+            const input = document.getElementById("password");
+            const icon = document.getElementById("eyeIcon");
+            const button = document.getElementById("passwordToggle");
+
+            const isPassword = input.type === "password";
+
+            input.type = isPassword ? "text" : "password";
+            icon.textContent = isPassword ? "visibility_off" : "visibility";
+            button.setAttribute("aria-label",
+                isPassword ? "Hide password" : "Show password");
+            button.setAttribute("aria-pressed", String(isPassword));
+        }
+
+        // Theme
+        function updateThemeButton() {
+            const isDark = document.documentElement.classList.contains("dark");
+            const icon = document.getElementById("themeIcon");
+            const button = document.getElementById("themeToggle");
+
+            icon.textContent = isDark ? "light_mode" : "dark_mode";
+            button.setAttribute(
+                "aria-label",
+                isDark ? "Switch to light theme" : "Switch to dark theme"
+            );
+            button.setAttribute(
+                "title",
+                isDark ? "Switch to light theme" : "Switch to dark theme"
+            );
+
+            document.querySelector('meta[name="theme-color"]')
+                .setAttribute("content", isDark ? "#09090b" : "#f8fafc");
+        }
+
+        function toggleTheme() {
+            const root = document.documentElement;
+            const isDark = root.classList.toggle("dark");
+
+            try {
+                localStorage.setItem("theme", isDark ? "dark" : "light");
+            } catch (error) {
+                // The current page theme still works without storage.
+            }
+
+            updateThemeButton();
+        }
+
+        // Login submission
+        document.addEventListener("DOMContentLoaded", function () {
+            const loginForm = document.getElementById("loginForm");
+            const loginText = document.getElementById("loginText");
+            const spinner = document.getElementById("spinner");
+            const loginBtn = document.getElementById("loginBtn");
+            const remember = document.getElementById("remember");
+            const username = document.getElementById("username");
+
+            updateThemeButton();
+
+            // Restore the remember preference.
+            try {
+                remember.checked =
+                    localStorage.getItem("remember") === "true";
+            } catch (error) {
+                remember.checked = false;
+            }
+
+            remember.addEventListener("change", function () {
+                try {
+                    localStorage.setItem(
+                        "remember",
+                        String(remember.checked)
+                    );
+                } catch (error) {
+                    // Remember preference cannot be saved.
+                }
+            });
+
+            // Avoid repeatedly submitting the same form.
+            loginForm.addEventListener("submit", function (event) {
+                if (!loginForm.checkValidity()) {
+                    return;
+                }
+
+                if (loginBtn.disabled) {
+                    event.preventDefault();
+                    return;
+                }
+
+                event.preventDefault();
+
+                loginBtn.disabled = true;
+                loginText.classList.add("hidden");
+                spinner.classList.remove("hidden");
+                loginBtn.setAttribute("aria-busy", "true");
+
+                // Native submission preserves Django's CSRF token.
+                requestAnimationFrame(function () {
+                    loginForm.submit();
+                });
+            });
+
+            // Keep keyboard users informed where they are.
+            if (!username.value) {
+                username.focus({ preventScroll: true });
+            }
+        });
+    </script>
+</body>
+</html>

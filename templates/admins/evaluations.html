@@ -1,0 +1,2096 @@
+{% extends 'admins/base.html' %}
+{% load static %}
+{% load time_extras %}
+
+{% block title %}Evaluations{% endblock %}
+{% block page_title %}Evaluations{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* =========================================================
+       EVALUATIONS — RESPONSIVE SAAS ADMIN UI
+    ========================================================= */
+    .ev-page {
+        --ev-ink: #172033;
+        --ev-muted: #718096;
+        --ev-line: #e7ecf3;
+        --ev-soft: #f7f9fc;
+        --ev-blue: #2563eb;
+        --ev-blue-soft: #eff6ff;
+        --ev-green: #15803d;
+        --ev-red: #dc2626;
+
+        width: 100%;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 2px 0 24px;
+        color: var(--ev-ink);
+        font-size: 14px;
+    }
+
+    .ev-page *,
+    .ev-page *::before,
+    .ev-page *::after {
+        box-sizing: border-box;
+    }
+
+    .ev-page button,
+    .ev-page input,
+    .ev-page select {
+        font: inherit;
+    }
+
+    .ev-page button {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .ev-page button:focus-visible,
+    .ev-page a:focus-visible,
+    .ev-page input:focus-visible,
+    .ev-page select:focus-visible {
+        outline: 3px solid rgba(37, 99, 235, .22);
+        outline-offset: 2px;
+    }
+
+    /* Header */
+    .ev-header {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .ev-heading {
+        min-width: 0;
+    }
+
+    .ev-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 7px;
+        color: var(--ev-blue);
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+    }
+
+    .ev-eyebrow .material-icons {
+        font-size: 17px;
+    }
+
+    .ev-title {
+        margin: 0;
+        color: var(--ev-ink);
+        font-size: 25px;
+        font-weight: 760;
+        letter-spacing: -.045em;
+        line-height: 1.2;
+    }
+
+    .ev-subtitle {
+        margin: 7px 0 0;
+        color: var(--ev-muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .ev-header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .ev-record-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--ev-muted);
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .ev-record-count strong {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 27px;
+        height: 26px;
+        padding: 0 7px;
+        border-radius: 8px;
+        background: var(--ev-blue-soft);
+        color: var(--ev-blue);
+        font-size: 11px;
+        font-weight: 750;
+    }
+
+    /* Buttons */
+    .ev-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 40px;
+        padding: 0 13px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 650;
+        line-height: 1;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition:
+            background .16s ease,
+            border-color .16s ease,
+            color .16s ease;
+    }
+
+    .ev-btn .material-icons {
+        font-size: 18px;
+    }
+
+    .ev-btn-neutral {
+        border-color: var(--ev-line);
+        color: #475569;
+    }
+
+    .ev-btn-neutral:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+        color: var(--ev-ink);
+    }
+
+    .ev-btn-primary {
+        background: var(--ev-blue);
+        color: #fff;
+    }
+
+    .ev-btn-primary:hover {
+        background: #1d4ed8;
+        color: #fff;
+    }
+
+    .ev-btn-excel {
+        border-color: #bbf7d0;
+        background: #f0fdf4;
+        color: #15803d;
+    }
+
+    .ev-btn-excel:hover {
+        border-color: #86efac;
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .ev-btn-pdf {
+        border-color: #fecaca;
+        background: #fff7f7;
+        color: #dc2626;
+    }
+
+    .ev-btn-pdf:hover {
+        border-color: #fca5a5;
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .ev-export-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Mobile export menu */
+    .ev-export-mobile {
+        position: relative;
+    }
+
+    .ev-export-menu {
+        position: absolute;
+        top: calc(100% + 7px);
+        right: 0;
+        z-index: 40;
+        width: 160px;
+        padding: 5px;
+        border: 1px solid var(--ev-line);
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, .12);
+    }
+
+    .ev-export-menu button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 42px;
+        padding: 0 11px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .ev-export-menu button:hover {
+        background: #f8fafc;
+    }
+
+    .ev-export-menu .material-icons {
+        font-size: 18px;
+    }
+
+    .ev-export-menu .ev-excel-option {
+        color: var(--ev-green);
+    }
+
+    .ev-export-menu .ev-pdf-option {
+        color: var(--ev-red);
+    }
+
+    /* Search and filters */
+    .ev-toolbar {
+        margin-bottom: 14px;
+        padding: 12px;
+        border: 1px solid var(--ev-line);
+        border-radius: 14px;
+        background: #fff;
+    }
+
+    .ev-mobile-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ev-search {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ev-search .material-icons {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 19px;
+        pointer-events: none;
+    }
+
+    .ev-search input {
+        width: 100%;
+        height: 43px;
+        padding: 0 12px 0 39px;
+        border: 1px solid var(--ev-line);
+        border-radius: 10px;
+        background: #f8fafc;
+        color: var(--ev-ink);
+        font-size: 13px;
+        outline: none;
+        transition: border-color .15s, background .15s, box-shadow .15s;
+    }
+
+    .ev-search input::placeholder {
+        color: #94a3b8;
+    }
+
+    .ev-search input:focus {
+        border-color: #93b4ff;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .09);
+    }
+
+    .ev-filter-trigger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-width: 44px;
+        height: 43px;
+        padding: 0 11px;
+        border: 1px solid var(--ev-line);
+        border-radius: 10px;
+        background: #fff;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 650;
+        cursor: pointer;
+    }
+
+    .ev-filter-trigger .material-icons {
+        font-size: 20px;
+    }
+
+    .ev-filter-trigger:hover {
+        border-color: #bfdbfe;
+        background: #f8fbff;
+        color: var(--ev-blue);
+    }
+
+    .ev-filter-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 19px;
+        height: 19px;
+        padding: 0 5px;
+        border-radius: 6px;
+        background: var(--ev-blue);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 750;
+    }
+
+    .ev-desktop-filters {
+        display: none;
+    }
+
+    .ev-field {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        height: 42px;
+        padding: 0 32px 0 11px;
+        border: 1px solid var(--ev-line);
+        border-radius: 9px;
+        background-color: #fff;
+        color: #334155;
+        font-size: 12px;
+        outline: none;
+        cursor: pointer;
+        transition: border-color .15s, box-shadow .15s;
+    }
+
+    .ev-field:focus {
+        border-color: #93b4ff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
+    }
+
+    .ev-filter-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 650;
+    }
+
+    .ev-filter-count {
+        margin-bottom: 10px;
+        color: var(--ev-muted);
+        font-size: 11px;
+    }
+
+    .ev-reset-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 40px;
+        padding: 0 11px;
+        border: 1px solid #fee2e2;
+        border-radius: 9px;
+        background: #fff;
+        color: #dc2626;
+        font-size: 11px;
+        font-weight: 650;
+        cursor: pointer;
+        transition: background .15s;
+    }
+
+    .ev-reset-btn:hover {
+        background: #fef2f2;
+    }
+
+    .ev-reset-btn .material-icons {
+        font-size: 16px;
+    }
+
+    /* Results panel */
+    .ev-results {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid var(--ev-line);
+        border-radius: 13px;
+        background: #fff;
+    }
+
+    .ev-results-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 15px;
+        border-bottom: 1px solid var(--ev-line);
+    }
+
+    .ev-results-title {
+        margin: 0;
+        color: var(--ev-ink);
+        font-size: 13px;
+        font-weight: 750;
+    }
+
+    .ev-results-description {
+        margin: 4px 0 0;
+        color: var(--ev-muted);
+        font-size: 11px;
+    }
+
+    .ev-results-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .ev-results-indicator::before {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #22c55e;
+        content: "";
+    }
+
+    /* Desktop table */
+    .ev-table-wrap {
+        display: none;
+        width: 100%;
+        overflow: auto;
+        max-height: 68vh;
+    }
+
+    .ev-table {
+        width: 100%;
+        min-width: 920px;
+        border-collapse: separate;
+        border-spacing: 0;
+        text-align: left;
+    }
+
+    .ev-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 13px 15px;
+        border-bottom: 1px solid var(--ev-line);
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: .055em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .ev-table tbody td {
+        padding: 14px 15px;
+        border-bottom: 1px solid #edf1f6;
+        color: #475569;
+        font-size: 12px;
+        vertical-align: middle;
+    }
+
+    .ev-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .ev-table tbody tr:hover {
+        background: #fafcff;
+    }
+
+    .ev-table .ev-center {
+        text-align: center;
+    }
+
+    .ev-teacher-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 650;
+        text-decoration: none;
+    }
+
+    .ev-teacher-link:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    .ev-teacher-link .material-icons {
+        font-size: 14px;
+    }
+
+    .ev-subject {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .ev-course {
+        color: #64748b;
+    }
+
+    .ev-code-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 7px;
+        border: 1px solid #e8edf3;
+        border-radius: 6px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .ev-rating {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        white-space: nowrap;
+    }
+
+    .ev-star {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        color: #eab308;
+    }
+
+    .ev-star-empty {
+        color: #dbe2ea;
+    }
+
+    .ev-rating-number {
+        margin-left: 5px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 650;
+    }
+
+    .ev-rating-na {
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .ev-view-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-height: 33px;
+        padding: 0 10px;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background .15s;
+    }
+
+    .ev-view-btn:hover {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .ev-view-btn .material-icons {
+        font-size: 16px;
+    }
+
+    /* Mobile evaluation cards */
+    .ev-mobile-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ev-mobile-card {
+        padding: 15px;
+        border-bottom: 1px solid #edf1f6;
+    }
+
+    .ev-mobile-card:last-child {
+        border-bottom: 0;
+    }
+
+    .ev-mobile-card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+    }
+
+    .ev-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 15px;
+        font-weight: 750;
+        text-transform: uppercase;
+    }
+
+    .ev-mobile-main {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ev-mobile-teacher {
+        display: inline-block;
+        margin: 1px 0 0;
+        color: var(--ev-ink);
+        font-size: 13px;
+        font-weight: 750;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        text-decoration: none;
+    }
+
+    .ev-mobile-teacher:hover {
+        color: var(--ev-blue);
+    }
+
+    .ev-mobile-subject {
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .ev-mobile-course {
+        margin-top: 7px;
+    }
+
+    .ev-mobile-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 12px;
+    }
+
+    .ev-meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 26px;
+        padding: 0 8px;
+        border: 1px solid #e8edf3;
+        border-radius: 7px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .ev-meta-chip .material-icons {
+        font-size: 13px;
+    }
+
+    .ev-mobile-rating {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 13px;
+        padding-top: 12px;
+        border-top: 1px solid #f0f3f7;
+    }
+
+    .ev-rating-label {
+        color: #94a3b8;
+        font-size: 10px;
+        font-weight: 650;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .ev-mobile-rating .ev-rating {
+        justify-content: flex-start;
+    }
+
+    .ev-mobile-action {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 12px;
+    }
+
+    .ev-mobile-action .ev-view-btn {
+        min-height: 38px;
+        padding: 0 13px;
+        font-size: 12px;
+    }
+
+    /* Empty state */
+    .ev-empty {
+        padding: 38px 20px;
+        text-align: center;
+    }
+
+    .ev-empty-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 12px;
+        border: 1px solid var(--ev-line);
+        border-radius: 14px;
+        background: #f8fafc;
+        color: #94a3b8;
+    }
+
+    .ev-empty-icon .material-icons {
+        font-size: 24px;
+    }
+
+    .ev-empty-title {
+        margin: 0;
+        color: var(--ev-ink);
+        font-size: 14px;
+        font-weight: 750;
+    }
+
+    .ev-empty-description {
+        margin: 6px 0 0;
+        color: var(--ev-muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    /* Pagination */
+    .ev-pagination {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 15px 12px;
+        border-top: 1px solid var(--ev-line);
+        background: #fff;
+    }
+
+    .ev-page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-width: 36px;
+        min-height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--ev-line);
+        border-radius: 9px;
+        background: #fff;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 650;
+        text-decoration: none;
+        transition: background .15s, border-color .15s;
+    }
+
+    .ev-page-link:hover {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .ev-page-status {
+        padding: 0 8px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+
+    /* Loading overlay */
+    .ev-loading {
+        position: absolute;
+        inset: 0;
+        z-index: 30;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 120px;
+        background: rgba(255, 255, 255, .76);
+        backdrop-filter: blur(2px);
+    }
+
+    .ev-loading[hidden] {
+        display: none !important;
+    }
+
+    .ev-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #dbeafe;
+        border-top-color: var(--ev-blue);
+        border-radius: 50%;
+        animation: ev-spin .75s linear infinite;
+    }
+
+    @keyframes ev-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Mobile bottom-sheet filter drawer */
+    .ev-drawer {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        visibility: visible;
+        opacity: 1;
+        transition: opacity .18s ease, visibility .18s ease;
+    }
+
+    .ev-drawer[hidden] {
+        display: none !important;
+    }
+
+    .ev-drawer-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, .48);
+        backdrop-filter: blur(3px);
+    }
+
+    .ev-drawer-panel {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-height: 88vh;
+        padding: 0;
+        overflow: hidden;
+        border: 1px solid rgba(226, 232, 240, .9);
+        border-bottom: 0;
+        border-radius: 22px 22px 0 0;
+        background: #fff;
+        box-shadow: 0 -15px 50px rgba(15, 23, 42, .14);
+        animation: ev-sheet-in .2s ease-out;
+    }
+
+    @keyframes ev-sheet-in {
+        from { transform: translateY(20px); opacity: .7; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .ev-drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 17px 19px;
+        border-bottom: 1px solid var(--ev-line);
+    }
+
+    .ev-drawer-title {
+        margin: 0;
+        color: var(--ev-ink);
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .ev-drawer-subtitle {
+        margin: 4px 0 0;
+        color: var(--ev-muted);
+        font-size: 11px;
+    }
+
+    .ev-drawer-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border: 1px solid var(--ev-line);
+        border-radius: 10px;
+        background: #fff;
+        color: #64748b;
+        cursor: pointer;
+    }
+
+    .ev-drawer-close .material-icons {
+        font-size: 20px;
+    }
+
+    .ev-drawer-body {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 18px 19px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .ev-drawer-footer {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 9px;
+        padding: 13px 19px calc(16px + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--ev-line);
+        background: #fff;
+    }
+
+    .ev-drawer-footer .ev-btn,
+    .ev-drawer-footer .ev-reset-btn {
+        min-height: 44px;
+    }
+
+    .ev-desktop-only {
+        display: none !important;
+    }
+
+    .ev-mobile-only {
+        display: initial;
+    }
+
+    @media (min-width: 640px) {
+        .ev-page {
+            padding-top: 6px;
+        }
+
+        .ev-header {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ev-title {
+            font-size: 28px;
+        }
+
+        .ev-subtitle {
+            font-size: 13px;
+        }
+
+        .ev-header-actions {
+            justify-content: flex-end;
+        }
+
+        .ev-mobile-export {
+            display: none !important;
+        }
+
+        .ev-toolbar {
+            padding: 13px;
+        }
+
+        .ev-mobile-toolbar {
+            display: none;
+        }
+
+        .ev-desktop-filters {
+            display: grid;
+            grid-template-columns: minmax(180px, 1.7fr) repeat(4, minmax(115px, 1fr)) auto;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ev-desktop-filters .ev-search {
+            min-width: 0;
+        }
+
+        .ev-desktop-filters .ev-search input {
+            height: 42px;
+            background: #fff;
+        }
+
+        .ev-desktop-filters .ev-field {
+            height: 42px;
+        }
+
+        .ev-results-header {
+            padding: 15px 18px;
+        }
+
+        .ev-table-wrap {
+            display: block;
+        }
+
+        .ev-mobile-list {
+            display: none;
+        }
+
+        .ev-pagination {
+            justify-content: flex-end;
+            padding: 13px 17px;
+        }
+
+        .ev-desktop-only {
+            display: initial !important;
+        }
+
+        .ev-mobile-only {
+            display: none !important;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .ev-toolbar {
+            padding: 15px;
+        }
+
+        .ev-desktop-filters {
+            grid-template-columns: minmax(220px, 1.8fr) repeat(4, minmax(125px, 1fr)) auto;
+            gap: 10px;
+        }
+
+        .ev-table thead th {
+            padding: 14px 17px;
+        }
+
+        .ev-table tbody td {
+            padding: 15px 17px;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .ev-title {
+            font-size: 23px;
+        }
+
+        .ev-header-actions {
+            gap: 7px;
+        }
+
+        .ev-btn {
+            padding-inline: 10px;
+        }
+
+        .ev-mobile-card {
+            padding: 13px;
+        }
+
+        .ev-pagination {
+            gap: 4px;
+        }
+
+        .ev-page-link {
+            min-width: 32px;
+            padding-inline: 7px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ev-page *,
+        .ev-page *::before,
+        .ev-page *::after,
+        .ev-drawer,
+        .ev-drawer-panel {
+            animation-duration: .01ms !important;
+            transition-duration: .01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ev-page" id="evaluationsPage">
+
+    <!-- Loading indicator -->
+    <div class="ev-loading" id="loadingOverlay" hidden aria-live="polite" aria-label="Loading evaluations">
+        <div class="ev-spinner" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="ev-header">
+        <div class="ev-heading">
+            <div class="ev-eyebrow">
+                <span class="material-icons" aria-hidden="true">fact_check</span>
+                Evaluation management
+            </div>
+
+            <h1 class="ev-title">Evaluations</h1>
+
+            <p class="ev-subtitle">
+                Review teacher feedback, ratings, and submitted evaluations.
+            </p>
+        </div>
+
+        <div class="ev-header-actions">
+            <div class="ev-record-count">
+                <strong id="recordCount">{{ page_obj.paginator.count }}</strong>
+                <span>records</span>
+            </div>
+
+            <!-- Desktop exports -->
+            <div class="ev-export-actions ev-desktop-only">
+                <button type="button" id="exportExcel" class="ev-btn ev-btn-excel">
+                    <span class="material-icons" aria-hidden="true">table_view</span>
+                    Export Excel
+                </button>
+
+                <button type="button" id="exportPDF" class="ev-btn ev-btn-pdf">
+                    <span class="material-icons" aria-hidden="true">picture_as_pdf</span>
+                    Export PDF
+                </button>
+            </div>
+
+            <!-- Mobile export menu -->
+            <div class="ev-export-mobile ev-mobile-only">
+                <button
+                    type="button"
+                    id="exportDropdownBtn"
+                    class="ev-btn ev-btn-neutral"
+                    aria-expanded="false"
+                    aria-controls="exportDropdownMenu"
+                >
+                    <span class="material-icons" aria-hidden="true">download</span>
+                    Export
+                    <span class="material-icons" aria-hidden="true">expand_more</span>
+                </button>
+
+                <div class="ev-export-menu" id="exportDropdownMenu" hidden>
+                    <button type="button" id="exportExcelMobile" class="ev-excel-option">
+                        <span class="material-icons" aria-hidden="true">table_view</span>
+                        Excel file
+                    </button>
+
+                    <button type="button" id="exportPDFMobile" class="ev-pdf-option">
+                        <span class="material-icons" aria-hidden="true">picture_as_pdf</span>
+                        PDF file
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search and filters -->
+    <section class="ev-toolbar" aria-label="Search and filter evaluations">
+
+        <!-- Mobile toolbar -->
+        <div class="ev-mobile-toolbar">
+            <label class="ev-search">
+                <span class="material-icons" aria-hidden="true">search</span>
+                <input
+                    type="search"
+                    id="searchInput"
+                    class="searchInput"
+                    placeholder="Search evaluations..."
+                    aria-label="Search evaluations"
+                    autocomplete="off"
+                >
+            </label>
+
+            <button
+                type="button"
+                id="openFilters"
+                class="ev-filter-trigger"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+                aria-controls="filterDrawer"
+            >
+                <span class="material-icons" aria-hidden="true">tune</span>
+                <span>Filters</span>
+                <span class="ev-filter-badge" id="activeFilterCount" hidden>0</span>
+            </button>
+        </div>
+
+        <!-- Desktop toolbar -->
+        <div class="ev-desktop-filters">
+            <label class="ev-search">
+                <span class="material-icons" aria-hidden="true">search</span>
+                <input
+                    type="search"
+                    id="searchInputDesktop"
+                    class="searchInput"
+                    placeholder="Search teacher or subject..."
+                    aria-label="Search evaluations"
+                    autocomplete="off"
+                >
+            </label>
+
+            <select class="filter ev-field" name="teacher" aria-label="Filter by teacher">
+                <option value="">All teachers</option>
+                {% for t in teachers %}
+                <option value="{{ t.id }}" {% if t.id|stringformat:"s" == selected_teacher %}selected{% endif %}>
+                    {{ t.first_name }} {{ t.last_name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <select class="filter ev-field" name="subject" aria-label="Filter by subject">
+                <option value="">All subjects</option>
+                {% for s in subjects %}
+                <option value="{{ s.id }}">{{ s.name }}</option>
+                {% endfor %}
+            </select>
+
+            <select class="filter ev-field" name="academic_year" aria-label="Filter by academic year">
+                <option value="">All academic years</option>
+                {% for year in academic_years %}
+                <option value="{{ year }}" {% if year == selected_academic_year %}selected{% endif %}>
+                    {{ year }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <select class="filter ev-field" name="semester" aria-label="Filter by semester">
+                <option value="">All semesters</option>
+                <option value="1st" {% if selected_semester == "1st" %}selected{% endif %}>1st semester</option>
+                <option value="2nd" {% if selected_semester == "2nd" %}selected{% endif %}>2nd semester</option>
+            </select>
+
+            <select id="sortSelect" class="ev-field" aria-label="Sort evaluations">
+                <option value="">Default sort</option>
+                <option value="date_desc">Newest first</option>
+                <option value="date_asc">Oldest first</option>
+                <option value="rating_desc">Highest rating</option>
+                <option value="rating_asc">Lowest rating</option>
+            </select>
+
+            <button type="button" class="ev-reset-btn" onclick="resetFilters()">
+                <span class="material-icons" aria-hidden="true">restart_alt</span>
+                Reset
+            </button>
+        </div>
+    </section>
+
+    <!-- Mobile filter drawer -->
+    <div
+        id="filterDrawer"
+        class="ev-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="filterDrawerTitle"
+        hidden
+    >
+        <div class="ev-drawer-backdrop" id="closeFilters"></div>
+
+        <section class="ev-drawer-panel">
+            <header class="ev-drawer-header">
+                <div>
+                    <h2 class="ev-drawer-title" id="filterDrawerTitle">Filters</h2>
+                    <p class="ev-drawer-subtitle">Narrow down your evaluation results.</p>
+                </div>
+
+                <button type="button" id="closeFiltersBtn" class="ev-drawer-close" aria-label="Close filters">
+                    <span class="material-icons" aria-hidden="true">close</span>
+                </button>
+            </header>
+
+            <div class="ev-drawer-body">
+                <div>
+                    <label class="ev-filter-label" for="mobileTeacherFilter">Teacher</label>
+                    <select class="filter ev-field" id="mobileTeacherFilter" name="teacher">
+                        <option value="">All teachers</option>
+                        {% for t in teachers %}
+                        <option value="{{ t.id }}" {% if t.id|stringformat:"s" == selected_teacher %}selected{% endif %}>
+                            {{ t.first_name }} {{ t.last_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="ev-filter-label" for="mobileSubjectFilter">Subject</label>
+                    <select class="filter ev-field" id="mobileSubjectFilter" name="subject">
+                        <option value="">All subjects</option>
+                        {% for s in subjects %}
+                        <option value="{{ s.id }}">{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="ev-filter-label" for="mobileAcademicYearFilter">Academic year</label>
+                    <select class="filter ev-field" id="mobileAcademicYearFilter" name="academic_year">
+                        <option value="">All academic years</option>
+                        {% for year in academic_years %}
+                        <option value="{{ year }}" {% if year == selected_academic_year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="ev-filter-label" for="mobileSemesterFilter">Semester</label>
+                    <select class="filter ev-field" id="mobileSemesterFilter" name="semester">
+                        <option value="">All semesters</option>
+                        <option value="1st" {% if selected_semester == "1st" %}selected{% endif %}>1st semester</option>
+                        <option value="2nd" {% if selected_semester == "2nd" %}selected{% endif %}>2nd semester</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="ev-filter-label" for="sortSelectMobile">Sort results</label>
+                    <select id="sortSelectMobile" class="ev-field">
+                        <option value="">Default sort</option>
+                        <option value="date_desc">Newest first</option>
+                        <option value="date_asc">Oldest first</option>
+                        <option value="rating_desc">Highest rating</option>
+                        <option value="rating_asc">Lowest rating</option>
+                    </select>
+                </div>
+            </div>
+
+            <footer class="ev-drawer-footer">
+                <button type="button" class="ev-reset-btn" onclick="resetFilters()">
+                    <span class="material-icons" aria-hidden="true">restart_alt</span>
+                    Reset filters
+                </button>
+
+                <button type="button" id="applyFiltersBtn" class="ev-btn ev-btn-primary">
+                    Apply filters
+                </button>
+            </footer>
+        </section>
+    </div>
+
+    <!-- Evaluation results -->
+    <section class="ev-results" aria-label="Evaluation results">
+        <div class="ev-loading" id="resultsLoading" hidden aria-label="Refreshing results">
+            <div class="ev-spinner" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+
+        <div class="ev-results-header">
+            <div>
+                <h2 class="ev-results-title">Evaluation records</h2>
+                <p class="ev-results-description">Ratings, course information, and submission details.</p>
+            </div>
+
+            <span class="ev-results-indicator">Records</span>
+        </div>
+
+        <!-- AJAX-replaced content -->
+        <div id="evaluationContent" aria-live="polite" aria-busy="false">
+
+            <!-- Desktop table -->
+            <div class="ev-table-wrap">
+                <table class="ev-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Teacher</th>
+                            <th scope="col">Subject</th>
+                            <th scope="col">Course</th>
+                            <th scope="col" class="ev-center">Semester</th>
+                            <th scope="col" class="ev-center">Academic year</th>
+                            <th scope="col">Overall rating</th>
+                            <th scope="col" class="ev-center">Submitted</th>
+                            <th scope="col" class="ev-center">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tableBody">
+                        {% for eval in page_obj %}
+                        <tr>
+                            <td>
+                                <a
+                                    href="{% url 'teacher_detail' eval.teacher.id %}"
+                                    class="ev-teacher-link"
+                                >
+                                    {{ eval.teacher.first_name }} {{ eval.teacher.last_name }}
+                                    <span class="material-icons" aria-hidden="true">arrow_forward</span>
+                                </a>
+                            </td>
+
+                            <td>
+                                <span class="ev-subject">{{ eval.subject.name|default:"—" }}</span>
+                            </td>
+
+                            <td>
+                                <span class="ev-course">{{ eval.course.name|default:"—" }}</span>
+                            </td>
+
+                            <td class="ev-center">
+                                {{ eval.semester|default:"—" }}
+                            </td>
+
+                            <td class="ev-center">
+                                {{ eval.academic_year|default:"—" }}
+                            </td>
+
+                            <td>
+                                {% if eval.overall_rating %}
+                                <div class="ev-rating" aria-label="Rating {{ eval.overall_rating|floatformat:2 }} out of 5">
+                                    {% for _ in eval.filled_stars_list %}
+                                    <svg class="ev-star" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.963a1 1 0 00.95.69h4.165c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.964c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.176 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.964a1 1 0 00-.364-1.118L2.036 9.39c-.783-.57-.38-1.81.588-1.81h4.165a1 1 0 00.95-.69l1.286-3.963z"/>
+                                    </svg>
+                                    {% endfor %}
+
+                                    {% for _ in eval.half_star_list %}
+                                    <svg class="ev-star" viewBox="0 0 20 20" aria-hidden="true">
+                                        <defs>
+                                            <linearGradient id="halfGrad{{ eval.id }}-{{ forloop.counter }}">
+                                                <stop offset="50%" stop-color="#eab308"/>
+                                                <stop offset="50%" stop-color="#dbe2ea"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path fill="url(#halfGrad{{ eval.id }}-{{ forloop.counter }})" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.963a1 1 0 00.95.69h4.165c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.964c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.176 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.964a1 1 0 00-.364-1.118L2.036 9.39c-.783-.57-.38-1.81.588-1.81h4.165a1 1 0 00.95-.69h4.165a1 1 0 00.95-.69l1.286-3.963z"/>
+                                    </svg>
+                                    {% endfor %}
+
+                                    {% for _ in eval.empty_stars_list %}
+                                    <svg class="ev-star ev-star-empty" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.963a1 1 0 00.95.69h4.165c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.964c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.176 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.964a1 1 0 00-.364-1.118L2.036 9.39c-.783-.57-.38-1.81.588-1.81h4.165a1 1 0 00.95-.69l1.286-3.963z"/>
+                                    </svg>
+                                    {% endfor %}
+
+                                    <span class="ev-rating-number">
+                                        {{ eval.overall_rating|floatformat:2 }}
+                                    </span>
+                                </div>
+                                {% else %}
+                                <span class="ev-rating-na">Not rated</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="ev-center">
+                                <span style="white-space:nowrap;">
+                                    {{ eval.submitted_at|time_badge }}
+                                </span>
+                            </td>
+
+                            <td class="ev-center">
+                                <a href="{% url 'evaluation_detail' eval.id %}" class="ev-view-btn">
+                                    <span class="material-icons" aria-hidden="true">visibility</span>
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8">
+                                <div class="ev-empty">
+                                    <div class="ev-empty-icon">
+                                        <span class="material-icons" aria-hidden="true">inbox</span>
+                                    </div>
+                                    <h3 class="ev-empty-title">No evaluations found</h3>
+                                    <p class="ev-empty-description">
+                                        Try changing your filters or search terms.
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile evaluation cards -->
+            <div class="ev-mobile-list" id="mobileEvaluationList">
+                {% for eval in page_obj %}
+                <article class="ev-mobile-card">
+                    <div class="ev-mobile-card-top">
+                        <div class="ev-avatar" aria-hidden="true">
+                            {{ eval.teacher.first_name|default:"T"|slice:":1" }}{{ eval.teacher.last_name|default:""|slice:":1" }}
+                        </div>
+
+                        <div class="ev-mobile-main">
+                            <a
+                                href="{% url 'teacher_detail' eval.teacher.id %}"
+                                class="ev-mobile-teacher"
+                            >
+                                {{ eval.teacher.first_name }} {{ eval.teacher.last_name }}
+                            </a>
+
+                            <div class="ev-mobile-subject">
+                                {{ eval.subject.name|default:"No subject" }}
+                            </div>
+
+                            <div class="ev-mobile-course">
+                                <span class="ev-code-pill">
+                                    {{ eval.course.name|default:"No course" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ev-mobile-meta">
+                        <span class="ev-meta-chip">
+                            <span class="material-icons" aria-hidden="true">school</span>
+                            {{ eval.semester|default:"No semester" }}
+                        </span>
+
+                        <span class="ev-meta-chip">
+                            <span class="material-icons" aria-hidden="true">calendar_month</span>
+                            {{ eval.academic_year|default:"No academic year" }}
+                        </span>
+                    </div>
+
+                    <div class="ev-mobile-rating">
+                        <span class="ev-rating-label">Overall rating</span>
+
+                        {% if eval.overall_rating %}
+                        <div class="ev-rating" aria-label="Rating {{ eval.overall_rating|floatformat:2 }} out of 5">
+                            {% for _ in eval.filled_stars_list %}
+                            <svg class="ev-star" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.963a1 1 0 00.95.69h4.165c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.964c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.176 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.964a1 1 0 00-.364-1.118L2.036 9.39c-.783-.57-.38-1.81.588-1.81h4.165a1 1 0 00.95-.69l1.286-3.963z"/>
+                            </svg>
+                            {% endfor %}
+
+                            {% for _ in eval.half_star_list %}
+                            <svg class="ev-star" viewBox="0 0 20 20" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="mobileHalfGrad{{ eval.id }}-{{ forloop.counter }}">
+                                        <stop offset="50%" stop-color="#eab308"/>
+                                        <stop offset="50%" stop-color="#dbe2ea"/>
+                                    </linearGradient>
+                                </defs>
+                                <path fill="url(#mobileHalfGrad{{ eval.id }}-{{ forloop.counter }})" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.963a1 1 0 00.95.69h4.165c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.964c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.176 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.964a1 1 0 00-.364-1.118L2.036 9.39c-.783-.57-.38-1.81.588-1.81h4.165a1 1 0 00.95-.69l1.286-3.963z"/>
+                            </svg>
+                            {% endfor %}
+
+                            {% for _ in eval.empty_stars_list %}
+                            <svg class="ev-star ev-star-empty" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.963a1 1 0 00.95.69h4.165c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.964c.3.921-.755 1.688-1.54 1.118l-3.37-2.448a1 1 0 00-1.176 0l-3.37 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.964a1 1 0 00-.364-1.118L2.036 9.39c-.783-.57-.38-1.81.588-1.81h4.165a1 1 0 00.95-.69l1.286-3.963z"/>
+                            </svg>
+                            {% endfor %}
+
+                            <span class="ev-rating-number">
+                                {{ eval.overall_rating|floatformat:2 }}
+                            </span>
+                        </div>
+                        {% else %}
+                        <span class="ev-rating-na">Not rated</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="ev-mobile-meta">
+                        <span class="ev-meta-chip">
+                            <span class="material-icons" aria-hidden="true">schedule</span>
+                            {{ eval.submitted_at|time_badge }}
+                        </span>
+                    </div>
+
+                    <div class="ev-mobile-action">
+                        <a href="{% url 'evaluation_detail' eval.id %}" class="ev-view-btn">
+                            <span class="material-icons" aria-hidden="true">visibility</span>
+                            View evaluation
+                        </a>
+                    </div>
+                </article>
+                {% empty %}
+                <div class="ev-empty">
+                    <div class="ev-empty-icon">
+                        <span class="material-icons" aria-hidden="true">inbox</span>
+                    </div>
+                    <h3 class="ev-empty-title">No evaluations found</h3>
+                    <p class="ev-empty-description">
+                        Try changing your filters or search terms.
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            <nav class="ev-pagination" id="pagination" aria-label="Evaluation pages">
+                {% if page_obj.has_previous %}
+                <a href="?page=1" class="ev-page-link pagination-link" aria-label="First page">
+                    <span class="material-icons" aria-hidden="true" style="font-size:15px;">first_page</span>
+                    <span>First</span>
+                </a>
+
+                <a href="?page={{ page_obj.previous_page_number }}" class="ev-page-link pagination-link" aria-label="Previous page">
+                    <span class="material-icons" aria-hidden="true" style="font-size:15px;">chevron_left</span>
+                    <span>Prev</span>
+                </a>
+                {% endif %}
+
+                <span class="ev-page-status">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="ev-page-link pagination-link" aria-label="Next page">
+                    <span>Next</span>
+                    <span class="material-icons" aria-hidden="true" style="font-size:15px;">chevron_right</span>
+                </a>
+
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="ev-page-link pagination-link" aria-label="Last page">
+                    <span>Last</span>
+                    <span class="material-icons" aria-hidden="true" style="font-size:15px;">last_page</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </section>
+</div>
+
+<script>
+(function () {
+    "use strict";
+
+    const page = document.getElementById("evaluationsPage");
+    if (!page) return;
+
+    const drawer = document.getElementById("filterDrawer");
+    const openFiltersBtn = document.getElementById("openFilters");
+    const closeFiltersBackdrop = document.getElementById("closeFilters");
+    const closeFiltersBtn = document.getElementById("closeFiltersBtn");
+    const applyFiltersBtn = document.getElementById("applyFiltersBtn");
+
+    const exportDropdownBtn = document.getElementById("exportDropdownBtn");
+    const exportDropdownMenu = document.getElementById("exportDropdownMenu");
+
+    const contentDiv = document.getElementById("evaluationContent");
+    const loader = document.getElementById("resultsLoading");
+    const recordCount = document.getElementById("recordCount");
+
+    const desktopSearch = document.getElementById("searchInputDesktop");
+    const mobileSearch = document.getElementById("searchInput");
+
+    const desktopSort = document.getElementById("sortSelect");
+    const mobileSort = document.getElementById("sortSelectMobile");
+
+    const filterControls = Array.from(document.querySelectorAll(".filter"));
+    const searchInputs = Array.from(document.querySelectorAll(".searchInput"));
+
+    let debounceTimer = null;
+    let activeRequest = null;
+    let lastFocusedElement = null;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function isMobile() {
+        return window.matchMedia("(max-width: 639px)").matches;
+    }
+
+    function setLoading(isLoading) {
+        if (loader) loader.hidden = !isLoading;
+
+        if (contentDiv) {
+            contentDiv.setAttribute("aria-busy", isLoading ? "true" : "false");
+        }
+    }
+
+    function syncSearchInputs(source) {
+        const value = source ? source.value : "";
+
+        searchInputs.forEach(function (input) {
+            if (input !== source) input.value = value;
+        });
+    }
+
+    function syncFilterControls(name, value) {
+        filterControls.forEach(function (control) {
+            if (control.name === name) {
+                control.value = value;
+            }
+        });
+    }
+
+    function syncSortControls(value) {
+        if (desktopSort) desktopSort.value = value;
+        if (mobileSort) mobileSort.value = value;
+    }
+
+    function getSearchValue() {
+        const visibleInput = isMobile() ? mobileSearch : desktopSearch;
+
+        if (visibleInput && visibleInput.value.trim()) {
+            return visibleInput.value.trim();
+        }
+
+        const otherInput = visibleInput === mobileSearch ? desktopSearch : mobileSearch;
+        return otherInput ? otherInput.value.trim() : "";
+    }
+
+    function getSelectedFilters() {
+        const values = {};
+
+        filterControls.forEach(function (control) {
+            if (!control.name) return;
+
+            // Prefer the currently visible filter when both desktop and
+            // mobile versions of the same control exist.
+            if (isMobile() && control.closest("#filterDrawer")) {
+                values[control.name] = control.value;
+            } else if (!isMobile() && !control.closest("#filterDrawer")) {
+                values[control.name] = control.value;
+            } else if (!(control.name in values)) {
+                values[control.name] = control.value;
+            }
+        });
+
+        return values;
+    }
+
+    function getParams(pageNumber) {
+        const params = new URLSearchParams();
+        const search = getSearchValue();
+
+        if (search) {
+            params.set("search", search);
+        }
+
+        const filters = getSelectedFilters();
+
+        Object.keys(filters).forEach(function (name) {
+            if (filters[name]) params.set(name, filters[name]);
+        });
+
+        const sort = isMobile()
+            ? (mobileSort ? mobileSort.value : "")
+            : (desktopSort ? desktopSort.value : "");
+
+        if (sort) params.set("sort", sort);
+        if (pageNumber) params.set("page", pageNumber);
+
+        return params;
+    }
+
+    function getActiveFilterCount() {
+        const filters = getSelectedFilters();
+
+        let count = Object.values(filters).filter(Boolean).length;
+
+        const sort = isMobile()
+            ? (mobileSort ? mobileSort.value : "")
+            : (desktopSort ? desktopSort.value : "");
+
+        if (sort) count += 1;
+
+        return count;
+    }
+
+    function updateFilterBadge() {
+        const badge = document.getElementById("activeFilterCount");
+        if (!badge) return;
+
+        const count = getActiveFilterCount();
+
+        badge.textContent = count;
+        badge.hidden = count === 0;
+    }
+
+    function updateRecordCountFromDocument(doc) {
+        if (!recordCount) return;
+
+        const newCount = doc.getElementById("recordCount");
+        if (newCount) {
+            recordCount.textContent = newCount.textContent.trim();
+        }
+    }
+
+    function closeExportMenu() {
+        if (!exportDropdownMenu || !exportDropdownBtn) return;
+
+        exportDropdownMenu.hidden = true;
+        exportDropdownBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function openDrawer() {
+        if (!drawer) return;
+
+        lastFocusedElement = document.activeElement;
+        drawer.hidden = false;
+
+        if (openFiltersBtn) {
+            openFiltersBtn.setAttribute("aria-expanded", "true");
+        }
+
+        document.body.style.overflow = "hidden";
+
+        const firstSelect = drawer.querySelector("select");
+        if (firstSelect) firstSelect.focus({ preventScroll: true });
+    }
+
+    function closeDrawer(restoreFocus = true) {
+        if (!drawer) return;
+
+        drawer.hidden = true;
+
+        if (openFiltersBtn) {
+            openFiltersBtn.setAttribute("aria-expanded", "false");
+        }
+
+        document.body.style.overflow = "";
+
+        if (restoreFocus && lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+            lastFocusedElement.focus({ preventScroll: true });
+        }
+    }
+
+    async function fetchData(pageNumber, options = {}) {
+        const params = getParams(pageNumber);
+
+        if (activeRequest) {
+            activeRequest.abort();
+        }
+
+        activeRequest = new AbortController();
+
+        setLoading(true);
+        closeExportMenu();
+
+        try {
+            const response = await fetch(`${window.location.pathname}?${params.toString()}`, {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                signal: activeRequest.signal,
+                credentials: "same-origin"
+            });
+
+            if (!response.ok) {
+                throw new Error(`Request failed (${response.status})`);
+            }
+
+            const html = await response.text();
+            const doc = new DOMParser().parseFromString(html, "text/html");
+
+            const newContent = doc.getElementById("evaluationContent");
+
+            if (!newContent) {
+                throw new Error("Could not find evaluation results in the server response.");
+            }
+
+            contentDiv.innerHTML = newContent.innerHTML;
+            updateRecordCountFromDocument(doc);
+            updateFilterBadge();
+
+            // Keep the browser URL shareable and preserve active filters.
+            const newUrl = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
+            window.history.replaceState({}, "", newUrl);
+
+            if (options.scrollToResults) {
+                const results = document.querySelector(".ev-results");
+                if (results) {
+                    results.scrollIntoView({
+                        behavior: reducedMotion ? "auto" : "smooth",
+                        block: "start"
+                    });
+                }
+            }
+        } catch (error) {
+            if (error.name !== "AbortError") {
+                console.error("Unable to load evaluations:", error);
+
+                if (typeof window.showToast === "function") {
+                    window.showToast("Unable to load evaluations. Please try again.", "error");
+                }
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    function scheduleSearch() {
+        clearTimeout(debounceTimer);
+
+        debounceTimer = setTimeout(function () {
+            fetchData(null);
+        }, 350);
+    }
+
+    function exportFile(format) {
+        const params = getParams();
+        params.delete("page");
+        params.set("export", format);
+
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
+        closeExportMenu();
+    }
+
+    window.resetFilters = function () {
+        clearTimeout(debounceTimer);
+
+        searchInputs.forEach(function (input) {
+            input.value = "";
+        });
+
+        filterControls.forEach(function (control) {
+            control.value = "";
+        });
+
+        syncSortControls("");
+        updateFilterBadge();
+        closeDrawer(false);
+
+        fetchData(null, { scrollToResults: true });
+    };
+
+    // Search
+    searchInputs.forEach(function (input) {
+        input.addEventListener("input", function () {
+            syncSearchInputs(input);
+            scheduleSearch();
+        });
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && input.value) {
+                input.value = "";
+                syncSearchInputs(input);
+                fetchData(null);
+            }
+        });
+    });
+
+    // Keep desktop/mobile filters synchronized.
+    filterControls.forEach(function (control) {
+        control.addEventListener("change", function () {
+            syncFilterControls(control.name, control.value);
+            updateFilterBadge();
+
+            // Mobile users can select several filters and apply them together.
+            if (!isMobile()) {
+                fetchData(null);
+            }
+        });
+    });
+
+    // Sorting
+    if (desktopSort) {
+        desktopSort.addEventListener("change", function () {
+            syncSortControls(desktopSort.value);
+            updateFilterBadge();
+            fetchData(null);
+        });
+    }
+
+    if (mobileSort) {
+        mobileSort.addEventListener("change", function () {
+            syncSortControls(mobileSort.value);
+            updateFilterBadge();
+        });
+    }
+
+    // Mobile drawer
+    if (openFiltersBtn) {
+        openFiltersBtn.addEventListener("click", openDrawer);
+    }
+
+    if (closeFiltersBackdrop) {
+        closeFiltersBackdrop.addEventListener("click", function () {
+            closeDrawer();
+        });
+    }
+
+    if (closeFiltersBtn) {
+        closeFiltersBtn.addEventListener("click", function () {
+            closeDrawer();
+        });
+    }
+
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener("click", function () {
+            closeDrawer(false);
+            fetchData(null, { scrollToResults: true });
+        });
+    }
+
+    // Export dropdown
+    if (exportDropdownBtn && exportDropdownMenu) {
+        exportDropdownBtn.addEventListener("click", function (event) {
+            event.stopPropagation();
+
+            const shouldOpen = exportDropdownMenu.hidden;
+            exportDropdownMenu.hidden = !shouldOpen;
+            exportDropdownBtn.setAttribute("aria-expanded", String(shouldOpen));
+        });
+
+        document.addEventListener("click", function (event) {
+            if (
+                !exportDropdownMenu.contains(event.target) &&
+                !exportDropdownBtn.contains(event.target)
+            ) {
+                closeExportMenu();
+            }
+        });
+    }
+
+    // Export actions
+    [
+        ["exportExcel", "excel"],
+        ["exportExcelMobile", "excel"],
+        ["exportPDF", "pdf"],
+        ["exportPDFMobile", "pdf"]
+    ].forEach(function (item) {
+        const button = document.getElementById(item[0]);
+
+        if (button) {
+            button.addEventListener("click", function () {
+                exportFile(item[1]);
+            });
+        }
+    });
+
+    // Pagination: retain the current search, filters, and sorting.
+    document.addEventListener("click", function (event) {
+        const link = event.target.closest(".pagination-link");
+
+        if (!link || !contentDiv.contains(link)) return;
+
+        event.preventDefault();
+
+        const url = new URL(link.href, window.location.origin);
+        const requestedPage = url.searchParams.get("page");
+
+        fetchData(requestedPage, { scrollToResults: true });
+    });
+
+    // Escape closes the filter drawer and export menu.
+    document.addEventListener("keydown", function (event) {
+        if (event.key !== "Escape") return;
+
+        if (drawer && !drawer.hidden) {
+            closeDrawer();
+        }
+
+        closeExportMenu();
+    });
+
+    // Close the mobile drawer when crossing into desktop layout.
+    window.addEventListener("resize", function () {
+        if (!isMobile() && drawer && !drawer.hidden) {
+            closeDrawer(false);
+        }
+    });
+
+    // Initialize sort/filter controls from the URL when possible.
+    const initialParams = new URLSearchParams(window.location.search);
+
+    filterControls.forEach(function (control) {
+        const value = initialParams.get(control.name);
+
+        if (value !== null) {
+            syncFilterControls(control.name, value);
+        }
+    });
+
+    const initialSort = initialParams.get("sort") || "";
+    syncSortControls(initialSort);
+
+    const initialSearch = initialParams.get("search") || "";
+    searchInputs.forEach(function (input) {
+        input.value = initialSearch;
+    });
+
+    updateFilterBadge();
+})();
+</script>
+{% endblock %}

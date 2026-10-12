@@ -1,0 +1,165 @@
+# 🎓 Faculty Evaluation System
+
+A web-based **Faculty Evaluation System** built with **Django** and **Tailwind CSS** that allows students to evaluate teachers efficiently while ensuring data integrity, real-time validation, and professional reporting for administrators.
+
+---
+
+## 🚀 Features
+
+### 📝 Student Evaluation
+- One evaluation **per student per teacher per subject per semester per academic year**
+- Student ID–based submission (no student account required)
+- Optional student name input
+- Clean, responsive evaluation form
+- Structured sections with multiple evaluation criteria
+- Rating scale:
+  - **5** – Outstanding  
+  - **4** – Good  
+  - **3** – Average  
+  - **2** – Needs Improvement  
+  - **1** – Unsatisfactory  
+  - **N** – Not Observed
+
+---
+
+### ⚡ Real-Time Duplicate Detection
+- Live validation while typing/selecting:
+  - Student ID
+  - Teacher
+  - Subject
+  - Semester
+  - Academic Year
+- Prevents duplicate evaluations **before submission**
+- Visual feedback:
+  - Red input borders
+  - Warning icon
+  - Helpful message
+- Submit button disabled when duplicate is detected
+
+---
+
+### 💬 Qualitative Feedback
+- **Commendable Features** (positive feedback)
+- **Suggestions for Improvement**
+  - Especially encouraged for low ratings (1)
+- Stored and viewable in admin panel and reports
+
+---
+
+### 🧮 Automatic Scoring
+- Automatic total score per section
+- Average rating calculations
+- Handles “Not Observed (N)” ratings correctly
+
+---
+
+### 🛠 Admin Dashboard
+- Total Teachers
+- Total Evaluations
+- Total Unique Students Evaluated
+- Overall Average Rating
+- Recent evaluations list
+- Clean, professional admin UI
+
+---
+
+### 📊 Evaluation Reports
+- View full evaluation details per submission
+- Grouped by section
+- Displays:
+  - Individual question ratings
+  - Section totals
+  - Student info
+  - Evaluation metadata
+  - Written comments
+
+---
+
+### 🖨 Print-Friendly & Export Ready
+- Print-optimized evaluation detail page
+- Clean layout for paper or PDF export
+- Ideal for:
+  - Faculty review
+  - Accreditation
+  - Administrative records
+
+---
+
+### 🔐 Admin Authentication
+- Secure admin login
+- Error-only message display on login
+- Clean, distraction-free login UI
+
+---
+
+### 📱 Responsive Design
+- Fully responsive (mobile, tablet, desktop)
+- Tailwind CSS–based layout
+- Accessible and user-friendly
+
+---
+
+## 🧱 Tech Stack
+
+- **Backend:** Django
+- **Frontend:** Tailwind CSS
+- **Database:** SQLite (default, configurable)
+- **Icons:** Google Material Icons
+- **Charts (optional):** Chart.js
+- **AJAX:** Fetch API for real-time validation
+
+---
+
+## 📂 Core Models Overview
+
+- `Teacher`
+- `Subject`
+- `Course`
+- `Section`
+- `Question`
+- `TeacherEvaluation`
+- `EvaluationItem`
+
+---
+
+## 🔄 Evaluation Flow
+
+1. Student enters required information
+2. System checks for duplicate evaluation in real time
+3. Student completes rating sections
+4. Optional written feedback added
+5. Evaluation submitted
+6. Admin reviews, prints, or exports reports
+
+---
+
+## ✅ Data Integrity Rules
+
+- One evaluation per:
+Student ID + Teacher + Subject + Semester + Academic Year
+
+- Duplicate submissions blocked both:
+- Frontend (real-time)
+- Backend (server-side validation)
+
+---
+
+## 📌 Future Enhancements (Optional)
+
+- PDF export button
+- Email notifications
+- Graphical analytics per teacher
+- Role-based access (Dean, Chair, Admin)
+- Anonymous evaluation mode
+- CSV export for analytics
+
+---
+
+## 📄 License
+
+This project is for **educational and institutional use**.  
+Modify and extend as needed.
+
+---
+
+✨ *Built with clarity, integrity, and academic professionalism.*

@@ -1,0 +1,1486 @@
+{% load static %}
+{% load form_extras %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8fafc">
+    <link rel="icon" href="{% static 'HIC_LOGO_TRANSPARENT.png' %}" type="image/png">
+    <title>Student Evaluation of Teachers | HIC</title>
+
+    <script>
+        (function () {
+            try {
+                const theme = localStorage.getItem("theme");
+                if (
+                    theme === "dark" ||
+                    (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+                ) {
+                    document.documentElement.classList.add("dark");
+                }
+            } catch (e) { }
+        })();
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: "class" };
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <link href="{% static 'css/home/select2-dark.css' %}" rel="stylesheet">
+    <script src="{% static 'js/home/select2-dark.js' %}"></script>
+
+    <style>
+        :root {
+            color-scheme: light;
+            --page: #f8fafc;
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+            --ink: #18181b;
+            --muted: #71717a;
+            --line: #e4e4e7;
+            --control: #ffffff;
+        }
+
+        html.dark {
+            color-scheme: dark;
+            --page: #09090b;
+            --surface: #111113;
+            --surface-soft: #18181b;
+            --ink: #fafafa;
+            --muted: #a1a1aa;
+            --line: #303036;
+            --control: #18181b;
+        }
+
+        * { box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 20px;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", sans-serif;
+            background: var(--page);
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        button, input, select, textarea { font: inherit; }
+
+        button, a, input, select, textarea {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid #71717a;
+            outline-offset: 2px;
+        }
+
+        .app-header {
+            flex-shrink: 0;
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .page-shell {
+            flex: 1 0 auto;
+            width: 100%;
+            max-width: 1100px;
+            margin-inline: auto;
+            padding: 16px;
+        }
+
+        .page-footer {
+            flex-shrink: 0;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .surface-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgb(0 0 0 / 2%);
+        }
+
+        .section-heading {
+            font-size: 15px;
+            line-height: 1.5;
+            font-weight: 650;
+            letter-spacing: -.25px;
+            color: var(--ink);
+        }
+
+        .section-description {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .field-label {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .required-mark { color: #dc2626; }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            min-height: 44px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            padding: 10px 12px;
+            background: var(--control);
+            color: var(--ink);
+            font-size: 13px;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+        .form-control::placeholder { color: #a1a1aa; }
+
+        .form-control:focus {
+            border-color: #71717a;
+            outline: none;
+            box-shadow: 0 0 0 3px rgb(113 113 122 / 12%);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.65;
+        }
+
+        .field-group { min-width: 0; }
+
+        /* Select2 */
+        .select2-container {
+            width: 100% !important;
+            font-size: 13px;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 44px !important;
+            border: 1px solid var(--line) !important;
+            border-radius: 9px !important;
+            background: var(--control) !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: var(--ink) !important;
+            line-height: 42px !important;
+            padding-left: 12px !important;
+            padding-right: 34px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #a1a1aa !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 42px !important;
+            right: 8px !important;
+        }
+
+        .select2-dropdown {
+            z-index: 100000 !important;
+            border-color: var(--line) !important;
+            background: var(--surface) !important;
+            color: var(--ink) !important;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            background: var(--control) !important;
+            color: var(--ink) !important;
+            border-color: var(--line) !important;
+            border-radius: 7px;
+        }
+
+        .select2-container--default .select2-results__option {
+            padding: 10px 12px;
+            color: var(--ink);
+        }
+
+        .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+            background: #27272a !important;
+            color: white !important;
+        }
+
+        .dark .select2-container--default .select2-selection--single {
+            color: var(--ink);
+        }
+
+        .dark .select2-container--default .select2-selection__arrow b {
+            border-color: #a1a1aa transparent transparent transparent;
+        }
+
+        /* Rating guide */
+        .scale-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 29px;
+            padding: 6px 10px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Evaluation question tables */
+        .question-table {
+            width: 100%;
+            min-width: 690px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 12px;
+        }
+
+        .question-table th {
+            padding: 12px 10px;
+            background: var(--surface-soft);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 650;
+            border-bottom: 1px solid var(--line);
+            white-space: nowrap;
+        }
+
+        .question-table td {
+            padding: 13px 10px;
+            border-bottom: 1px solid var(--line);
+            color: var(--ink);
+        }
+
+        .question-table tbody tr:last-child td { border-bottom: none; }
+
+        .question-table tbody tr:not(.total-row):hover td {
+            background: var(--surface-soft);
+        }
+
+        .question-table .question-cell {
+            min-width: 230px;
+            max-width: 360px;
+            line-height: 1.65;
+            overflow-wrap: anywhere;
+        }
+
+        .rating-cell {
+            text-align: center;
+            width: 56px;
+        }
+
+        .rating-radio {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            border: 1.5px solid #d4d4d8;
+            background: var(--control);
+            cursor: pointer;
+            vertical-align: middle;
+            transition: background .15s, border-color .15s, box-shadow .15s;
+        }
+
+        .rating-radio:hover { border-color: #71717a; }
+
+        .rating-radio:checked {
+            border: 5px solid #27272a;
+            background: var(--control);
+        }
+
+        .dark .rating-radio:checked { border-color: #fafafa; }
+
+        .rating-radio:focus-visible {
+            outline: 2px solid #71717a;
+            outline-offset: 3px;
+        }
+
+        .rating-popup { pointer-events: none; }
+
+        .total-row td {
+            background: var(--surface-soft);
+            font-weight: 650;
+        }
+
+        .total-value {
+            color: var(--ink);
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 42px;
+            padding: 9px 14px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s, border-color .15s, transform .15s;
+        }
+
+        .btn:active:not(:disabled) { transform: scale(.99); }
+
+        .btn:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #18181b;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) { background: #27272a; }
+
+        .dark .btn-primary {
+            background: #fafafa;
+            color: #18181b;
+        }
+
+        .dark .btn-primary:hover:not(:disabled) { background: #e4e4e7; }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--ink);
+            border-color: var(--line);
+        }
+
+        .btn-secondary:hover { background: var(--surface-soft); }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* Modals */
+        .modal-panel {
+            background: var(--surface);
+            color: var(--ink);
+            border: 1px solid var(--line);
+            box-shadow: 0 24px 70px rgb(0 0 0 / 18%);
+        }
+
+        .modal-backdrop {
+            padding: 12px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+        }
+
+        #previewModal, #clearModal { overscroll-behavior: contain; }
+
+        #previewContent { overflow-wrap: anywhere; }
+
+        .preview-table {
+            width: 100%;
+            min-width: 610px;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            border: 1px solid var(--line);
+            padding: 8px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .preview-table th {
+            background: var(--surface-soft);
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .preview-table .preview-rating {
+            width: 48px;
+            min-width: 42px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .preview-table .preview-rating-radio {
+            display: inline-block;
+            width: 17px;
+            height: 17px;
+            margin: 0;
+            vertical-align: middle;
+            opacity: 1;
+            cursor: default;
+        }
+
+        .preview-table .preview-rating-radio:disabled { opacity: 1; }
+
+        .preview-table .preview-question {
+            min-width: 230px;
+            max-width: 380px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .preview-table .preview-total-label {
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .preview-table .preview-total-value {
+            text-align: center;
+            font-weight: 700;
+            background: var(--surface-soft);
+        }
+
+        .draft-toast {
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+        }
+
+        @media (min-width: 640px) {
+            .page-shell { padding: 28px 24px 40px; }
+            .question-table { font-size: 13px; }
+            .modal-backdrop { padding: 24px; }
+        }
+
+        @media (max-width: 639px) {
+            .mobile-action { flex: 1; }
+
+            #previewModal {
+                padding: 0;
+                align-items: flex-end;
+            }
+
+            #previewModal > .modal-panel {
+                width: 100%;
+                max-width: none;
+                height: 94dvh;
+                max-height: 94dvh;
+                border-radius: 18px 18px 0 0;
+            }
+
+            #previewContent { padding: 16px; }
+
+            .preview-info-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 14px;
+            }
+
+            #previewModal .preview-actions {
+                padding: 12px 16px;
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+            }
+
+            #clearModal {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            #clearModal > .modal-panel {
+                max-width: none;
+                width: 100%;
+                border-radius: 18px 18px 0 0;
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Application header -->
+    <header class="app-header">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <img src="{% static 'HIC_LOGO_TRANSPARENT.png' %}" alt="Holy Infant College logo"
+                    class="w-10 h-10 sm:w-11 sm:h-11 object-contain shrink-0">
+
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold tracking-tight truncate">Holy Infant College</p>
+                    <p class="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Student Evaluation Portal
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button" onclick="toggleTheme()" id="themeToggle"
+                    class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                    aria-label="Toggle dark mode" title="Toggle dark mode">
+                    <span id="themeIcon" class="material-icons text-[20px]">dark_mode</span>
+                </button>
+
+                <a href="{% url 'admin_login' %}"
+                    class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                    aria-label="Administrator login" title="Administrator login">
+                    <span class="material-icons text-[20px]">settings</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-shell">
+
+        <!-- Page title -->
+        <div class="mb-6 sm:mb-7">
+            <h1 class="text-[23px] sm:text-[28px] font-semibold tracking-[-0.7px] leading-tight">
+                Student Evaluation of Teachers
+            </h1>
+            <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400 leading-6">
+                Share your feedback to help improve teaching and learning.
+            </p>
+        </div>
+
+        <!-- Institution details -->
+        <section class="surface-card p-4 sm:p-5 mb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div class="hidden sm:flex w-12 h-12 rounded-xl items-center justify-center bg-gray-50 border border-gray-100 shrink-0">
+                    <img src="{% static 'HIC_LOGO_TRANSPARENT.png' %}" alt="" class="w-10 h-10 object-contain">
+                </div>
+
+                <div class="min-w-0 text-center sm:text-left">
+                    <p class="text-[12px] sm:text-[13px] font-bold tracking-wide">
+                        HOLY INFANT COLLEGE OF TACLOBAN CITY, INC.
+                    </p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                        Benigno Aquino Ave., Utap Hills, Tacloban City
+                    </p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 italic mt-1">
+                        Administered by the Religious Sisters of Mercy (RSM)
+                    </p>
+                </div>
+
+                <div class="sm:ml-auto flex items-center justify-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 rounded-full px-3 py-1.5 shrink-0">
+                    <span class="material-icons text-[14px]">lock</span>
+                    Confidential
+                </div>
+            </div>
+        </section>
+
+        <!-- Instructions -->
+        {% if active_period %}
+        <section class="surface-card p-4 sm:p-5 mb-6">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 shrink-0">
+                    <span class="material-icons text-[19px] text-zinc-600 dark:text-zinc-300">info</span>
+                </div>
+                <div>
+                    <h2 class="text-[13px] font-semibold mb-1">Before you begin</h2>
+                    <p class="text-xs sm:text-[13px] text-zinc-500 dark:text-zinc-400 leading-6">
+                        This evaluation is part of our ongoing effort to maintain quality education.
+                        Please answer each question honestly and thoughtfully. Your responses will
+                        be kept confidential and used to help faculty improve their teaching.
+                    </p>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Duplicate evaluation warning -->
+        <div id="duplicateWarning"
+            class="hidden items-center gap-2 text-sm text-red-700 dark:text-red-300 mb-5 p-3.5 border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 rounded-xl relative"
+            role="alert">
+            <span id="duplicateHelpBtn" class="material-icons cursor-pointer select-none text-[20px]" tabindex="0"
+                role="button" aria-label="Explain duplicate evaluation warning">help_outline</span>
+
+            <span class="font-medium text-xs sm:text-sm">Duplicate evaluation detected</span>
+
+            <div id="duplicateTooltip"
+                class="hidden absolute left-3 top-full mt-2 w-[min(290px,calc(100vw-48px))] bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-200 text-xs border border-gray-200 dark:border-gray-700 shadow-xl rounded-lg p-3 z-50">
+                This student already submitted an evaluation for the selected teacher, subject, semester, and academic year.
+            </div>
+        </div>
+
+        <script src="{% static 'js/home/clickable_warning.js' %}"></script>
+
+        <!-- Closed evaluation message -->
+        {% if not active_period %}
+        <section class="surface-card p-6 sm:p-10 text-center mb-6">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400">
+                <span class="material-icons text-3xl">event_busy</span>
+            </div>
+            <h2 class="text-lg font-semibold">Evaluations Are Currently Closed</h2>
+            <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                The administration has not opened an evaluation period yet.
+                Please check back when the next evaluation period becomes available.
+            </p>
+        </section>
+        {% endif %}
+
+        <!-- Evaluation form -->
+        <form id="evaluationForm" method="POST" action="" {% if not active_period %}hidden{% endif %}>
+            {% csrf_token %}
+
+            <!-- Student and teacher information -->
+            <section class="surface-card p-4 sm:p-6 mb-6">
+                <div class="mb-5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                            <span class="material-icons text-[18px]">assignment_ind</span>
+                        </div>
+                        <h2 class="section-heading">Evaluation details</h2>
+                    </div>
+                    <p class="section-description ml-10">
+                        Enter your information and select the teacher being evaluated.
+                        Fields marked with <span class="required-mark">*</span> are required.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+
+                    <div class="field-group">
+                        <label for="teacherSelect" class="field-label">
+                            Teacher <span class="required-mark">*</span>
+                        </label>
+                        
+                        <select
+                            name="teacher"
+                            id="teacherSelect"
+                            data-ajax-url="{% url 'teacher_list_json' %}?division=COLLEGE"
+                            required
+                            class="form-control"
+                        >
+                            <option value=""></option>
+                        </select>
+
+                    </div>
+
+                    <div class="field-group">
+                        <label for="subject" class="field-label">
+                            Subject <span class="required-mark">*</span>
+                        </label>
+                        <input type="text" id="subject" name="subject"
+                            placeholder="Enter subject" value="{{ request.POST.subject|default:'' }}"
+                            required class="form-control">
+                    </div>
+
+                    <!-- Evaluation period -->
+                    <div class="field-group">
+                        <label for="evaluation_period_display" class="field-label">Evaluation Period</label>
+                        <input type="text" id="evaluation_period_display"
+                            value="{% if active_period %}{{ active_period.get_semester_display }} · {{ active_period.academic_year }}{% endif %}"
+                            readonly aria-readonly="true" class="form-control">
+
+                        <input type="hidden" name="semester" id="semester"
+                            value="{% if active_period %}{{ active_period.semester }}{% endif %}">
+                        <input type="hidden" name="academic_year" id="academic_year"
+                            value="{% if active_period %}{{ active_period.academic_year }}{% endif %}">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="student_name" class="field-label">Student Name</label>
+                        <input type="text" id="student_name" name="student_name"
+                            value="{{ request.POST.student_name|default:'' }}"
+                            placeholder="Optional" autocomplete="name" class="form-control">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="student_id" class="field-label">
+                            Student ID <span class="required-mark">*</span>
+                        </label>
+                        <input type="text" name="student_id" id="student_id"
+                            value="{{ request.POST.student_id|default:'' }}"
+                            placeholder="Enter student ID" required autocomplete="off"
+                            aria-describedby="studentIdWarning" class="form-control">
+
+                        <div id="studentIdWarning" class="hidden items-center gap-1.5 mt-2 text-xs text-red-600 dark:text-red-400" role="alert">
+                            <span class="material-icons text-[16px]">error_outline</span>
+                            <span>Invalid Student ID</span>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="course" class="field-label">
+                            Course <span class="required-mark">*</span>
+                        </label>
+                        <select id="course" name="course" required class="form-control">
+                            <option value="" disabled {% if not request.POST.course %}selected{% endif %}>Select course</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}" {% if request.POST.course == course.id|stringformat:"s" %}selected{% endif %}>
+                                {{ course.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="year_level" class="field-label">
+                            Year Level <span class="required-mark">*</span>
+                        </label>
+                        <select id="year_level" name="year_level" required class="form-control">
+                            <option value="" disabled {% if not request.POST.year_level %}selected{% endif %}>Select year level</option>
+
+                            <optgroup label="Elementary">
+                                {% for level in "Kindergarten,Grade 1,Grade 2,Grade 3,Grade 4,Grade 5,Grade 6"|cut:" "|default:"" %}
+                                {% endfor %}
+                                <option value="Kindergarten" {% if request.POST.year_level == "Kindergarten" %}selected{% endif %}>Kindergarten</option>
+                                <option value="Grade 1" {% if request.POST.year_level == "Grade 1" %}selected{% endif %}>Grade 1</option>
+                                <option value="Grade 2" {% if request.POST.year_level == "Grade 2" %}selected{% endif %}>Grade 2</option>
+                                <option value="Grade 3" {% if request.POST.year_level == "Grade 3" %}selected{% endif %}>Grade 3</option>
+                                <option value="Grade 4" {% if request.POST.year_level == "Grade 4" %}selected{% endif %}>Grade 4</option>
+                                <option value="Grade 5" {% if request.POST.year_level == "Grade 5" %}selected{% endif %}>Grade 5</option>
+                                <option value="Grade 6" {% if request.POST.year_level == "Grade 6" %}selected{% endif %}>Grade 6</option>
+                            </optgroup>
+
+                            <optgroup label="Junior High School">
+                                <option value="Grade 7" {% if request.POST.year_level == "Grade 7" %}selected{% endif %}>Grade 7</option>
+                                <option value="Grade 8" {% if request.POST.year_level == "Grade 8" %}selected{% endif %}>Grade 8</option>
+                                <option value="Grade 9" {% if request.POST.year_level == "Grade 9" %}selected{% endif %}>Grade 9</option>
+                                <option value="Grade 10" {% if request.POST.year_level == "Grade 10" %}selected{% endif %}>Grade 10</option>
+                            </optgroup>
+
+                            <optgroup label="Senior High School">
+                                <option value="Grade 11" {% if request.POST.year_level == "Grade 11" %}selected{% endif %}>Grade 11</option>
+                                <option value="Grade 12" {% if request.POST.year_level == "Grade 12" %}selected{% endif %}>Grade 12</option>
+                            </optgroup>
+
+                            <optgroup label="College">
+                                <option value="1st Year College" {% if request.POST.year_level == "1st Year College" %}selected{% endif %}>1st Year</option>
+                                <option value="2nd Year College" {% if request.POST.year_level == "2nd Year College" %}selected{% endif %}>2nd Year</option>
+                                <option value="3rd Year College" {% if request.POST.year_level == "3rd Year College" %}selected{% endif %}>3rd Year</option>
+                                <option value="4th Year College" {% if request.POST.year_level == "4th Year College" %}selected{% endif %}>4th Year</option>
+                                <option value="5th Year College" {% if request.POST.year_level == "5th Year College" %}selected{% endif %}>5th Year</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Evaluation scale -->
+            <section class="surface-card p-4 sm:p-5 mb-6">
+                <div class="flex items-start gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                        <span class="material-icons text-[18px]">rule</span>
+                    </div>
+                    <div>
+                        <h2 class="section-heading">Rating scale</h2>
+                        <p class="section-description">
+                            Select one rating for every question. Choose N if the item was not observed.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <span class="scale-badge bg-green-100 text-green-800">5 — Outstanding</span>
+                    <span class="scale-badge bg-blue-100 text-blue-800">4 — Good</span>
+                    <span class="scale-badge bg-yellow-100 text-yellow-800">3 — Average</span>
+                    <span class="scale-badge bg-orange-100 text-orange-800">2 — Needs Improvement</span>
+                    <span class="scale-badge bg-red-100 text-red-800">1 — Unsatisfactory</span>
+                    <span class="scale-badge bg-gray-200 text-gray-700">N — Not Observed</span>
+                </div>
+            </section>
+
+            <!-- Evaluation questions -->
+            <div class="mb-6">
+                <div class="flex items-center gap-3 mb-4 px-1">
+                    <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                        <span class="material-icons text-[18px]">fact_check</span>
+                    </div>
+                    <div>
+                        <h2 class="section-heading">Evaluation questions</h2>
+                        <p class="section-description">Answer all questions before previewing your evaluation.</p>
+                    </div>
+                </div>
+
+                {% for section in sections %}
+                <section class="surface-card mb-4 overflow-hidden evaluation-question-section">
+                    <div class="px-4 sm:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="font-semibold text-sm tracking-tight">
+                            {{ section.prefix }}. {{ section.title }}
+                        </h3>
+                        <p class="section-description">Select one rating per item.</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="question-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left pl-4 sm:pl-5">Evaluation item</th>
+                                    <th class="rating-cell">5</th>
+                                    <th class="rating-cell">4</th>
+                                    <th class="rating-cell">3</th>
+                                    <th class="rating-cell">2</th>
+                                    <th class="rating-cell">1</th>
+                                    <th class="rating-cell">N</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for q in section.questions.all %}
+                                <tr>
+                                    <td class="question-cell pl-4 sm:pl-5">
+                                        {{ forloop.counter }}. {{ q.text }}
+                                    </td>
+
+                                    {% for v in "54321N" %}
+                                    <td class="rating-cell relative">
+                                        <div class="rating-popup absolute bottom-full left-1/2 -translate-x-1/2 opacity-0 scale-75 transition-all duration-200 z-20">
+                                            <div class="{% if v == '5' %}bg-green-600{% elif v == '4' %}bg-blue-600{% elif v == '3' %}bg-yellow-600{% elif v == '2' %}bg-orange-600{% elif v == '1' %}bg-red-600{% else %}bg-gray-600{% endif %} text-white text-[10px] px-2 py-1 rounded-md shadow whitespace-nowrap">
+                                                {% if v == '5' %}Outstanding{% elif v == '4' %}Good{% elif v == '3' %}Average{% elif v == '2' %}Needs Improvement{% elif v == '1' %}Unsatisfactory{% else %}Not Observed{% endif %}
+                                            </div>
+                                        </div>
+
+                                        <input type="radio"
+                                            name="q_{{ section.prefix }}_{{ q.order }}"
+                                            value="{{ v }}"
+                                            data-section="{{ section.prefix }}"
+                                            aria-label="Question {{ forloop.parentloop.counter }} rating {{ v }}"
+                                            required class="rating-radio">
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+
+                                <tr class="total-row">
+                                    <td class="text-right">TOTAL</td>
+                                    <td colspan="6" class="text-center">
+                                        <span id="total_{{ section.prefix }}" class="total-value">0</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="px-4 py-2.5 bg-gray-50 dark:bg-zinc-900/60 border-t border-gray-100 dark:border-gray-800">
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400">
+                            <span class="font-semibold">Section score:</span>
+                            <span id="sectionHint_{{ section.prefix }}">Ratings update as you answer.</span>
+                        </p>
+                    </div>
+                </section>
+                {% endfor %}
+            </div>
+
+            <!-- Rating popup behavior -->
+            <script>
+                document.querySelectorAll(".rating-radio").forEach(function (radio) {
+                    radio.addEventListener("change", function () {
+                        document.querySelectorAll(".rating-popup").forEach(function (popup) {
+                            popup.classList.remove("opacity-100", "scale-100", "-translate-y-2");
+                            popup.classList.add("opacity-0", "scale-75");
+                        });
+
+                        const popup = this.parentElement.querySelector(".rating-popup");
+                        if (!popup) return;
+
+                        popup.classList.remove("opacity-0", "scale-75");
+                        popup.classList.add("opacity-100", "scale-100", "-translate-y-2");
+
+                        setTimeout(function () {
+                            popup.classList.remove("opacity-100", "scale-100", "-translate-y-2");
+                            popup.classList.add("opacity-0", "scale-75");
+                        }, 1200);
+                    });
+                });
+            </script>
+
+            <!-- Additional comments -->
+            <section class="surface-card p-4 sm:p-6 mb-6">
+                <div class="mb-5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                            <span class="material-icons text-[18px]">rate_review</span>
+                        </div>
+                        <h2 class="section-heading">Additional feedback</h2>
+                    </div>
+                    <p class="section-description ml-10">
+                        Share specific observations or suggestions to support improvement.
+                    </p>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label for="commendable_features" class="field-label">A. Commendable Features</label>
+                        <textarea id="commendable_features" name="commendable_features" rows="4"
+                            class="form-control"
+                            placeholder="What teaching practices or qualities did you appreciate?">{{ request.POST.commendable_features|default:'' }}</textarea>
+                    </div>
+
+                    <div>
+                        <label for="suggestions_improvement" class="field-label">B. Suggestions for Improvement</label>
+                        <textarea id="suggestions_improvement" name="suggestions_improvement" rows="4"
+                            class="form-control"
+                            placeholder="What could be improved, especially for items rated 1?">{{ request.POST.suggestions_improvement|default:'' }}</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Form actions -->
+            <div class="surface-card p-4 sm:px-5 sm:py-4 mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-semibold">Review your responses</p>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                            Preview your answers before submitting.
+                        </p>
+                    </div>
+
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button type="button" id="clearBtn" class="btn btn-secondary mobile-action">
+                            <span class="material-icons text-[18px]">restart_alt</span>
+                            Clear
+                        </button>
+
+                        <button type="button" id="previewBtn" class="btn btn-primary mobile-action"
+                            {% if not active_period %}disabled title="Evaluations are currently closed"{% endif %}>
+                            <span class="material-icons text-[18px]">visibility</span>
+                            Preview evaluation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-950 px-4 py-5">
+        <p class="text-center text-[11px] text-zinc-400 dark:text-zinc-500">
+            Holy Infant College of Tacloban City, Inc.
+            <span class="mx-1">·</span>
+            Student Evaluation Portal
+        </p>
+    </footer>
+
+    <!-- External logic -->
+    <script src="{% static 'js/home/total_calculation.js' %}"></script>
+    <script src="{% static 'js/home/duplicate_check.js' %}"></script>
+
+    <!-- Clear confirmation modal -->
+    <div id="clearModal" class="modal-backdrop fixed inset-0 z-[100000] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+        <section class="modal-panel w-full max-w-sm rounded-2xl p-5 sm:p-6">
+            <div class="flex items-start gap-3 mb-4">
+                <div class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/30 shrink-0">
+                    <span class="material-icons text-red-600">warning_amber</span>
+                </div>
+                <div>
+                    <h2 class="text-base font-semibold">Clear this evaluation?</h2>
+                    <p class="text-xs leading-5 text-zinc-500 dark:text-zinc-400 mt-1">
+                        All entered information and selected ratings will be removed. This cannot be undone.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex gap-2 justify-end mt-6">
+                <button type="button" id="cancelClear" class="btn btn-secondary">Keep responses</button>
+                <button type="button" id="confirmClear" class="btn btn-danger">Clear form</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Preview modal -->
+    <div id="previewModal" class="modal-backdrop fixed inset-0 z-[99999] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+        <section class="modal-panel w-full max-w-5xl max-h-[92dvh] rounded-2xl flex flex-col overflow-hidden">
+            <header class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3 shrink-0">
+                <div>
+                    <h2 class="text-base font-semibold">Preview evaluation</h2>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                        Check your details and ratings before submission.
+                    </p>
+                </div>
+                <button type="button" id="closePreview"
+                    class="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
+                    aria-label="Close preview">
+                    <span class="material-icons">close</span>
+                </button>
+            </header>
+
+            <div id="previewContent" class="px-4 py-5 sm:p-6 text-sm overflow-y-auto flex-1">
+                <div class="preview-info-grid grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 mb-7">
+                    <div>
+                        <p class="text-[11px] text-zinc-500 mb-1">Teacher</p>
+                        <p id="p_teacher" class="font-medium border-b border-gray-300 dark:border-gray-700 pb-2 break-words"></p>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-zinc-500 mb-1">Subject</p>
+                        <p id="p_subject" class="font-medium border-b border-gray-300 dark:border-gray-700 pb-2 break-words"></p>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-zinc-500 mb-1">Semester</p>
+                        <p id="p_semester" class="font-medium border-b border-gray-300 dark:border-gray-700 pb-2"></p>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-zinc-500 mb-1">Academic Year</p>
+                        <p id="p_year" class="font-medium border-b border-gray-300 dark:border-gray-700 pb-2"></p>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-zinc-500 mb-1">Student ID</p>
+                        <p id="p_student_id" class="font-medium border-b border-gray-300 dark:border-gray-700 pb-2 break-words"></p>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-zinc-500 mb-1">Student Name</p>
+                        <p id="p_student_name" class="font-medium border-b border-gray-300 dark:border-gray-700 pb-2 break-words"></p>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-zinc-500 mb-1">Course</p>
+                        <p id="p_course" class="font-medium border-b border-gray-300 dark:border-gray-700 pb-2 break-words"></p>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-zinc-500 mb-1">Year Level</p>
+                        <p id="p_year_level" class="font-medium border-b border-gray-300 dark:border-gray-700 pb-2"></p>
+                    </div>
+                </div>
+
+                <div id="previewSections" class="space-y-6"></div>
+
+                <div class="mt-7 space-y-5">
+                    <div>
+                        <p class="font-semibold text-sm mb-2">A. Commendable Features</p>
+                        <p id="p_comm" class="text-sm leading-6 whitespace-pre-wrap break-words"></p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-sm mb-2">B. Suggestions for Improvement</p>
+                        <p id="p_suggest" class="text-sm leading-6 whitespace-pre-wrap break-words"></p>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="preview-actions shrink-0 p-4 sm:px-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end gap-2 bg-white dark:bg-zinc-950">
+                <button type="button" id="editPreview" class="btn btn-secondary">Edit responses</button>
+                <button type="button" id="submitBtn" class="btn btn-primary"
+                    {% if not active_period %}disabled title="Evaluations are currently closed"{% endif %}>
+                    <svg id="spinner" class="hidden animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    <span id="btnText">Submit evaluation</span>
+                </button>
+            </footer>
+        </section>
+    </div>
+
+    <!-- Draft status toast -->
+    <div id="draftStatus" class="draft-toast fixed bottom-0 sm:bottom-4 right-0 sm:right-4 z-[100001] hidden px-4 sm:px-0">
+        <div class="toast-inner flex items-center gap-3 p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-700 shadow-xl text-gray-800 dark:text-gray-100 translate-y-4 opacity-0 transition-all duration-300 max-w-[320px] sm:max-w-sm">
+            <span class="material-icons text-emerald-500 text-xl">check_circle</span>
+            <div class="hidden sm:flex flex-col leading-tight">
+                <span class="text-sm font-semibold">Draft saved</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">Your progress has been saved.</span>
+                <div class="mt-2 h-1 w-40 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div id="toastProgress" class="h-full bg-emerald-500 w-full transition-all"></div>
+                </div>
+            </div>
+            <span class="sm:hidden text-sm font-medium">Draft saved</span>
+        </div>
+    </div>
+
+    <script src="{% static 'js/home/clear_form.js' %}"></script>
+    <script src="{% static 'js/home/saveDraft.js' %}"></script>
+
+    <script>
+        (function () {
+            "use strict";
+
+            const form = document.getElementById("evaluationForm");
+            const modal = document.getElementById("previewModal");
+            const clearModal = document.getElementById("clearModal");
+            const previewBtn = document.getElementById("previewBtn");
+            const clearBtn = document.getElementById("clearBtn");
+            const submitBtn = document.getElementById("submitBtn");
+            const spinner = document.getElementById("spinner");
+            const btnText = document.getElementById("btnText");
+
+            let isSubmitting = false;
+            let previousFocus = null;
+
+            function updateThemeIcon() {
+                const dark = document.documentElement.classList.contains("dark");
+                const icon = document.getElementById("themeIcon");
+                const button = document.getElementById("themeToggle");
+
+                icon.textContent = dark ? "light_mode" : "dark_mode";
+                button.setAttribute(
+                    "aria-label",
+                    dark ? "Switch to light mode" : "Switch to dark mode"
+                );
+
+                document.querySelector('meta[name="theme-color"]')
+                    .setAttribute("content", dark ? "#09090b" : "#f8fafc");
+            }
+
+            window.toggleTheme = function () {
+                const dark = document.documentElement.classList.toggle("dark");
+
+                try {
+                    localStorage.setItem("theme", dark ? "dark" : "light");
+                } catch (e) { }
+
+                updateThemeIcon();
+            };
+
+            updateThemeIcon();
+
+            function showModal(element) {
+                previousFocus = document.activeElement;
+                element.classList.remove("hidden");
+                element.classList.add("flex");
+                document.body.style.overflow = "hidden";
+
+                const firstButton = element.querySelector("button:not(:disabled)");
+                if (firstButton) firstButton.focus({ preventScroll: true });
+            }
+
+            function hideModal(element) {
+                element.classList.add("hidden");
+                element.classList.remove("flex");
+
+                if (!modal.classList.contains("flex") &&
+                    !clearModal.classList.contains("flex")) {
+                    document.body.style.overflow = "";
+                }
+
+                if (previousFocus && typeof previousFocus.focus === "function") {
+                    previousFocus.focus({ preventScroll: true });
+                }
+            }
+
+            function setPreviewText(id, value, fallback) {
+                const element = document.getElementById(id);
+                const normalized = value == null ? "" : String(value).trim();
+                element.textContent = normalized || fallback;
+            }
+
+            function selectedText(name) {
+                const field = form.elements.namedItem(name);
+                if (!field) return "";
+
+                if (name === "teacher" && window.jQuery && jQuery.fn.select2) {
+                    const teacher = jQuery("#teacherSelect");
+                    if (teacher.hasClass("select2-hidden-accessible")) {
+                        const selected = teacher.select2("data");
+                        if (selected && selected.length && selected[0].text) {
+                            return selected[0].text.trim();
+                        }
+                    }
+                }
+
+                if (field.tagName === "SELECT") {
+                    if (field.selectedIndex < 0) return "";
+                    const option = field.options[field.selectedIndex];
+                    return option && !option.disabled ? option.text.trim() : "";
+                }
+
+                return field.value || "";
+            }
+
+            function buildPreviewSections() {
+                const container = document.getElementById("previewSections");
+                container.replaceChildren();
+
+                const ratingValues = ["5", "4", "3", "2", "1", "N"];
+                const questionSections = form.querySelectorAll(
+                    ".evaluation-question-section"
+                );
+
+                questionSections.forEach(function (sectionWrapper) {
+                    const heading = sectionWrapper.querySelector("h3");
+                    const questionRows = Array.from(
+                        sectionWrapper.querySelectorAll("tbody tr:not(.total-row)")
+                    );
+
+                    if (!heading || questionRows.length === 0) return;
+
+                    const section = document.createElement("section");
+                    section.className = "mb-6";
+
+                    const title = document.createElement("h3");
+                    title.className = "font-semibold text-sm mb-3";
+                    title.textContent = heading.textContent.trim();
+                    section.appendChild(title);
+
+                    const tableWrapper = document.createElement("div");
+                    tableWrapper.className =
+                        "overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700";
+
+                    const table = document.createElement("table");
+                    table.className = "preview-table";
+
+                    const thead = document.createElement("thead");
+                    const headerRow = document.createElement("tr");
+
+                    const questionHeader = document.createElement("th");
+                    questionHeader.textContent = "Evaluation item";
+                    headerRow.appendChild(questionHeader);
+
+                    ratingValues.forEach(function (value) {
+                        const th = document.createElement("th");
+                        th.textContent = value;
+                        th.className = "preview-rating";
+                        headerRow.appendChild(th);
+                    });
+
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    const tbody = document.createElement("tbody");
+                    let total = 0;
+                    let answeredCount = 0;
+                    let numericCount = 0;
+
+                    questionRows.forEach(function (originalRow) {
+                        const questionCell = originalRow.querySelector(".question-cell");
+                        if (!questionCell) return;
+
+                        const originalRadios = Array.from(
+                            originalRow.querySelectorAll(".rating-radio")
+                        );
+
+                        const selectedRadio = originalRadios.find(
+                            function (radio) { return radio.checked; }
+                        );
+
+                        const selectedValue = selectedRadio ? selectedRadio.value : null;
+
+                        if (selectedValue !== null) {
+                            answeredCount++;
+
+                            if (/^[1-5]$/.test(selectedValue)) {
+                                total += Number(selectedValue);
+                                numericCount++;
+                            }
+                        }
+
+                        const row = document.createElement("tr");
+
+                        const question = document.createElement("td");
+                        question.className = "preview-question";
+                        question.textContent = questionCell.textContent.trim();
+                        row.appendChild(question);
+
+                        ratingValues.forEach(function (value) {
+                            const cell = document.createElement("td");
+                            cell.className = "preview-rating";
+
+                            const radio = document.createElement("input");
+                            radio.type = "radio";
+                            radio.name = "preview_" +
+                                (selectedRadio
+                                    ? selectedRadio.name
+                                    : "question_" + Array.from(
+                                        sectionWrapper.querySelectorAll("tbody tr:not(.total-row)")
+                                    ).indexOf(originalRow));
+
+                            radio.value = value;
+                            radio.checked = selectedValue === value;
+                            radio.disabled = true;
+                            radio.tabIndex = -1;
+                            radio.className = "rating-radio preview-rating-radio";
+                            radio.setAttribute(
+                                "aria-label",
+                                "Rating " + value +
+                                (selectedValue === value ? ", selected" : "")
+                            );
+
+                            cell.appendChild(radio);
+                            row.appendChild(cell);
+                        });
+
+                        tbody.appendChild(row);
+                    });
+
+                    const totalRow = document.createElement("tr");
+
+                    const totalLabel = document.createElement("td");
+                    totalLabel.colSpan = 1;
+                    totalLabel.textContent = "TOTAL SCORE";
+                    totalLabel.className = "preview-total-label";
+
+                    const totalValue = document.createElement("td");
+                    totalValue.colSpan = 6;
+                    totalValue.className = "preview-total-value";
+                    totalValue.textContent = String(total);
+
+                    totalRow.append(totalLabel, totalValue);
+                    tbody.appendChild(totalRow);
+
+                    table.appendChild(tbody);
+                    tableWrapper.appendChild(table);
+                    section.appendChild(tableWrapper);
+
+                    const summary = document.createElement("p");
+                    summary.className = "mt-2 text-xs text-zinc-500 dark:text-zinc-400";
+                    summary.textContent =
+                        answeredCount + " of " + questionRows.length +
+                        " questions answered · " +
+                        numericCount + " numeric ratings · Total score: " + total;
+
+                    section.appendChild(summary);
+                    container.appendChild(section);
+                });
+
+                if (!container.children.length) {
+                    const empty = document.createElement("p");
+                    empty.className = "text-sm text-zinc-500 dark:text-zinc-400";
+                    empty.textContent = "No evaluation questions are available to preview.";
+                    container.appendChild(empty);
+                }
+            }
+
+            function preparePreview() {
+                setPreviewText("p_teacher", selectedText("teacher"), "Not selected");
+                setPreviewText("p_subject", form.elements.subject.value, "N/A");
+
+                const periodDisplay = document.getElementById("evaluation_period_display");
+                const periodText = periodDisplay ? periodDisplay.value.trim() : "";
+                const separator = " · ";
+                const separatorIndex = periodText.lastIndexOf(separator);
+
+                const semester = separatorIndex >= 0
+                    ? periodText.substring(0, separatorIndex).trim()
+                    : periodText;
+
+                const academicYear = separatorIndex >= 0
+                    ? periodText.substring(separatorIndex + separator.length).trim()
+                    : "";
+
+                setPreviewText("p_semester", semester, "N/A");
+                setPreviewText("p_year", academicYear, "N/A");
+                setPreviewText("p_student_id", form.elements.student_id.value, "N/A");
+                setPreviewText("p_student_name", form.elements.student_name.value, "Not provided");
+                setPreviewText("p_course", selectedText("course"), "N/A");
+                setPreviewText("p_year_level", selectedText("year_level"), "N/A");
+                setPreviewText("p_comm", form.elements.commendable_features.value, "None provided");
+                setPreviewText("p_suggest", form.elements.suggestions_improvement.value, "None provided");
+
+                buildPreviewSections();
+            }
+
+            previewBtn.addEventListener("click", function () {
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                preparePreview();
+                showModal(modal);
+            });
+
+            document.getElementById("closePreview").addEventListener("click", function () {
+                hideModal(modal);
+            });
+
+            document.getElementById("editPreview").addEventListener("click", function () {
+                hideModal(modal);
+            });
+
+            clearBtn.addEventListener("click", function () {
+                showModal(clearModal);
+            });
+
+            document.getElementById("cancelClear").addEventListener("click", function () {
+                hideModal(clearModal);
+            });
+
+            document.getElementById("confirmClear").addEventListener("click", function () {
+                form.reset();
+
+                if (window.jQuery && jQuery.fn.select2 &&
+                    jQuery("#teacherSelect").hasClass("select2-hidden-accessible")) {
+                    jQuery("#teacherSelect").val(null).trigger("change");
+                }
+
+                form.querySelectorAll('[id^="total_"]').forEach(function (element) {
+                    element.textContent = "0";
+                });
+
+                form.querySelectorAll('[id^="sectionHint_"]').forEach(function (element) {
+                    element.textContent = "Ratings update as you answer.";
+                });
+
+                const warning = document.getElementById("studentIdWarning");
+                warning.classList.add("hidden");
+                warning.classList.remove("flex");
+
+                form.querySelectorAll(".rating-radio").forEach(function (radio) {
+                    radio.checked = false;
+                });
+
+                form.querySelectorAll(".rating-popup").forEach(function (popup) {
+                    popup.classList.remove("opacity-100", "scale-100", "-translate-y-2");
+                    popup.classList.add("opacity-0", "scale-75");
+                });
+
+                hideModal(clearModal);
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    if (modal.classList.contains("flex")) {
+                        hideModal(modal);
+                    } else if (clearModal.classList.contains("flex")) {
+                        hideModal(clearModal);
+                    }
+                }
+            });
+
+            [modal, clearModal].forEach(function (element) {
+                element.addEventListener("click", function (event) {
+                    if (event.target === element) hideModal(element);
+                });
+            });
+
+            submitBtn.addEventListener("click", function () {
+                if (isSubmitting || submitBtn.disabled) return;
+
+                if (!form.checkValidity()) {
+                    hideModal(modal);
+                    form.reportValidity();
+                    return;
+                }
+
+                isSubmitting = true;
+                submitBtn.disabled = true;
+                submitBtn.setAttribute("aria-busy", "true");
+                spinner.classList.remove("hidden");
+                btnText.textContent = "Submitting...";
+
+                HTMLFormElement.prototype.submit.call(form);
+            });
+
+            window.addEventListener("pageshow", function () {
+                isSubmitting = false;
+
+                const evaluationOpen = {% if active_period %}true{% else %}false{% endif %};
+
+                submitBtn.disabled = !evaluationOpen;
+                submitBtn.removeAttribute("aria-busy");
+                spinner.classList.add("hidden");
+                btnText.textContent = "Submit evaluation";
+            });
+        })();
+    </script>
+</body>
+</html>

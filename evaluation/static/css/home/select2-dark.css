@@ -1,0 +1,26 @@
+/* Match input height and padding */
+        #teacherSelect + .select2-container .select2-selection {
+            height: 3rem; /* same as p-3 padding in Tailwind */
+            padding: 0.75rem; /* match vertical padding */
+            border-radius: 0.5rem; /* match rounded-lg */
+            border: 1px solid #e5e7eb; /* match border-gray-200 */
+        }
+
+        #teacherSelect + .select2-container .select2-selection__rendered {
+            line-height: 1.5rem; /* vertically center text */
+        }
+
+        #teacherSelect + .select2-container .select2-selection__arrow {
+            height: 3rem; /* arrow container matches input height */
+        }
+        
+/* Dark mode styles */
+.dark .dark-select2-dropdown .select2-results__option {
+    background-color: #374151; /* gray-700 */
+    color: white;
+}
+
+.dark .dark-select2-dropdown .select2-results__option--highlighted {
+    background-color: #4b5563; /* gray-600 */
+    color: white;
+}

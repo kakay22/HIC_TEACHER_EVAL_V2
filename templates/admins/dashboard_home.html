@@ -1,0 +1,331 @@
+{% extends 'admins/base.html' %}
+{% load time_extras %}
+
+{% block title %}Dashboard | HIC Faculty Evaluation{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dashboard-page { color: #172033; }
+    .dashboard-eyebrow { color: #7b8798; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .dashboard-card { min-width: 0; border: 1px solid #e7ebf1; border-radius: 16px; background: #fff; box-shadow: 0 4px 18px rgba(23,32,51,.025); }
+    .metric-card { position: relative; overflow: hidden; padding: 19px; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+    .metric-card:hover { border-color: #d5deef; box-shadow: 0 10px 28px rgba(23,32,51,.07); transform: translateY(-1px); }
+    .metric-icon { display: inline-flex; height: 44px; width: 44px; flex: 0 0 44px; align-items: center; justify-content: center; border-radius: 13px; }
+    .metric-value { margin-top: 13px; color: #172033; font-size: clamp(26px, 3vw, 32px); font-weight: 750; letter-spacing: -.045em; line-height: 1.1; }
+    .metric-label { color: #667085; font-size: 13px; font-weight: 550; }
+    .dashboard-select { width: 100%; min-height: 44px; appearance: none; border: 1px solid #dfe4ec; border-radius: 10px; background-color: #fff; padding: 10px 38px 10px 12px; color: #344054; font-size: 13px; outline: none; transition: border-color .15s ease, box-shadow .15s ease; }
+    .dashboard-select:focus { border-color: #7da2f5; box-shadow: 0 0 0 3px rgba(36,87,197,.1); }
+    .dashboard-select-wrap { position: relative; min-width: 0; }
+    .dashboard-select-wrap .material-icons-outlined { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #8a94a6; font-size: 20px; }
+    .dashboard-section-title { color: #172033; font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+    .dashboard-section-subtitle { margin-top: 4px; color: #8791a2; font-size: 12px; line-height: 1.5; }
+    .evaluation-row { display: flex; align-items: center; gap: 12px; padding: 14px 18px; transition: background .15s ease; }
+    .evaluation-row:hover { background: #f8faff; }
+    .evaluation-avatar { display: flex; width: 40px; height: 40px; flex: 0 0 40px; align-items: center; justify-content: center; border: 1px solid #dbe6ff; border-radius: 13px; background: #edf3ff; color: #2457c5; font-size: 12px; font-weight: 750; }
+    .empty-state { display: flex; min-height: 240px; flex-direction: column; align-items: center; justify-content: center; padding: 28px 20px; text-align: center; }
+    .filter-label { display: block; margin-bottom: 7px; color: #667085; font-size: 12px; font-weight: 650; }
+    @media (max-width: 639px) {
+        .metric-card { padding: 15px; }
+        .metric-icon { height: 40px; width: 40px; flex-basis: 40px; border-radius: 12px; }
+        .metric-value { margin-top: 11px; font-size: 27px; }
+        .evaluation-row { padding: 13px 14px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page space-y-5 md:space-y-6">
+
+    <!-- Page introduction -->
+    <section class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="dashboard-eyebrow">Overview</p>
+            <h2 class="mt-1 text-[23px] font-bold tracking-tight text-[#172033] sm:text-[26px]">Faculty evaluation at a glance</h2>
+            <p class="mt-1.5 max-w-2xl text-[13px] leading-5 text-slate-500">Review faculty participation and evaluation ratings using the filters below.</p>
+        </div>
+        <button type="button" onclick="window.location.reload()" class="inline-flex min-h-[40px] w-fit items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-[13px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50">
+            <span class="material-icons-outlined text-[18px]">refresh</span>
+            Refresh data
+        </button>
+    </section>
+
+    <!-- Filters -->
+    <section class="dashboard-card p-4 sm:p-5">
+        <div class="mb-4 flex items-center gap-2.5">
+            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#edf3ff] text-[#2457c5]">
+                <span class="material-icons-outlined text-[20px]">tune</span>
+            </span>
+            <div>
+                <h3 class="text-[14px] font-bold text-slate-800">Filter dashboard</h3>
+                <p class="mt-0.5 text-[11px] text-slate-400">Choose a semester, academic year, or faculty member.</p>
+            </div>
+        </div>
+
+        <form id="filterForm" method="GET" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div>
+                <label for="semesterFilter" class="filter-label">Semester</label>
+                <div class="dashboard-select-wrap">
+                    <select id="semesterFilter" name="semester" class="dashboard-select">
+                        <option value="">All Semesters</option>
+                        <option value="1st" {% if selected_semester == "1st" %}selected{% endif %}>1st Semester</option>
+                        <option value="2nd" {% if selected_semester == "2nd" %}selected{% endif %}>2nd Semester</option>
+                    </select>
+                    <span class="material-icons-outlined">expand_more</span>
+                </div>
+            </div>
+            <div>
+                <label for="academicYearFilter" class="filter-label">Academic year</label>
+                <div class="dashboard-select-wrap">
+                    <select id="academicYearFilter" name="academic_year" class="dashboard-select">
+                        <option value="" {% if selected_academic_year == "" %}selected{% endif %}>All academic years</option>
+                        <option value="2024-2025" {% if selected_academic_year == "2024-2025" %}selected{% endif %}>2024–2025</option>
+                        <option value="2025-2026" {% if selected_academic_year == "2025-2026" %}selected{% endif %}>2025–2026</option>
+                        <option value="2026-2027" {% if selected_academic_year == "2026-2027" %}selected{% endif %}>2026–2027</option>
+                        <option value="2027-2028" {% if selected_academic_year == "2027-2028" %}selected{% endif %}>2027–2028</option>
+                    </select>
+                    <span class="material-icons-outlined">expand_more</span>
+                </div>
+            </div>
+            <div>
+                <label for="teacherFilter" class="filter-label">Faculty member</label>
+                <div class="dashboard-select-wrap">
+                    <select id="teacherFilter" name="teacher" class="dashboard-select">
+                        <option value="">All faculty</option>
+                        {% for t in teachers %}
+                        <option value="{{ t.id }}" {% if selected_teacher == t.id|stringformat:"s" %}selected{% endif %}>{{ t.first_name }} {{ t.last_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="material-icons-outlined">expand_more</span>
+                </div>
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="submit" class="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#2457c5] px-4 text-[13px] font-semibold text-white transition hover:bg-[#1946a3]">
+                    <span class="material-icons-outlined text-[18px]">filter_alt</span> Apply filters
+                </button>
+                <a href="{% url 'dashboard_home' %}" class="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50" aria-label="Clear filters" title="Clear filters">
+                    <span class="material-icons-outlined text-[19px]">restart_alt</span>
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <!-- Summary metrics -->
+    <section aria-label="Evaluation summary" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <a href="{% url 'teachers_list' %}" class="dashboard-card metric-card group block">
+            <div class="flex items-center justify-between gap-3">
+                <span class="metric-label">Total teachers</span>
+                <span class="metric-icon bg-[#edf3ff] text-[#2457c5]"><span class="material-icons-outlined text-[22px]">groups</span></span>
+            </div>
+            <p class="metric-value">{{ total_teachers|default:0 }}</p>
+            <p class="mt-2 flex items-center gap-1 text-[11px] text-slate-400">Faculty directory <span class="material-icons-outlined text-[14px] transition group-hover:translate-x-0.5">arrow_forward</span></p>
+        </a>
+
+        <a href="{% url 'evaluations_list' %}" class="dashboard-card metric-card group block">
+            <div class="flex items-center justify-between gap-3">
+                <span class="metric-label">Total evaluations</span>
+                <span class="metric-icon bg-[#e9f8f0] text-[#168454]"><span class="material-icons-outlined text-[22px]">fact_check</span></span>
+            </div>
+            <p class="metric-value">{{ total_evaluations|default:0 }}</p>
+            <p class="mt-2 flex items-center gap-1 text-[11px] text-slate-400">View submissions <span class="material-icons-outlined text-[14px] transition group-hover:translate-x-0.5">arrow_forward</span></p>
+        </a>
+
+        <div class="dashboard-card metric-card">
+            <div class="flex items-center justify-between gap-3">
+                <span class="metric-label">Average rating</span>
+                <span class="metric-icon bg-[#fff5dc] text-[#b77908]"><span class="material-icons-outlined text-[22px]">star</span></span>
+            </div>
+            <p class="metric-value">{{ avg_rating|default:0|floatformat:2 }}<span class="ml-1 text-[14px] font-semibold tracking-normal text-slate-400">/ 5</span></p>
+            <div class="mt-2 flex items-center gap-0.5" aria-label="Average rating {{ avg_rating|floatformat:2 }} out of 5">
+                {% for i in "12345" %}
+                    {% if avg_rating >= forloop.counter %}
+                        <span class="material-icons text-[17px] text-amber-400">star</span>
+                    {% elif avg_rating >= forloop.counter0|add:0.5 %}
+                        <span class="material-icons text-[17px] text-amber-400">star_half</span>
+                    {% else %}
+                        <span class="material-icons text-[17px] text-slate-200">star</span>
+                    {% endif %}
+                {% endfor %}
+                <span class="ml-1.5 text-[11px] text-slate-400">Overall score</span>
+            </div>
+        </div>
+
+        <div class="dashboard-card metric-card">
+            <div class="flex items-center justify-between gap-3">
+                <span class="metric-label">Students evaluated</span>
+                <span class="metric-icon bg-[#f2edff] text-[#7451c8]"><span class="material-icons-outlined text-[22px]">school</span></span>
+            </div>
+            <p class="metric-value">{{ total_students|default:0 }}</p>
+            <p class="mt-2 text-[11px] text-slate-400">Student participation</p>
+        </div>
+    </section>
+
+    <!-- Rating chart and recent evaluations -->
+    <section class="grid grid-cols-1 gap-4 xl:grid-cols-5">
+        <div class="dashboard-card min-w-0 p-4 sm:p-5 xl:col-span-3">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h3 class="dashboard-section-title">Rating distribution</h3>
+                    <p class="dashboard-section-subtitle">How submitted evaluations are distributed across the five rating levels.</p>
+                </div>
+                <span class="inline-flex w-fit items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
+                    <span class="h-2 w-2 rounded-full bg-[#2457c5]"></span>
+                    {% if selected_semester or selected_academic_year or selected_teacher %}Filtered results{% else %}All available data{% endif %}
+                </span>
+            </div>
+            <div class="relative mt-5 h-[270px] w-full sm:h-[310px]">
+                <canvas id="ratingChart" role="img" aria-label="Bar chart showing evaluation counts for each rating level"></canvas>
+                <p id="chartFallback" class="hidden absolute inset-0 items-center justify-center text-center text-sm text-slate-400">Chart unavailable. Please refresh the page.</p>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 sm:grid-cols-5">
+                <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Unsatisfactory</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.1|default:0 }}</p></div>
+                <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Needs improvement</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.2|default:0 }}</p></div>
+                <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Satisfactory</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.3|default:0 }}</p></div>
+                <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Very satisfactory</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.4|default:0 }}</p></div>
+                <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Outstanding</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.5|default:0 }}</p></div>
+            </div>
+        </div>
+
+        <div class="dashboard-card flex min-w-0 flex-col overflow-hidden xl:col-span-2">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-5 sm:px-5">
+                <div>
+                    <h3 class="dashboard-section-title">Recent evaluations</h3>
+                    <p class="dashboard-section-subtitle">The latest submitted evaluations.</p>
+                </div>
+                <a href="{% url 'evaluations_list' %}" class="inline-flex min-h-[36px] shrink-0 items-center gap-1 rounded-lg px-2 text-[12px] font-semibold text-[#2457c5] transition hover:bg-[#edf3ff]">
+                    View all <span class="material-icons-outlined text-[16px]">arrow_forward</span>
+                </a>
+            </div>
+            <div class="flex-1 divide-y divide-slate-100">
+                {% for eval in recent_evaluations %}
+                <a href="{% url 'evaluation_detail' eval.id %}" class="evaluation-row group">
+                    <span class="evaluation-avatar">{{ eval.teacher.first_name|slice:":1" }}{{ eval.teacher.last_name|slice:":1" }}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block truncate text-[13px] font-semibold text-slate-800 transition group-hover:text-[#2457c5]">{{ eval.teacher.first_name }} {{ eval.teacher.last_name }}</span>
+                        <span class="mt-1 block text-[11px] text-slate-400">{{ eval.submitted_at|time_badge }}</span>
+                    </span>
+                    <span class="material-icons-outlined text-[19px] text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#2457c5]">chevron_right</span>
+                </a>
+                {% empty %}
+                <div class="empty-state">
+                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"><span class="material-icons-outlined text-[25px]">inbox</span></span>
+                    <p class="mt-4 text-[13px] font-semibold text-slate-700">No evaluations yet</p>
+                    <p class="mt-1 max-w-[220px] text-[12px] leading-5 text-slate-400">When evaluations are submitted, the latest activity will appear here.</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% if recent_evaluations %}
+            <a href="{% url 'evaluations_list' %}" class="flex min-h-[46px] items-center justify-center gap-2 border-t border-slate-100 bg-slate-50/60 text-[12px] font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-[#2457c5]">
+                Browse all evaluations <span class="material-icons-outlined text-[16px]">arrow_forward</span>
+            </a>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Submit filters when a value changes; the form remains usable without JavaScript.
+    const filterForm = document.getElementById("filterForm");
+    if (filterForm) {
+        filterForm.querySelectorAll("select").forEach(function (select) {
+            select.addEventListener("change", function () {
+                filterForm.requestSubmit ? filterForm.requestSubmit() : filterForm.submit();
+            });
+        });
+    }
+
+    const canvas = document.getElementById("ratingChart");
+    if (!canvas) return;
+
+    if (typeof Chart === "undefined") {
+        const fallback = document.getElementById("chartFallback");
+        if (fallback) fallback.classList.remove("hidden");
+        return;
+    }
+
+    const ratingValues = [
+        Number("{{ rating_data.1|default:0 }}") || 0,
+        Number("{{ rating_data.2|default:0 }}") || 0,
+        Number("{{ rating_data.3|default:0 }}") || 0,
+        Number("{{ rating_data.4|default:0 }}") || 0,
+        Number("{{ rating_data.5|default:0 }}") || 0
+    ];
+
+    new Chart(canvas, {
+        type: "bar",
+        data: {
+            labels: ["Unsatisfactory", "Needs Improvement", "Satisfactory", "Very Satisfactory", "Outstanding"],
+            datasets: [{
+                label: "Evaluations",
+                data: ratingValues,
+                backgroundColor: [
+                    "rgba(220, 75, 75, .82)",
+                    "rgba(229, 133, 55, .82)",
+                    "rgba(218, 173, 48, .85)",
+                    "rgba(40, 157, 104, .82)",
+                    "rgba(55, 104, 210, .84)"
+                ],
+                borderRadius: 7,
+                borderSkipped: false,
+                maxBarThickness: 48
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 350 },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: "#172033",
+                    titleFont: { size: 12, weight: "600" },
+                    bodyFont: { size: 12 },
+                    padding: 11,
+                    cornerRadius: 9,
+                    displayColors: false,
+                    callbacks: {
+                        label: function (context) {
+                            return context.raw + (context.raw === 1 ? " evaluation" : " evaluations");
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grace: "8%",
+                    ticks: { precision: 0, color: "#8791a2", font: { size: 11 }, padding: 8 },
+                    grid: { color: "#eef1f5", drawTicks: false },
+                    border: { display: false }
+                },
+                x: {
+                    ticks: {
+                        color: "#667085",
+                        font: { size: 10 },
+                        maxRotation: 0,
+                        minRotation: 0,
+                        callback: function (value) {
+                            const label = this.getLabelForValue(value);
+                            if (window.innerWidth < 520) {
+                                const shortLabels = {
+                                    "Unsatisfactory": "Unsat.",
+                                    "Needs Improvement": "Needs imp.",
+                                    "Satisfactory": "Satisfactory",
+                                    "Very Satisfactory": "Very sat.",
+                                    "Outstanding": "Outstanding"
+                                };
+                                return shortLabels[label] || label;
+                            }
+                            return label;
+                        }
+                    },
+                    grid: { display: false },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

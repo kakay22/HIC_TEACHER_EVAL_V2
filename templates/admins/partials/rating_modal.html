@@ -1,0 +1,142 @@
+{% load dict_extras %}
+
+<div class="modal fade" id="ratingModal{{ teacher.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+
+            <!-- HEADER -->
+            <div class="modal-header border-0 pb-0">
+
+                <!-- Avatar + Name -->
+                <div class="d-flex align-items-center gap-3">
+
+                    <!-- Initials Avatar -->
+                    <div class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shadow-sm"
+                         style="width:48px; height:48px;">
+                        {{ teacher.first_name|slice:":1" }}{{ teacher.last_name|slice:":1" }}
+                    </div>
+
+                    <div>
+                        <h5 class="modal-title mb-0 fw-semibold">
+                            {{ teacher.first_name }} {{ teacher.last_name }}
+                        </h5>
+                        <small class="text-muted">
+                            Faculty Performance Overview
+                        </small>
+                    </div>
+
+                </div>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body pt-3">
+
+                <!-- OVERALL CARD -->
+                <div class="p-4 rounded-4 bg-light border mb-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <div class="text-muted small text-uppercase">Overall Rating</div>
+                            <div class="display-6 fw-bold text-dark">
+                                {{ teacher.average_rating|floatformat:1 }}
+                            </div>
+                            <div class="text-muted small">
+                                {{ teacher.total_evaluations|default:0 }} evaluations
+                            </div>
+                        </div>
+
+                        <!-- Stars -->
+                        <div class="text-warning fs-4">
+                            {% with rating=teacher.average_rating|floatformat:0|add:"0" %}
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= rating %}
+                                        ★
+                                    {% else %}
+                                        ☆
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- SECTION BREAKDOWN TITLE -->
+                <div class="mb-2">
+                    <div class="fw-semibold">Section Breakdown</div>
+                    <small class="text-muted">Performance per evaluation category</small>
+                </div>
+
+                <!-- SECTION CARDS -->
+                <div class="row g-3">
+
+                    {% for section in sections %}
+                        {% with val=teacher.section_averages|get_item:section.id %}
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="p-3 border rounded-4 h-100">
+
+                                <!-- Section Name -->
+                                <div class="fw-semibold mb-1">
+                                    {{ section.prefix }}. {{ section.title }}
+                                </div>
+
+                                <!-- Rating -->
+                                <div class="d-flex align-items-center justify-content-between">
+
+                                    <div class="text-muted small">
+                                        {% if val %}
+                                            Based on evaluations
+                                        {% else %}
+                                            No data yet
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="text-end">
+
+                                        {% if val %}
+
+                                            <div class="fw-bold">
+                                                {{ val|floatformat:1 }}
+                                            </div>
+
+                                            <!-- Stars -->
+                                            <div class="text-warning small">
+                                                {% with r=val|floatformat:0|add:"0" %}
+                                                    {% for i in "12345" %}
+                                                        {% if forloop.counter <= r %}
+                                                            ★
+                                                        {% else %}
+                                                            ☆
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endwith %}
+                                            </div>
+
+                                        {% else %}
+                                            <div class="text-muted">—</div>
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% endwith %}
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

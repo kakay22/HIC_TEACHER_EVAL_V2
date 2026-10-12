@@ -1,0 +1,559 @@
+{% extends 'admins/base.html' %}
+
+{% block title %}New Evaluation Period{% endblock %}
+{% block page_title %}New Evaluation Period{% endblock %}
+
+{% block extra_head %}
+<style>
+    .epa-page {
+        --epa-ink: #172033;
+        --epa-muted: #748096;
+        --epa-line: #e6eaf1;
+        --epa-soft: #f7f8fc;
+        --epa-brand: #4f46e5;
+        --epa-brand-soft: #eef2ff;
+        color: var(--epa-ink);
+        font-size: 14px;
+        padding-bottom: 24px;
+    }
+
+    .epa-page *,
+    .epa-page *::before,
+    .epa-page *::after {
+        box-sizing: border-box;
+    }
+
+    .epa-page .epa-heading {
+        font-size: clamp(1.45rem, 4vw, 1.9rem);
+        line-height: 1.2;
+        font-weight: 780;
+        letter-spacing: -.045em;
+    }
+
+    .epa-page .epa-subtitle {
+        color: var(--epa-muted);
+        font-size: 13px;
+        line-height: 1.7;
+        max-width: 540px;
+    }
+
+    .epa-page .epa-eyebrow {
+        color: var(--epa-muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .epa-page .epa-back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 40px;
+        padding: 9px 12px;
+        color: #475467;
+        background: #fff;
+        border: 1px solid var(--epa-line);
+        border-radius: 11px;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .15s ease, border-color .15s ease;
+    }
+
+    .epa-page .epa-back:hover {
+        background: var(--epa-soft);
+        border-color: #cfd6e3;
+        color: var(--epa-ink);
+    }
+
+    .epa-page .epa-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+    }
+
+    .epa-page .epa-card {
+        min-width: 0;
+        background: #fff;
+        border: 1px solid var(--epa-line);
+        border-radius: 17px;
+        box-shadow: 0 3px 12px rgb(16 24 40 / 3%);
+        overflow: hidden;
+    }
+
+    .epa-page .epa-card-header {
+        padding: 19px 18px;
+        border-bottom: 1px solid var(--epa-line);
+    }
+
+    .epa-page .epa-card-body {
+        padding: 19px 18px;
+    }
+
+    .epa-page .epa-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        border-radius: 13px;
+        background: var(--epa-brand-soft);
+        color: var(--epa-brand);
+    }
+
+    .epa-page .epa-section-title {
+        font-size: 14px;
+        font-weight: 750;
+        letter-spacing: -.015em;
+    }
+
+    .epa-page .epa-section-description {
+        margin-top: 4px;
+        color: var(--epa-muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .epa-page .epa-field {
+        min-width: 0;
+        margin-bottom: 19px;
+    }
+
+    .epa-page .epa-field:last-child {
+        margin-bottom: 0;
+    }
+
+    .epa-page .epa-field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #344054;
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .epa-page .epa-field input:not([type="checkbox"]):not([type="radio"]),
+    .epa-page .epa-field select,
+    .epa-page .epa-field textarea,
+    .epa-page .epa-field .form-control,
+    .epa-page .epa-field .form-select {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        min-height: 46px;
+        padding: 11px 12px;
+        color: var(--epa-ink);
+        background-color: #fff;
+        border: 1px solid #dfe4ed;
+        border-radius: 10px;
+        box-shadow: none;
+        outline: none;
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.5;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .epa-page .epa-field textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .epa-page .epa-field input:focus,
+    .epa-page .epa-field select:focus,
+    .epa-page .epa-field textarea:focus,
+    .epa-page .epa-field .form-control:focus,
+    .epa-page .epa-field .form-select:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 11%);
+    }
+
+    .epa-page .epa-field input::placeholder,
+    .epa-page .epa-field textarea::placeholder {
+        color: #98a2b3;
+    }
+
+    .epa-page .epa-field .helptext,
+    .epa-page .epa-field .help-text,
+    .epa-page .epa-field .form-text {
+        display: block;
+        margin-top: 6px;
+        color: var(--epa-muted);
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .epa-page .epa-field .errorlist {
+        padding: 0;
+        margin: 6px 0 0;
+        color: #b42318;
+        font-size: 12px;
+        list-style: none;
+    }
+
+    .epa-page .epa-error {
+        padding: 12px 14px;
+        margin-bottom: 18px;
+        color: #b42318;
+        background: #fef3f2;
+        border: 1px solid #fecdca;
+        border-radius: 11px;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .epa-page .epa-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        padding: 14px;
+        color: #3730a3;
+        background: #f5f6ff;
+        border: 1px solid #e0e7ff;
+        border-radius: 12px;
+    }
+
+    .epa-page .epa-info-title {
+        font-size: 12px;
+        font-weight: 750;
+        margin-bottom: 4px;
+    }
+
+    .epa-page .epa-info-text {
+        color: #626b91;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .epa-page .epa-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        padding-top: 20px;
+        margin-top: 22px;
+        border-top: 1px solid var(--epa-line);
+    }
+
+    .epa-page .epa-submit,
+    .epa-page .epa-cancel {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 46px;
+        padding: 11px 16px;
+        border-radius: 11px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 750;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background .15s ease, border-color .15s ease;
+    }
+
+    .epa-page .epa-submit {
+        color: #fff;
+        background: #242b42;
+        border: 1px solid #242b42;
+    }
+
+    .epa-page .epa-submit:hover {
+        color: #fff;
+        background: #363f5d;
+        border-color: #363f5d;
+    }
+
+    .epa-page .epa-cancel {
+        color: #475467;
+        background: #fff;
+        border: 1px solid #dfe4ed;
+    }
+
+    .epa-page .epa-cancel:hover {
+        color: var(--epa-ink);
+        background: var(--epa-soft);
+    }
+
+    .epa-page .epa-side-card {
+        padding: 19px;
+        background: #fff;
+        border: 1px solid var(--epa-line);
+        border-radius: 16px;
+    }
+
+    .epa-page .epa-check-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .epa-page .epa-check-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 29px;
+        height: 29px;
+        flex: 0 0 29px;
+        color: #475467;
+        background: #f2f4f7;
+        border-radius: 9px;
+    }
+
+    .epa-page .epa-check-title {
+        font-size: 12px;
+        font-weight: 750;
+        margin-bottom: 3px;
+    }
+
+    .epa-page .epa-check-description {
+        color: var(--epa-muted);
+        font-size: 11px;
+        line-height: 1.65;
+    }
+
+    .epa-page .epa-side-note {
+        padding: 14px;
+        margin-top: 14px;
+        border-radius: 12px;
+        background: var(--epa-soft);
+        color: var(--epa-muted);
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    @media (min-width: 576px) {
+        .epa-page .epa-card-header {
+            padding: 22px 24px;
+        }
+
+        .epa-page .epa-card-body {
+            padding: 24px;
+        }
+
+        .epa-page .epa-actions {
+            flex-direction: row;
+            justify-content: flex-end;
+        }
+
+        .epa-page .epa-submit,
+        .epa-page .epa-cancel {
+            width: auto;
+            min-width: 125px;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .epa-page .epa-layout {
+            grid-template-columns: minmax(0, 1fr) 275px;
+            gap: 20px;
+        }
+
+        .epa-page .epa-side-card {
+            position: sticky;
+            top: 20px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .epa-page * {
+            transition: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="epa-page container-fluid px-0 px-sm-1 py-2">
+
+    <!-- Page heading -->
+    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+        <div>
+            <div class="epa-eyebrow mb-2">Evaluation management / Periods</div>
+
+            <h1 class="epa-heading mb-2">
+                Create evaluation period
+            </h1>
+
+            <p class="epa-subtitle mb-0">
+                Configure a semester and its schedule before opening evaluations to students.
+            </p>
+        </div>
+
+        <a href="{% url 'evaluation_periods_list' %}" class="epa-back align-self-start align-self-sm-center">
+            <span class="material-icons-outlined" style="font-size:18px">arrow_back</span>
+            All periods
+        </a>
+    </div>
+
+    <div class="epa-layout">
+
+        <!-- Form -->
+        <section class="epa-card">
+            <div class="epa-card-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="epa-icon">
+                        <span class="material-icons-outlined" style="font-size:23px">calendar_month</span>
+                    </div>
+
+                    <div class="min-w-0">
+                        <h2 class="epa-section-title mb-0">Period details</h2>
+                        <p class="epa-section-description mb-0">
+                            Enter the academic year, semester, and date range.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="epa-card-body">
+
+                {% if form.non_field_errors %}
+                <div class="epa-error" role="alert">
+                    <strong>Please review the form.</strong>
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <form method="post">
+    {% csrf_token %}
+
+    <!-- Division selector -->
+    <div class="epa-field">
+        <label for="id_education_level">
+            Division <span class="text-danger">*</span>
+        </label>
+
+        {% with current=period.education_level|default:selected_division|default:"COLLEGE" %}
+        <select name="education_level" id="id_education_level" class="form-select" required>
+            <option value="COLLEGE" {% if current == "COLLEGE" %}selected{% endif %}>
+                College Only
+            </option>
+            <option value="BASIC" {% if current == "BASIC" %}selected{% endif %}>
+                Basic Education Only
+            </option>
+            <option value="BOTH" {% if current == "BOTH" %}selected{% endif %}>
+                Both Divisions
+            </option>
+        </select>
+        {% endwith %}
+
+        <div class="form-text">
+            Choose one division or create matching evaluation periods
+            for College and Basic Education.
+        </div>
+    </div>
+
+    <!-- Django form fields (education_level is rendered manually above) -->
+    {% for field in form %}
+        {% if field.name != "education_level" %}
+        <div class="epa-field">
+            <label for="{{ field.id_for_label }}">
+                {{ field.label }}
+                {% if field.field.required %}
+                <span class="text-danger">*</span>
+                {% endif %}
+            </label>
+
+            {{ field }}
+
+            {% if field.help_text %}
+            <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
+
+            {% for error in field.errors %}
+            <div class="text-danger small mt-2" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endfor %}
+
+                    <!-- Existing information box -->
+                    <div class="epa-info mt-4">
+                        <span class="material-icons-outlined" style="font-size:20px">info</span>
+                        <div>
+                            <div class="epa-info-title">Before opening the period</div>
+                            <div class="epa-info-text">
+                                Check the academic year, semester, and dates carefully.
+                                Creating a period does not automatically open it.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Existing actions -->
+                    <div class="epa-actions">
+                        <a href="{% url 'evaluation_periods_list' %}" class="epa-cancel">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="epa-submit">
+                            <span class="material-icons-outlined" style="font-size:18px">add_circle</span>
+                            Create period
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </section>
+
+        <!-- Supporting information -->
+        <aside>
+            <section class="epa-side-card">
+                <div class="epa-eyebrow mb-2">Quick guide</div>
+                <h2 class="epa-section-title mb-1">How it works</h2>
+                <p class="epa-section-description mb-0">
+                    Follow these steps to set up a semester.
+                </p>
+
+                <div class="epa-check-item">
+                    <div class="epa-check-icon">
+                        <span class="material-icons-outlined" style="font-size:17px">edit_calendar</span>
+                    </div>
+                    <div>
+                        <div class="epa-check-title">1. Set the schedule</div>
+                        <div class="epa-check-description">
+                            Select the correct academic year, semester, start date, and end date.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="epa-check-item">
+                    <div class="epa-check-icon">
+                        <span class="material-icons-outlined" style="font-size:17px">fact_check</span>
+                    </div>
+                    <div>
+                        <div class="epa-check-title">2. Review the details</div>
+                        <div class="epa-check-description">
+                            Make sure the dates match your school's evaluation calendar.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="epa-check-item">
+                    <div class="epa-check-icon">
+                        <span class="material-icons-outlined" style="font-size:17px">lock_open</span>
+                    </div>
+                    <div>
+                        <div class="epa-check-title">3. Open when ready</div>
+                        <div class="epa-check-description">
+                            Return to the periods list and open the semester when student submissions should begin.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="epa-side-note">
+                <span class="material-icons-outlined align-middle me-1" style="font-size:16px">tips_and_updates</span>
+                <strong>Tip:</strong> Confirm the schedule with your academic calendar before allowing students to
+                submit evaluations.
+            </div>
+        </aside>
+
+    </div>
+</div>
+{% endblock %}

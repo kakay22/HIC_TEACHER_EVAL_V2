@@ -1,0 +1,1400 @@
+{% extends 'admins/base.html' %}
+
+{% block title %}Courses{% endblock %}
+{% block page_title %}Courses{% endblock %}
+
+{% block extra_head %}
+<style>
+    .courses-page {
+        --cp-ink: #172033;
+        --cp-muted: #718096;
+        --cp-line: #e8edf3;
+        --cp-soft: #f7f9fc;
+        --cp-brand: #2563eb;
+        --cp-brand-soft: #eff6ff;
+        --cp-danger: #dc2626;
+        color: var(--cp-ink);
+        width: 100%;
+        max-width: 1500px;
+        margin-inline: auto;
+        padding: 4px 0 24px;
+    }
+
+    .courses-page * {
+        box-sizing: border-box;
+    }
+
+    .cp-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 18px;
+        margin-bottom: 22px;
+    }
+
+    .cp-heading {
+        min-width: 0;
+    }
+
+    .cp-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--cp-brand);
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+    }
+
+    .cp-eyebrow .material-icons {
+        font-size: 17px;
+    }
+
+    .cp-title {
+        margin: 0;
+        color: var(--cp-ink);
+        font-size: 25px;
+        font-weight: 750;
+        letter-spacing: -.045em;
+        line-height: 1.2;
+    }
+
+    .cp-subtitle {
+        color: var(--cp-muted);
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 7px 0 0;
+    }
+
+    .cp-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .cp-search {
+        position: relative;
+        width: 100%;
+    }
+
+    .cp-search .material-icons {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 20px;
+        pointer-events: none;
+    }
+
+    .cp-search input {
+        width: 100%;
+        height: 44px;
+        padding: 0 13px 0 41px;
+        border: 1px solid var(--cp-line);
+        border-radius: 11px;
+        outline: none;
+        background: #fff;
+        color: var(--cp-ink);
+        font-family: inherit;
+        font-size: 14px;
+        transition: border-color .18s, box-shadow .18s;
+    }
+
+    .cp-search input::placeholder {
+        color: #9aa5b5;
+    }
+
+    .cp-search input:focus {
+        border-color: #93b4ff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+    }
+
+    .cp-button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        min-height: 43px;
+        padding: 0 15px;
+        border: 1px solid transparent;
+        border-radius: 11px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 650;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background .18s, border-color .18s, transform .18s;
+    }
+
+    .cp-button .material-icons {
+        font-size: 19px;
+    }
+
+    .cp-button:focus-visible,
+    .cp-icon-button:focus-visible,
+    .cp-add-row:focus-visible {
+        outline: 3px solid rgba(37, 99, 235, .24);
+        outline-offset: 2px;
+    }
+
+    .cp-button-primary {
+        background: var(--cp-brand);
+        color: #fff;
+    }
+
+    .cp-button-primary:hover {
+        background: #1d4ed8;
+        color: #fff;
+    }
+
+    .cp-button-secondary {
+        background: #fff;
+        color: #475569;
+        border-color: #dfe5ed;
+    }
+
+    .cp-button-secondary:hover {
+        background: #f8fafc;
+        color: var(--cp-ink);
+        border-color: #cbd5e1;
+    }
+
+    .cp-button-success {
+        background: #15803d;
+        color: #fff;
+    }
+
+    .cp-button-success:hover {
+        background: #166534;
+        color: #fff;
+    }
+
+    .cp-button-danger {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .cp-button-danger:hover {
+        background: #b91c1c;
+        color: #fff;
+    }
+
+    .cp-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 15px 16px;
+        border: 1px solid var(--cp-line);
+        border-radius: 13px 13px 0 0;
+        background: #fff;
+    }
+
+    .cp-summary-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 550;
+    }
+
+    .cp-summary-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 30px;
+        height: 28px;
+        padding: 0 9px;
+        border-radius: 8px;
+        background: var(--cp-brand-soft);
+        color: var(--cp-brand);
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .cp-panel {
+        overflow: hidden;
+        border: 1px solid var(--cp-line);
+        border-top: 0;
+        border-radius: 0 0 13px 13px;
+        background: #fff;
+    }
+
+    .cp-table-wrap {
+        display: none;
+        overflow-x: auto;
+        width: 100%;
+    }
+
+    .cp-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .cp-table thead th {
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--cp-line);
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: .065em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .cp-table tbody td {
+        padding: 14px 18px;
+        border-bottom: 1px solid #edf1f6;
+        color: #334155;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .cp-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .cp-table tbody tr:not(.cp-add-form-row):not(.cp-add-row):hover {
+        background: #fafcff;
+    }
+
+    .cp-index {
+        color: #94a3b8 !important;
+        font-size: 12px !important;
+        width: 58px;
+    }
+
+    .cp-course-name {
+        display: inline-block;
+        max-width: 100%;
+        color: var(--cp-ink);
+        font-weight: 650;
+        overflow-wrap: anywhere;
+    }
+
+    .cp-code {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 8px;
+        border: 1px solid #e8edf3;
+        border-radius: 6px;
+        background: #f8fafc;
+        color: #475569;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .cp-muted-value {
+        color: #a0aaba;
+    }
+
+    .cp-row-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .cp-icon-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        border: 1px solid #e4e9f0;
+        border-radius: 9px;
+        background: #fff;
+        color: #64748b;
+        cursor: pointer;
+        transition: background .18s, color .18s, border-color .18s;
+    }
+
+    .cp-icon-button .material-icons {
+        font-size: 18px;
+    }
+
+    .cp-icon-edit:hover {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .cp-icon-delete:hover {
+        border-color: #fecaca;
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .cp-icon-save {
+        border-color: #bbf7d0;
+        background: #f0fdf4;
+        color: #15803d;
+    }
+
+    .cp-icon-save:hover {
+        background: #dcfce7;
+    }
+
+    .cp-icon-cancel:hover {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    .cp-field {
+        display: block;
+        width: 100%;
+        min-width: 120px;
+        min-height: 39px;
+        padding: 8px 10px;
+        border: 1px solid #dbe3ed;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--cp-ink);
+        font-family: inherit;
+        font-size: 13px;
+        outline: none;
+    }
+
+    .cp-field:focus {
+        border-color: #93b4ff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .09);
+    }
+
+    .cp-add-form-row td {
+        background: #f8fbff;
+    }
+
+    .cp-add-row td {
+        padding: 0 !important;
+    }
+
+    .cp-add-row-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 53px;
+        padding: 12px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 0;
+        background: #fbfdff;
+        color: #64748b;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 650;
+        cursor: pointer;
+        transition: background .18s, color .18s, border-color .18s;
+    }
+
+    .cp-add-row-button .material-icons {
+        font-size: 19px;
+    }
+
+    .cp-add-row-button:hover {
+        border-color: #93b4ff;
+        background: #f0f6ff;
+        color: var(--cp-brand);
+    }
+
+    .cp-mobile-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cp-mobile-card {
+        padding: 16px;
+        border-bottom: 1px solid #edf1f6;
+    }
+
+    .cp-mobile-card:last-of-type {
+        border-bottom: 0;
+    }
+
+    .cp-mobile-card-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .cp-course-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 43px;
+        height: 43px;
+        flex-shrink: 0;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .cp-course-avatar .material-icons {
+        font-size: 22px;
+    }
+
+    .cp-mobile-course-info {
+        flex: 1;
+        min-width: 0;
+        padding-top: 1px;
+    }
+
+    .cp-mobile-course-name {
+        margin: 0;
+        color: var(--cp-ink);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    .cp-mobile-course-code {
+        margin-top: 5px;
+    }
+
+    .cp-mobile-actions {
+        display: flex;
+        gap: 7px;
+        margin-top: 14px;
+    }
+
+    .cp-mobile-actions .cp-button {
+        flex: 1;
+        min-height: 40px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+
+    .cp-mobile-edit-form {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--cp-line);
+    }
+
+    .cp-field-group label {
+        display: block;
+        margin-bottom: 6px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .cp-mobile-add {
+        padding: 14px;
+        border-top: 1px solid var(--cp-line);
+        background: #fbfdff;
+    }
+
+    .cp-mobile-add-form {
+        display: grid;
+        gap: 12px;
+    }
+
+    .cp-empty {
+        padding: 35px 20px;
+        text-align: center;
+    }
+
+    .cp-empty-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 12px;
+        border: 1px solid var(--cp-line);
+        border-radius: 14px;
+        background: #f8fafc;
+        color: #64748b;
+    }
+
+    .cp-empty-icon .material-icons {
+        font-size: 24px;
+    }
+
+    .cp-empty-title {
+        margin: 0;
+        color: var(--cp-ink);
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .cp-empty-text {
+        margin: 6px 0 0;
+        color: var(--cp-muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .cp-no-results {
+        display: none;
+        padding: 30px 18px;
+        color: var(--cp-muted);
+        font-size: 13px;
+        text-align: center;
+    }
+
+    .cp-hidden {
+        display: none !important;
+    }
+
+    /* Delete confirmation */
+    .cp-modal .modal-content {
+        border: 1px solid var(--cp-line);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, .15);
+    }
+
+    .cp-modal .modal-header {
+        padding: 19px 20px 14px;
+        border-bottom: 1px solid var(--cp-line);
+    }
+
+    .cp-modal .modal-title {
+        color: var(--cp-ink);
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .cp-modal .modal-body {
+        padding: 18px 20px;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .cp-modal .modal-footer {
+        gap: 8px;
+        padding: 14px 20px 20px;
+        border-top: 0;
+    }
+
+    .cp-modal .modal-footer .btn {
+        min-height: 40px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    @media (min-width: 640px) {
+        .courses-page {
+            padding-top: 8px;
+        }
+
+        .cp-header {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .cp-toolbar {
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-end;
+            width: auto;
+            min-width: 320px;
+        }
+
+        .cp-search {
+            width: 230px;
+        }
+
+        .cp-toolbar > .cp-button {
+            flex-shrink: 0;
+        }
+
+        .cp-mobile-list {
+            display: none;
+        }
+
+        .cp-table-wrap {
+            display: block;
+        }
+
+        .cp-table thead th:last-child {
+            text-align: right;
+        }
+
+        .cp-table tbody td:last-child {
+            text-align: right;
+        }
+
+        .cp-table .cp-add-row-button {
+            border-right: 0;
+            border-left: 0;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .cp-title {
+            font-size: 28px;
+        }
+
+        .cp-subtitle {
+            font-size: 13px;
+        }
+
+        .cp-summary {
+            padding: 16px 20px;
+        }
+
+        .cp-table thead th {
+            padding: 14px 20px;
+        }
+
+        .cp-table tbody td {
+            padding: 15px 20px;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .cp-mobile-card {
+            padding: 13px;
+        }
+
+        .cp-course-avatar {
+            width: 38px;
+            height: 38px;
+        }
+
+        .cp-mobile-actions {
+            gap: 6px;
+        }
+
+        .cp-mobile-actions .cp-button {
+            gap: 5px;
+            padding-inline: 7px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .courses-page *,
+        .courses-page *::before,
+        .courses-page *::after {
+            scroll-behavior: auto !important;
+            transition-duration: .01ms !important;
+            animation-duration: .01ms !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="courses-page">
+
+    <!-- Header -->
+    <header class="cp-header">
+        <div class="cp-heading">
+            <div class="cp-eyebrow">
+                <span class="material-icons" aria-hidden="true">school</span>
+                Academic management
+            </div>
+
+            <h1 class="cp-title">Courses</h1>
+            <p class="cp-subtitle">
+                Manage your institution's courses and course codes.
+            </p>
+        </div>
+
+        <div class="cp-toolbar">
+            <form method="GET" class="cp-search" role="search" id="courseSearchForm">
+                <span class="material-icons" aria-hidden="true">search</span>
+                <input
+                    type="search"
+                    name="q"
+                    id="courseSearch"
+                    value="{{ request.GET.q|default:'' }}"
+                    placeholder="Search courses..."
+                    aria-label="Search courses"
+                    autocomplete="off"
+                >
+            </form>
+
+            <button
+                type="button"
+                class="cp-button cp-button-primary"
+                id="addCourseButton"
+                onclick="showAddCourseForm()"
+            >
+                <span class="material-icons" aria-hidden="true">add</span>
+                Add course
+            </button>
+        </div>
+    </header>
+
+    <!-- Course list -->
+    <section aria-label="Course management">
+        <div class="cp-summary">
+            <span class="cp-summary-label">All courses</span>
+            <span class="cp-summary-count" id="courseCount">{{ courses|length }}</span>
+        </div>
+
+        <div class="cp-panel">
+
+            <!-- Desktop table -->
+            <div class="cp-table-wrap">
+                <table class="cp-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Course name</th>
+                            <th scope="col">Course code</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="desktopCourseList">
+                        {% for course in courses %}
+                        <tr
+                            id="row-{{ course.id }}"
+                            class="cp-course-row"
+                            data-course-search="{{ course.name|default:''|lower }} {{ course.code|default:''|lower }}"
+                        >
+                            <td class="cp-index">{{ forloop.counter }}</td>
+
+                            <td>
+                                <span class="view cp-course-name">{{ course.name }}</span>
+
+                                <input
+                                    type="text"
+                                    name="name"
+                                    form="edit-course-{{ course.id }}"
+                                    class="edit cp-field cp-hidden"
+                                    value="{{ course.name }}"
+                                    aria-label="Course name"
+                                    maxlength="255"
+                                    required
+                                >
+                            </td>
+
+                            <td>
+                                <span class="view cp-code {% if not course.code %}cp-muted-value{% endif %}">
+                                    {{ course.code|default:"No code" }}
+                                </span>
+
+                                <input
+                                    type="text"
+                                    name="code"
+                                    form="edit-course-{{ course.id }}"
+                                    class="edit cp-field cp-hidden"
+                                    value="{{ course.code|default:'' }}"
+                                    aria-label="Course code"
+                                    maxlength="50"
+                                >
+                            </td>
+
+                            <td>
+                                <form
+                                    id="edit-course-{{ course.id }}"
+                                    method="POST"
+                                    action="{% url 'course_edit' course.id %}"
+                                    class="cp-row-actions"
+                                >
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="button"
+                                        class="cp-icon-button cp-icon-edit view"
+                                        onclick="toggleEditCourse({{ course.id }})"
+                                        aria-label="Edit {{ course.name }}"
+                                        title="Edit course"
+                                    >
+                                        <span class="material-icons" aria-hidden="true">edit</span>
+                                    </button>
+
+                                    <button
+                                        type="submit"
+                                        class="cp-icon-button cp-icon-save edit cp-hidden"
+                                        aria-label="Save course"
+                                        title="Save changes"
+                                    >
+                                        <span class="material-icons" aria-hidden="true">check</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="cp-icon-button cp-icon-cancel edit cp-hidden"
+                                        onclick="toggleEditCourse({{ course.id }})"
+                                        aria-label="Cancel editing"
+                                        title="Cancel"
+                                    >
+                                        <span class="material-icons" aria-hidden="true">close</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="cp-icon-button cp-icon-delete view"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteCourseModal{{ course.id }}"
+                                        aria-label="Delete {{ course.name }}"
+                                        title="Delete course"
+                                    >
+                                        <span class="material-icons" aria-hidden="true">delete</span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr id="desktopEmptyRow">
+                            <td colspan="4">
+                                <div class="cp-empty">
+                                    <div class="cp-empty-icon">
+                                        <span class="material-icons" aria-hidden="true">school</span>
+                                    </div>
+                                    <h2 class="cp-empty-title">No courses yet</h2>
+                                    <p class="cp-empty-text">
+                                        Add your first course to get started.
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        <!-- Inline add form -->
+                        <tr id="addFormRow" class="cp-add-form-row cp-hidden">
+                            <td class="cp-index">New</td>
+
+                            <td>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    form="add-course-form"
+                                    class="cp-field"
+                                    placeholder="Enter course name"
+                                    aria-label="New course name"
+                                    maxlength="255"
+                                    required
+                                >
+                            </td>
+
+                            <td>
+                                <input
+                                    type="text"
+                                    name="code"
+                                    form="add-course-form"
+                                    class="cp-field"
+                                    placeholder="Course code"
+                                    aria-label="New course code"
+                                    maxlength="50"
+                                >
+                            </td>
+
+                            <td>
+                                <form
+                                    id="add-course-form"
+                                    method="POST"
+                                    action="{% url 'course_add' %}"
+                                    class="cp-row-actions"
+                                >
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="cp-icon-button cp-icon-save"
+                                        aria-label="Save new course"
+                                        title="Save course"
+                                    >
+                                        <span class="material-icons" aria-hidden="true">check</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="cp-icon-button cp-icon-cancel"
+                                        onclick="hideAddCourseForm()"
+                                        aria-label="Cancel adding course"
+                                        title="Cancel"
+                                    >
+                                        <span class="material-icons" aria-hidden="true">close</span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        <tr id="desktopAddRow" class="cp-add-row">
+                            <td colspan="4">
+                                <button
+                                    type="button"
+                                    class="cp-add-row-button"
+                                    onclick="showAddCourseForm()"
+                                >
+                                    <span class="material-icons" aria-hidden="true">add_circle_outline</span>
+                                    Add another course
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile course cards -->
+            <div class="cp-mobile-list" id="mobileCourseList">
+                {% for course in courses %}
+                <article
+                    class="cp-mobile-card cp-course-row"
+                    id="mobile-row-{{ course.id }}"
+                    data-course-search="{{ course.name|default:''|lower }} {{ course.code|default:''|lower }}"
+                >
+                    <div class="cp-mobile-card-head">
+                        <div class="cp-course-avatar">
+                            <span class="material-icons" aria-hidden="true">school</span>
+                        </div>
+
+                        <div class="cp-mobile-course-info">
+                            <h2 class="cp-mobile-course-name view">{{ course.name }}</h2>
+
+                            <div class="cp-mobile-course-code view">
+                                <span class="cp-code {% if not course.code %}cp-muted-value{% endif %}">
+                                    {{ course.code|default:"No course code" }}
+                                </span>
+                            </div>
+
+                            <form
+                                method="POST"
+                                action="{% url 'course_edit' course.id %}"
+                                id="mobile-edit-course-{{ course.id }}"
+                                class="cp-mobile-edit-form edit cp-hidden"
+                            >
+                                {% csrf_token %}
+
+                                <div class="cp-field-group">
+                                    <label for="mobile-name-{{ course.id }}">Course name</label>
+                                    <input
+                                        id="mobile-name-{{ course.id }}"
+                                        type="text"
+                                        name="name"
+                                        class="cp-field"
+                                        value="{{ course.name }}"
+                                        maxlength="255"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="cp-field-group">
+                                    <label for="mobile-code-{{ course.id }}">Course code</label>
+                                    <input
+                                        id="mobile-code-{{ course.id }}"
+                                        type="text"
+                                        name="code"
+                                        class="cp-field"
+                                        value="{{ course.code|default:'' }}"
+                                        maxlength="50"
+                                    >
+                                </div>
+
+                                <div class="cp-mobile-actions">
+                                    <button type="submit" class="cp-button cp-button-success">
+                                        <span class="material-icons" aria-hidden="true">check</span>
+                                        Save changes
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="cp-button cp-button-secondary"
+                                        onclick="toggleMobileEditCourse({{ course.id }})"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="cp-mobile-actions view">
+                        <button
+                            type="button"
+                            class="cp-button cp-button-secondary"
+                            onclick="toggleMobileEditCourse({{ course.id }})"
+                        >
+                            <span class="material-icons" aria-hidden="true">edit</span>
+                            Edit
+                        </button>
+
+                        <button
+                            type="button"
+                            class="cp-button cp-button-secondary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteCourseModal{{ course.id }}"
+                            style="color:#dc2626;"
+                        >
+                            <span class="material-icons" aria-hidden="true">delete</span>
+                            Delete
+                        </button>
+                    </div>
+                </article>
+                {% empty %}
+                <div class="cp-empty" id="mobileEmptyRow">
+                    <div class="cp-empty-icon">
+                        <span class="material-icons" aria-hidden="true">school</span>
+                    </div>
+                    <h2 class="cp-empty-title">No courses yet</h2>
+                    <p class="cp-empty-text">
+                        Add your first course to get started.
+                    </p>
+                </div>
+                {% endfor %}
+
+                <!-- Mobile add form -->
+                <div class="cp-mobile-add cp-hidden" id="mobileAddForm">
+                    <form method="POST" action="{% url 'course_add' %}" class="cp-mobile-add-form">
+                        {% csrf_token %}
+
+                        <div class="cp-field-group">
+                            <label for="mobileNewCourseName">Course name</label>
+                            <input
+                                id="mobileNewCourseName"
+                                type="text"
+                                name="name"
+                                class="cp-field"
+                                placeholder="Enter course name"
+                                maxlength="255"
+                                required
+                            >
+                        </div>
+
+                        <div class="cp-field-group">
+                            <label for="mobileNewCourseCode">Course code <span style="font-weight:400;">(optional)</span></label>
+                            <input
+                                id="mobileNewCourseCode"
+                                type="text"
+                                name="code"
+                                class="cp-field"
+                                placeholder="e.g. BSIT"
+                                maxlength="50"
+                            >
+                        </div>
+
+                        <div class="cp-mobile-actions">
+                            <button type="submit" class="cp-button cp-button-primary">
+                                <span class="material-icons" aria-hidden="true">check</span>
+                                Save course
+                            </button>
+
+                            <button
+                                type="button"
+                                class="cp-button cp-button-secondary"
+                                onclick="hideAddCourseForm()"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="cp-no-results" id="mobileNoResults">
+                    No courses match your search.
+                </div>
+            </div>
+
+            <div class="cp-no-results" id="desktopNoResults">
+                No courses match your search.
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Delete confirmation dialogs -->
+{% for course in courses %}
+<div
+    class="modal fade cp-modal"
+    id="deleteCourseModal{{ course.id }}"
+    tabindex="-1"
+    aria-labelledby="deleteCourseTitle{{ course.id }}"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <form method="POST" action="{% url 'course_delete' course.id %}" class="modal-content">
+            {% csrf_token %}
+
+            <div class="modal-header">
+                <h2 class="modal-title" id="deleteCourseTitle{{ course.id }}">
+                    Delete course?
+                </h2>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+            </div>
+
+            <div class="modal-body">
+                <p style="margin:0 0 10px;">
+                    Are you sure you want to delete
+                    <strong style="color:#172033;">{{ course.name }}</strong>?
+                </p>
+                <p style="margin:0;font-size:12px;color:#94a3b8;">
+                    This action cannot be undone.
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-light border"
+                    data-bs-dismiss="modal"
+                >
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn btn-danger">
+                    Delete course
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+(function () {
+    "use strict";
+
+    const addFormRow = document.getElementById("addFormRow");
+    const desktopAddRow = document.getElementById("desktopAddRow");
+    const mobileAddForm = document.getElementById("mobileAddForm");
+    const addCourseButton = document.getElementById("addCourseButton");
+    const courseSearch = document.getElementById("courseSearch");
+
+    function isMobileLayout() {
+        return window.matchMedia("(max-width: 639px)").matches;
+    }
+
+    window.showAddCourseForm = function () {
+        if (isMobileLayout()) {
+            if (!mobileAddForm) return;
+
+            mobileAddForm.classList.remove("cp-hidden");
+
+            if (addFormRow) {
+                addFormRow.classList.add("cp-hidden");
+            }
+
+            if (desktopAddRow) {
+                desktopAddRow.classList.add("cp-hidden");
+            }
+
+            const input = document.getElementById("mobileNewCourseName");
+            if (input) {
+                input.focus({ preventScroll: true });
+            }
+
+            mobileAddForm.scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                    ? "auto"
+                    : "smooth",
+                block: "nearest"
+            });
+        } else {
+            if (!addFormRow) return;
+
+            addFormRow.classList.remove("cp-hidden");
+
+            if (desktopAddRow) {
+                desktopAddRow.classList.add("cp-hidden");
+            }
+
+            const input = addFormRow.querySelector('input[name="name"]');
+            if (input) input.focus({ preventScroll: true });
+        }
+
+        if (addCourseButton) {
+            addCourseButton.setAttribute("aria-expanded", "true");
+        }
+    };
+
+    window.hideAddCourseForm = function () {
+        if (addFormRow) {
+            addFormRow.classList.add("cp-hidden");
+        }
+
+        if (desktopAddRow) {
+            desktopAddRow.classList.remove("cp-hidden");
+        }
+
+        if (mobileAddForm) {
+            mobileAddForm.classList.add("cp-hidden");
+
+            const form = mobileAddForm.querySelector("form");
+            if (form) form.reset();
+        }
+
+        if (addCourseButton) {
+            addCourseButton.setAttribute("aria-expanded", "false");
+        }
+    };
+
+    window.toggleAddCourseRow = function () {
+        if (addFormRow && !addFormRow.classList.contains("cp-hidden")) {
+            window.hideAddCourseForm();
+        } else {
+            window.showAddCourseForm();
+        }
+    };
+
+    window.toggleEditCourse = function (id) {
+        const row = document.getElementById(`row-${id}`);
+        if (!row) return;
+
+        const isEditing = row.querySelector(".edit:not(.cp-hidden)") !== null;
+
+        row.querySelectorAll(".view").forEach(function (element) {
+            element.classList.toggle("cp-hidden", !isEditing);
+        });
+
+        row.querySelectorAll(".edit").forEach(function (element) {
+            element.classList.toggle("cp-hidden", isEditing);
+        });
+
+        if (!isEditing) {
+            const nameInput = row.querySelector('input[name="name"]');
+            if (nameInput) {
+                nameInput.focus({ preventScroll: true });
+                nameInput.select();
+            }
+        }
+    };
+
+    window.toggleMobileEditCourse = function (id) {
+        const row = document.getElementById(`mobile-row-${id}`);
+        if (!row) return;
+
+        const editForm = row.querySelector(".cp-mobile-edit-form");
+        if (!editForm) return;
+
+        const isEditing = !editForm.classList.contains("cp-hidden");
+
+        row.querySelectorAll(".view").forEach(function (element) {
+            element.classList.toggle("cp-hidden", !isEditing);
+        });
+
+        editForm.classList.toggle("cp-hidden", isEditing);
+
+        if (!isEditing) {
+            const nameInput = editForm.querySelector('input[name="name"]');
+            if (nameInput) {
+                nameInput.focus({ preventScroll: true });
+            }
+        }
+    };
+
+    // Filter currently rendered courses without requiring a page reload.
+    // Submitting the GET form still supports server-side search and pagination.
+    function filterCourses() {
+        if (!courseSearch) return;
+
+        const query = courseSearch.value.trim().toLowerCase();
+        const desktopRows = Array.from(
+            document.querySelectorAll("#desktopCourseList .cp-course-row")
+        );
+        const mobileRows = Array.from(
+            document.querySelectorAll("#mobileCourseList .cp-course-row")
+        );
+
+        let visibleCount = 0;
+
+        desktopRows.forEach(function (row) {
+            const searchableText = (row.dataset.courseSearch || "").toLowerCase();
+            const matches = searchableText.includes(query);
+
+            row.classList.toggle("cp-hidden", !matches);
+
+            if (matches && row.id.startsWith("row-")) {
+                visibleCount++;
+            }
+        });
+
+        mobileRows.forEach(function (row) {
+            const searchableText = (row.dataset.courseSearch || "").toLowerCase();
+            row.classList.toggle("cp-hidden", !searchableText.includes(query));
+        });
+
+        const desktopNoResults = document.getElementById("desktopNoResults");
+        const mobileNoResults = document.getElementById("mobileNoResults");
+
+        const hasCourses = desktopRows.length > 0;
+
+        if (desktopNoResults) {
+            desktopNoResults.style.display =
+                hasCourses && visibleCount === 0 ? "block" : "none";
+        }
+
+        if (mobileNoResults) {
+            mobileNoResults.style.display =
+                hasCourses && visibleCount === 0 ? "block" : "none";
+        }
+
+        const countElement = document.getElementById("courseCount");
+        if (countElement) {
+            countElement.textContent = query ? visibleCount : desktopRows.length;
+        }
+
+        // Hide the add row while searching; avoid mixing new-course fields with results.
+        if (query) {
+            if (addFormRow) addFormRow.classList.add("cp-hidden");
+            if (desktopAddRow) desktopAddRow.classList.add("cp-hidden");
+            if (mobileAddForm) mobileAddForm.classList.add("cp-hidden");
+        } else if (
+            addFormRow &&
+            addFormRow.querySelector('input[name="name"]') &&
+            !addFormRow.classList.contains("cp-hidden")
+        ) {
+            if (desktopAddRow) desktopAddRow.classList.add("cp-hidden");
+        } else if (desktopAddRow) {
+            desktopAddRow.classList.remove("cp-hidden");
+        }
+    }
+
+    if (courseSearch) {
+        courseSearch.addEventListener("input", filterCourses);
+
+        const searchForm = document.getElementById("courseSearchForm");
+        if (searchForm) {
+            searchForm.addEventListener("submit", function (event) {
+                // Keep server-side GET search behavior.
+                // Do not prevent submission.
+            });
+        }
+
+        filterCourses();
+    }
+
+    // If the viewport changes while the add form is open, switch to the
+    // appropriate form rather than leaving the user with the wrong layout.
+    let wasMobile = isMobileLayout();
+
+    window.addEventListener("resize", function () {
+        const nowMobile = isMobileLayout();
+
+        if (nowMobile !== wasMobile) {
+            const desktopFormOpen =
+                addFormRow && !addFormRow.classList.contains("cp-hidden");
+            const mobileFormOpen =
+                mobileAddForm && !mobileAddForm.classList.contains("cp-hidden");
+
+            if (desktopFormOpen || mobileFormOpen) {
+                window.hideAddCourseForm();
+            }
+
+            wasMobile = nowMobile;
+            filterCourses();
+        }
+    });
+})();
+</script>
+{% endblock %}
+

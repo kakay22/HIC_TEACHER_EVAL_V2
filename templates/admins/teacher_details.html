@@ -1,0 +1,1798 @@
+{% extends 'admins/base.html' %}
+{% load time_extras %}
+
+{% block title %}Faculty Overview{% endblock %}
+{% block page_title %}Faculty Overview{% endblock %}
+
+{% block extra_head %}
+<style>
+/* =========================================================
+   HIC FACULTY PROFILE — MOBILE-FIRST SAAS
+========================================================= */
+.teacher-detail-page {
+    --td-ink: #172033;
+    --td-muted: #748096;
+    --td-line: #e7ebf2;
+    --td-soft: #f7f9fc;
+    --td-brand: #2457c5;
+    --td-brand-soft: #edf3ff;
+    color: var(--td-ink);
+    min-width: 0;
+    width: 100%;
+    padding-bottom: 24px;
+}
+
+.teacher-detail-page *,
+.teacher-detail-page *::before,
+.teacher-detail-page *::after {
+    box-sizing: border-box;
+}
+
+.teacher-detail-page .material-icons,
+.teacher-detail-page .material-icons-outlined {
+    vertical-align: middle;
+}
+
+.teacher-detail-page button,
+.teacher-detail-page input,
+.teacher-detail-page select {
+    font: inherit;
+}
+
+.td-panel {
+    min-width: 0;
+    border: 1px solid var(--td-line);
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(23, 32, 51, .025);
+}
+
+.td-eyebrow {
+    color: var(--td-muted);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: .09em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.td-section-title {
+    margin: 0;
+    color: var(--td-ink);
+    font-size: 16px;
+    font-weight: 750;
+    letter-spacing: -.25px;
+}
+
+.td-section-description {
+    margin: 5px 0 0;
+    color: var(--td-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.td-icon-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border: 1px solid #e8edf5;
+    border-radius: 13px;
+    background: #f8faff;
+    color: #64748b;
+}
+
+.td-icon-box .material-icons {
+    font-size: 21px;
+}
+
+.td-header {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 18px;
+    margin-bottom: 17px;
+}
+
+.td-profile {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    min-width: 0;
+}
+
+.td-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 58px;
+    width: 58px;
+    height: 58px;
+    border: 1px solid #d8e4ff;
+    border-radius: 17px;
+    background: linear-gradient(145deg, #eaf1ff, #dbe7ff);
+    color: #2457c5;
+    font-size: 18px;
+    font-weight: 850;
+    letter-spacing: -.5px;
+}
+
+.td-profile-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.td-profile-name {
+    margin: 0;
+    color: var(--td-ink);
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -.65px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.td-profile-subtitle {
+    margin: 5px 0 0;
+    color: var(--td-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.td-profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.td-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    padding: 6px 9px;
+    border: 1px solid #e5eaf2;
+    border-radius: 9px;
+    background: #f8faff;
+    color: #526078;
+    font-size: 11px;
+    font-weight: 650;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.td-chip .material-icons {
+    flex: 0 0 auto;
+    font-size: 15px;
+}
+
+.td-chip-blue {
+    border-color: #dce6ff;
+    background: #f0f5ff;
+    color: #315bb4;
+}
+
+.td-chip-purple {
+    border-color: #e8e0fb;
+    background: #f8f5ff;
+    color: #7053a7;
+}
+
+.td-chip-muted {
+    background: #f8fafc;
+    color: #8993a5;
+}
+
+.td-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.td-stat-card {
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid var(--td-line);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.td-stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+    margin-bottom: 13px;
+}
+
+.td-stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    background: #edf3ff;
+    color: #315fc2;
+}
+
+.td-stat-icon .material-icons {
+    font-size: 19px;
+}
+
+.td-stat-icon-yellow {
+    background: #fff5d9;
+    color: #a9780b;
+}
+
+.td-stat-label {
+    display: block;
+    color: #7c879a;
+    font-size: 10px;
+    font-weight: 750;
+    line-height: 1.5;
+    text-transform: uppercase;
+}
+
+.td-stat-value {
+    display: block;
+    margin-top: 5px;
+    color: var(--td-ink);
+    font-size: 25px;
+    font-weight: 850;
+    letter-spacing: -.8px;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+}
+
+.td-stat-note {
+    display: block;
+    margin-top: 5px;
+    color: #929bad;
+    font-size: 10px;
+}
+
+.td-insights-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    margin-bottom: 17px;
+}
+
+.td-insights-panel {
+    padding: 17px;
+}
+
+.td-panel-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.td-panel-heading-copy {
+    min-width: 0;
+}
+
+.td-section-list {
+    display: flex;
+    flex-direction: column;
+    gap: 19px;
+}
+
+.td-section-item {
+    min-width: 0;
+}
+
+.td-section-item-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+}
+
+.td-section-item-name {
+    min-width: 0;
+    color: #344054;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.td-section-score {
+    flex: 0 0 auto;
+    color: #263248;
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.td-progress-track {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #edf0f5;
+}
+
+.td-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    transition: width .25s ease;
+}
+
+.td-progress-green { background: #16a36a; }
+.td-progress-blue { background: #3975e8; }
+.td-progress-yellow { background: #e6a520; }
+.td-progress-red { background: #e05252; }
+
+.td-performance-label {
+    display: inline-block;
+    margin-top: 7px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.td-performance-green { color: #13875a; }
+.td-performance-blue { color: #315fc2; }
+.td-performance-yellow { color: #ad7b12; }
+.td-performance-red { color: #d04444; }
+
+.td-empty {
+    padding: 34px 16px;
+    text-align: center;
+}
+
+.td-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    border: 1px solid var(--td-line);
+    border-radius: 15px;
+    background: #f8fafc;
+    color: #8a95a7;
+}
+
+.td-empty-icon .material-icons {
+    font-size: 23px;
+}
+
+.td-empty-title {
+    margin: 0;
+    color: #475467;
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.td-empty-description {
+    margin: 5px 0 0;
+    color: #8993a5;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.td-summary-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.td-summary-card {
+    padding: 16px;
+    border: 1px solid var(--td-line);
+    border-radius: 15px;
+    background: #fff;
+}
+
+.td-summary-green {
+    border-color: #d5eee1;
+    background: linear-gradient(135deg, #f0fbf5, #fff 78%);
+}
+
+.td-summary-red {
+    border-color: #f4dddd;
+    background: linear-gradient(135deg, #fff4f4, #fff 78%);
+}
+
+.td-summary-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.td-summary-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.td-summary-label-green { color: #16845a; }
+.td-summary-label-red { color: #c34242; }
+
+.td-summary-name {
+    margin: 6px 0 0;
+    color: #263248;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.td-summary-score {
+    margin-top: 14px;
+    font-size: 27px;
+    font-weight: 850;
+    letter-spacing: -.7px;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.td-summary-score-green { color: #16845a; }
+.td-summary-score-red { color: #c34242; }
+
+.td-tabs-panel {
+    overflow: hidden;
+}
+
+.td-tabs-header {
+    padding: 12px;
+    border-bottom: 1px solid var(--td-line);
+    background: #fff;
+}
+
+.td-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.td-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 89px;
+    padding: 10px 9px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: #667085;
+    text-align: left;
+    cursor: pointer;
+    transition: background .16s, border-color .16s, color .16s;
+}
+
+.td-tab:hover {
+    background: #f8fafc;
+}
+
+.td-tab:focus-visible {
+    outline: 3px solid rgba(36, 87, 197, .25);
+    outline-offset: 2px;
+}
+
+.td-tab-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 31px;
+    height: 31px;
+    border-radius: 10px;
+    background: #f1f4f9;
+    color: #748096;
+}
+
+.td-tab-icon .material-icons {
+    font-size: 18px;
+}
+
+.td-tab-copy {
+    display: block;
+    min-width: 0;
+}
+
+.td-tab-title {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.td-tab-subtitle {
+    display: block;
+    margin-top: 3px;
+    color: #929bad;
+    font-size: 9px;
+    line-height: 1.4;
+}
+
+.td-tab[data-color="blue"][aria-selected="true"] {
+    border-color: #cbdcff;
+    background: #f0f5ff;
+    color: #2457c5;
+}
+
+.td-tab[data-color="blue"][aria-selected="true"] .td-tab-icon {
+    background: #2457c5;
+    color: #fff;
+}
+
+.td-tab[data-color="green"][aria-selected="true"] {
+    border-color: #c8ead7;
+    background: #f0fbf5;
+    color: #16845a;
+}
+
+.td-tab[data-color="green"][aria-selected="true"] .td-tab-icon {
+    background: #16845a;
+    color: #fff;
+}
+
+.td-tab[data-color="orange"][aria-selected="true"] {
+    border-color: #f6dfc5;
+    background: #fff7ef;
+    color: #c76a18;
+}
+
+.td-tab[data-color="orange"][aria-selected="true"] .td-tab-icon {
+    background: #c76a18;
+    color: #fff;
+}
+
+.td-tab-panel {
+    min-width: 0;
+}
+
+.td-panel-content {
+    padding: 13px;
+}
+
+.td-evaluation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.td-evaluation-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--td-line);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.td-evaluation-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 13px;
+    border-bottom: 1px solid #edf0f5;
+    background: #fafbfe;
+}
+
+.td-evaluation-identity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.td-student-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #dbe5fb;
+    border-radius: 11px;
+    background: #edf3ff;
+    color: #315fc2;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.td-student-avatar-green {
+    border-color: #d0ecdc;
+    background: #eaf8f0;
+    color: #16845a;
+}
+
+.td-student-avatar-orange {
+    border-color: #f4dfcc;
+    background: #fff4e9;
+    color: #b96721;
+}
+
+.td-student-info {
+    min-width: 0;
+}
+
+.td-student-name {
+    margin: 0;
+    color: #344054;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.td-evaluation-date {
+    margin-top: 4px;
+    color: #8993a5;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.td-rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    padding: 6px 8px;
+    border: 1px solid #f2e3b8;
+    border-radius: 9px;
+    background: #fffaf0;
+    color: #926a10;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.td-rating-badge .material-icons {
+    font-size: 14px;
+}
+
+.td-rating-badge-green {
+    border-color: #ccebd9;
+    background: #effaf4;
+    color: #16845a;
+}
+
+.td-rating-badge-blue {
+    border-color: #d6e3ff;
+    background: #f0f5ff;
+    color: #315fc2;
+}
+
+.td-evaluation-body {
+    padding: 13px;
+}
+
+.td-evaluation-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 12px;
+}
+
+.td-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border: 1px solid #e8ecf3;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #667085;
+    font-size: 10px;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.td-meta-chip .material-icons {
+    font-size: 14px;
+}
+
+.td-feedback-label {
+    margin: 0 0 7px;
+    color: #8993a5;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.td-feedback-text {
+    margin: 0;
+    color: #475467;
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+.td-evaluation-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 13px;
+    padding-top: 12px;
+    border-top: 1px solid #edf0f5;
+}
+
+.td-evaluation-id {
+    color: #98a1b1;
+    font-size: 10px;
+}
+
+.td-view-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 35px;
+    padding: 7px 10px;
+    border: 1px solid #dce6fb;
+    border-radius: 9px;
+    background: #f4f7ff;
+    color: #315fc2;
+    font-size: 11px;
+    font-weight: 750;
+    text-decoration: none;
+    transition: background .16s, border-color .16s;
+}
+
+.td-view-link:hover {
+    border-color: #b8cdf9;
+    background: #eaf1ff;
+    color: #1946a3;
+}
+
+.td-view-link .material-icons {
+    font-size: 16px;
+}
+
+.td-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+
+.td-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: #475467;
+    font-size: 12px;
+}
+
+.td-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 13px 15px;
+    border-bottom: 1px solid var(--td-line);
+    background: #f8fafd;
+    color: #7a8497;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.td-table td {
+    padding: 13px 15px;
+    border-bottom: 1px solid #edf0f5;
+    background: #fff;
+    vertical-align: middle;
+}
+
+.td-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.td-table tbody tr:hover td {
+    background: #fbfcff;
+}
+
+.td-table-student {
+    color: #344054;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.td-table-muted {
+    color: #7d8799;
+}
+
+.td-table-rating {
+    color: #926a10;
+    font-weight: 800;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.td-table-view {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 34px;
+    padding: 6px 10px;
+    border: 1px solid #dce6fb;
+    border-radius: 9px;
+    background: #f4f7ff;
+    color: #315fc2;
+    font-size: 11px;
+    font-weight: 750;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.td-table-view:hover {
+    background: #eaf1ff;
+    color: #1946a3;
+}
+
+.td-table-view .material-icons {
+    font-size: 16px;
+}
+
+.td-mobile-rating-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.td-mobile-rating-card {
+    padding: 13px;
+    border: 1px solid var(--td-line);
+    border-radius: 13px;
+    background: #fff;
+}
+
+.td-mobile-rating-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.td-mobile-rating-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.td-mobile-rating-name {
+    color: #344054;
+    font-size: 12px;
+    font-weight: 750;
+    overflow-wrap: anywhere;
+}
+
+.td-mobile-rating-subject {
+    margin-top: 5px;
+    color: #7d8799;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.td-mobile-rating-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 11px;
+    border-top: 1px solid #edf0f5;
+}
+
+@media (min-width: 640px) {
+    .td-header {
+        padding: 22px;
+    }
+
+    .td-profile {
+        align-items: center;
+    }
+
+    .td-avatar {
+        flex-basis: 66px;
+        width: 66px;
+        height: 66px;
+        border-radius: 19px;
+        font-size: 21px;
+    }
+
+    .td-profile-name {
+        font-size: 25px;
+    }
+
+    .td-stat-card {
+        padding: 16px;
+    }
+
+    .td-stat-value {
+        font-size: 29px;
+    }
+
+    .td-insights-panel {
+        padding: 21px;
+    }
+
+    .td-panel-content {
+        padding: 18px;
+    }
+
+    .td-tabs-header {
+        padding: 14px 18px;
+    }
+
+    .td-tab {
+        flex-direction: row;
+        align-items: center;
+        min-height: 72px;
+        gap: 10px;
+        padding: 11px;
+    }
+
+    .td-tab-title {
+        font-size: 12px;
+    }
+
+    .td-tab-subtitle {
+        font-size: 10px;
+    }
+
+    .td-evaluation-header,
+    .td-evaluation-body {
+        padding: 16px;
+    }
+}
+
+@media (min-width: 768px) {
+    .teacher-detail-page {
+        padding-bottom: 30px;
+    }
+
+    .td-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+
+    .td-profile {
+        flex: 1;
+    }
+
+    .td-stat-grid {
+        flex: 0 0 330px;
+        max-width: 370px;
+    }
+
+    .td-insights-grid {
+        grid-template-columns: minmax(0, 1.7fr) minmax(260px, .9fr);
+        gap: 17px;
+        margin-bottom: 20px;
+    }
+
+    .td-tabs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .td-tab {
+        flex: 1;
+        max-width: 245px;
+        min-height: 76px;
+        padding: 12px;
+    }
+
+    .td-tab-title {
+        font-size: 13px;
+    }
+
+    .td-panel-content {
+        padding: 0;
+    }
+
+    .td-evaluation-list {
+        padding: 18px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .td-header {
+        padding: 26px;
+    }
+
+    .td-profile-name {
+        font-size: 28px;
+    }
+
+    .td-stat-grid {
+        flex-basis: 365px;
+    }
+
+    .td-insights-panel {
+        padding: 23px;
+    }
+
+    .td-summary-card {
+        padding: 20px;
+    }
+
+    .td-summary-score {
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 380px) {
+    .td-header {
+        padding: 13px;
+    }
+
+    .td-profile {
+        gap: 10px;
+    }
+
+    .td-avatar {
+        flex-basis: 48px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        font-size: 15px;
+    }
+
+    .td-profile-name {
+        font-size: 18px;
+    }
+
+    .td-stat-card {
+        padding: 10px;
+    }
+
+    .td-stat-value {
+        font-size: 22px;
+    }
+
+    .td-tabs-header {
+        padding: 8px;
+    }
+
+    .td-tabs {
+        gap: 4px;
+    }
+
+    .td-tab {
+        min-height: 82px;
+        padding: 8px 6px;
+    }
+
+    .td-tab-title {
+        font-size: 10px;
+    }
+
+    .td-tab-subtitle {
+        font-size: 8px;
+    }
+
+    .td-panel-content {
+        padding: 9px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .teacher-detail-page *,
+    .teacher-detail-page *::before,
+    .teacher-detail-page *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="teacher-detail-page">
+
+    <!-- PROFILE HEADER -->
+    <section class="td-panel td-header">
+
+        <div class="td-profile">
+            <div class="td-avatar" aria-hidden="true">
+                {{ teacher.first_name|slice:":1"|upper }}{{ teacher.last_name|slice:":1"|upper }}
+            </div>
+
+            <div class="td-profile-info">
+                <div class="td-eyebrow">Faculty directory / Overview</div>
+
+                <h1 class="td-profile-name">
+                    {{ teacher.first_name }} {{ teacher.last_name }}
+                </h1>
+
+                <p class="td-profile-subtitle">
+                    Faculty performance and evaluation insights
+                </p>
+
+                <div class="td-profile-tags">
+                    {% for course in teacher.courses.all %}
+                        <span class="td-chip td-chip-blue">
+                            <span class="material-icons">apartment</span>
+                            {{ course.name }}
+                        </span>
+                    {% empty %}
+                        <span class="td-chip td-chip-muted">
+                            <span class="material-icons">apartment</span>
+                            No department assigned
+                        </span>
+                    {% endfor %}
+
+                    {% if teacher.specialization %}
+                        <span class="td-chip td-chip-purple">
+                            <span class="material-icons">school</span>
+                            {{ teacher.specialization }}
+                        </span>
+                    {% else %}
+                        <span class="td-chip td-chip-muted">
+                            <span class="material-icons">school</span>
+                            Specialization not specified
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="td-stat-grid">
+
+            <article class="td-stat-card">
+                <div class="td-stat-top">
+                    <span class="td-stat-icon">
+                        <span class="material-icons">assignment</span>
+                    </span>
+                    <span class="td-eyebrow">Records</span>
+                </div>
+
+                <span class="td-stat-label">Total evaluations</span>
+                <span class="td-stat-value">{{ teacher.evaluations.count }}</span>
+                <span class="td-stat-note">Submitted evaluations</span>
+            </article>
+
+            <article class="td-stat-card">
+                <div class="td-stat-top">
+                    <span class="td-stat-icon td-stat-icon-yellow">
+                        <span class="material-icons">star</span>
+                    </span>
+                    <span class="td-eyebrow">Performance</span>
+                </div>
+
+                <span class="td-stat-label">Average rating</span>
+                <span class="td-stat-value">
+                    {% if avg_rating != None %}
+                        {{ avg_rating|floatformat:2 }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </span>
+                <span class="td-stat-note">Out of 5.00</span>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- SECTION INSIGHTS -->
+    <section class="td-insights-grid">
+
+        <article class="td-panel td-insights-panel">
+            <div class="td-panel-heading">
+                <div class="td-panel-heading-copy">
+                    <h2 class="td-section-title">Section insights</h2>
+                    <p class="td-section-description">
+                        Average ratings across evaluation sections
+                    </p>
+                </div>
+
+                <span class="td-icon-box">
+                    <span class="material-icons">insights</span>
+                </span>
+            </div>
+
+            <div class="td-section-list">
+                {% for section in section_insights %}
+                    <div class="td-section-item">
+                        <div class="td-section-item-heading">
+                            <div class="td-section-item-name">
+                                {{ section.section__prefix }}.
+                                {{ section.section__title }}
+                            </div>
+
+                            <div class="td-section-score">
+                                {{ section.avg_rating|floatformat:2 }}
+                                <span style="color:#d49b20;">★</span>
+                            </div>
+                        </div>
+
+                        <div class="td-progress-track"
+                             role="progressbar"
+                             aria-label="{{ section.section__title }} average rating"
+                             aria-valuemin="0"
+                             aria-valuemax="5"
+                             aria-valuenow="{{ section.avg_rating|default:0 }}">
+                            <div class="td-progress-fill
+                                {% if section.avg_rating >= 4.5 %}
+                                    td-progress-green
+                                {% elif section.avg_rating >= 4.0 %}
+                                    td-progress-blue
+                                {% elif section.avg_rating >= 3.0 %}
+                                    td-progress-yellow
+                                {% else %}
+                                    td-progress-red
+                                {% endif %}"
+                                style="width:{% widthratio section.avg_rating 5 100 %}%">
+                            </div>
+                        </div>
+
+                        {% if section.avg_rating >= 4.5 %}
+                            <span class="td-performance-label td-performance-green">
+                                Excellent performance
+                            </span>
+                        {% elif section.avg_rating >= 4.0 %}
+                            <span class="td-performance-label td-performance-blue">
+                                Very good performance
+                            </span>
+                        {% elif section.avg_rating >= 3.0 %}
+                            <span class="td-performance-label td-performance-yellow">
+                                Satisfactory performance
+                            </span>
+                        {% else %}
+                            <span class="td-performance-label td-performance-red">
+                                Needs improvement
+                            </span>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <div class="td-empty">
+                        <span class="td-empty-icon">
+                            <span class="material-icons">analytics</span>
+                        </span>
+                        <h3 class="td-empty-title">No section insights yet</h3>
+                        <p class="td-empty-description">
+                            Section ratings will appear when evaluation data is available.
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        </article>
+
+        <!-- PERFORMANCE SUMMARY -->
+        <div class="td-summary-stack">
+
+            <article class="td-summary-card td-summary-green">
+                <div class="td-summary-top">
+                    <div class="min-w-0">
+                        <div class="td-summary-label td-summary-label-green">
+                            Strongest area
+                        </div>
+
+                        <h3 class="td-summary-name">
+                            {% if strongest_section %}
+                                {{ strongest_section.section__prefix }}.
+                                {{ strongest_section.section__title }}
+                            {% else %}
+                                No data available
+                            {% endif %}
+                        </h3>
+                    </div>
+
+                    <span class="td-icon-box" style="background:#e3f7eb;color:#16845a;border-color:#d2efde;">
+                        <span class="material-icons">trending_up</span>
+                    </span>
+                </div>
+
+                {% if strongest_section %}
+                    <div class="td-summary-score td-summary-score-green">
+                        {{ strongest_section.avg_rating|floatformat:2 }}
+                        <span style="font-size:17px;">★</span>
+                    </div>
+                    <p class="td-section-description">Highest section average</p>
+                {% else %}
+                    <p class="td-section-description">
+                        Ratings will identify the strongest area.
+                    </p>
+                {% endif %}
+            </article>
+
+            <article class="td-summary-card td-summary-red">
+                <div class="td-summary-top">
+                    <div class="min-w-0">
+                        <div class="td-summary-label td-summary-label-red">
+                            Needs attention
+                        </div>
+
+                        <h3 class="td-summary-name">
+                            {% if weakest_section %}
+                                {{ weakest_section.section__prefix }}.
+                                {{ weakest_section.section__title }}
+                            {% else %}
+                                No data available
+                            {% endif %}
+                        </h3>
+                    </div>
+
+                    <span class="td-icon-box" style="background:#ffebeb;color:#c34242;border-color:#f6dddd;">
+                        <span class="material-icons">priority_high</span>
+                    </span>
+                </div>
+
+                {% if weakest_section %}
+                    <div class="td-summary-score td-summary-score-red">
+                        {{ weakest_section.avg_rating|floatformat:2 }}
+                        <span style="font-size:17px;">★</span>
+                    </div>
+                    <p class="td-section-description">Lowest section average</p>
+                {% else %}
+                    <p class="td-section-description">
+                        Ratings will identify areas for improvement.
+                    </p>
+                {% endif %}
+            </article>
+
+        </div>
+    </section>
+
+    <!-- EVALUATION TABS -->
+    <section class="td-panel td-tabs-panel">
+
+        <div class="td-tabs-header">
+            <div class="td-tabs" role="tablist" aria-label="Faculty evaluation information">
+
+                <button id="ratingsTab"
+                        class="td-tab"
+                        type="button"
+                        role="tab"
+                        data-color="blue"
+                        aria-selected="true"
+                        aria-controls="ratingsContent"
+                        tabindex="0">
+                    <span class="td-tab-icon">
+                        <span class="material-icons">analytics</span>
+                    </span>
+                    <span class="td-tab-copy">
+                        <span class="td-tab-title">Ratings</span>
+                        <span class="td-tab-subtitle">Evaluation scores</span>
+                    </span>
+                </button>
+
+                <button id="commendableTab"
+                        class="td-tab"
+                        type="button"
+                        role="tab"
+                        data-color="green"
+                        aria-selected="false"
+                        aria-controls="commendableContent"
+                        tabindex="-1">
+                    <span class="td-tab-icon">
+                        <span class="material-icons">thumb_up</span>
+                    </span>
+                    <span class="td-tab-copy">
+                        <span class="td-tab-title">Commendable</span>
+                        <span class="td-tab-subtitle">Positive feedback</span>
+                    </span>
+                </button>
+
+                <button id="suggestionsTab"
+                        class="td-tab"
+                        type="button"
+                        role="tab"
+                        data-color="orange"
+                        aria-selected="false"
+                        aria-controls="suggestionsContent"
+                        tabindex="-1">
+                    <span class="td-tab-icon">
+                        <span class="material-icons">lightbulb</span>
+                    </span>
+                    <span class="td-tab-copy">
+                        <span class="td-tab-title">Suggestions</span>
+                        <span class="td-tab-subtitle">Improvements</span>
+                    </span>
+                </button>
+
+            </div>
+        </div>
+
+        <!-- RATINGS TAB -->
+        <div id="ratingsContent"
+             class="td-tab-panel"
+             role="tabpanel"
+             aria-labelledby="ratingsTab">
+            <div class="td-panel-content">
+
+                <!-- Mobile evaluation cards -->
+                <div class="td-mobile-rating-list p-3 md:hidden">
+                    {% for eval in teacher_evaluations %}
+                        <article class="td-mobile-rating-card">
+                            <div class="td-mobile-rating-top">
+                                <div class="td-mobile-rating-info">
+                                    <div class="td-mobile-rating-name">
+                                        {% if eval.student_name %}
+                                            {{ eval.student_name }}
+                                        {% else %}
+                                            {{ eval.student_id|default:"Anonymous student" }}
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="td-mobile-rating-subject">
+                                        {{ eval.subject|default:"No subject specified" }}
+                                    </div>
+                                </div>
+
+                                <span class="td-rating-badge">
+                                    <span class="material-icons">star</span>
+                                    {% if eval.overall_rating %}
+                                        {{ eval.overall_rating }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="td-mobile-rating-bottom">
+                                <span class="td-evaluation-date">
+                                    {{ eval.submitted_at|time_badge }}
+                                </span>
+
+                                <a href="{% url 'evaluation_detail' eval.id %}"
+                                   class="td-view-link">
+                                    <span class="material-icons">visibility</span>
+                                    View evaluation
+                                </a>
+                            </div>
+                        </article>
+                    {% empty %}
+                        <div class="td-empty">
+                            <span class="td-empty-icon">
+                                <span class="material-icons">assignment</span>
+                            </span>
+                            <h3 class="td-empty-title">No evaluations yet</h3>
+                            <p class="td-empty-description">
+                                Submitted evaluations will appear here.
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Desktop evaluation table -->
+                <div class="td-table-wrap hidden md:block">
+                    <table class="td-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Subject</th>
+                                <th>Date submitted</th>
+                                <th>Rating</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for eval in teacher_evaluations %}
+                                <tr>
+                                    <td class="td-table-student">
+                                        {% if eval.student_name %}
+                                            {{ eval.student_name }}
+                                        {% else %}
+                                            {{ eval.student_id|default:"Anonymous student" }}
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="td-table-muted">
+                                        {{ eval.subject|default:"—" }}
+                                    </td>
+
+                                    <td class="td-table-muted">
+                                        {{ eval.submitted_at|time_badge }}
+                                    </td>
+
+                                    <td class="td-table-rating">
+                                        {% if eval.overall_rating %}
+                                            {{ eval.overall_rating }}
+                                            <span style="color:#d49b20;">★</span>
+                                        {% else %}
+                                            <span class="text-gray-400">N/A</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <a href="{% url 'evaluation_detail' eval.id %}"
+                                           class="td-table-view">
+                                            <span class="material-icons">visibility</span>
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="td-empty">
+                                            <h3 class="td-empty-title">No evaluations yet</h3>
+                                            <p class="td-empty-description">
+                                                Submitted evaluations will appear here.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- COMMENDABLE TAB -->
+        <div id="commendableContent"
+             class="td-tab-panel"
+             role="tabpanel"
+             aria-labelledby="commendableTab"
+             hidden>
+            <div class="td-panel-content">
+                <div class="td-evaluation-list">
+
+                    {% for eval in teacher.evaluations.all %}
+                        {% if eval.commendable_features %}
+                            <article class="td-evaluation-card">
+
+                                <div class="td-evaluation-header"
+                                     style="background:linear-gradient(110deg,#f0fbf5,#fff 80%);">
+                                    <div class="td-evaluation-identity">
+                                        <span class="td-student-avatar td-student-avatar-green">
+                                            {% if eval.student_name %}
+                                                {{ eval.student_name|slice:":1"|upper }}
+                                            {% else %}
+                                                {{ eval.student_id|default:"S"|slice:":1"|upper }}
+                                            {% endif %}
+                                        </span>
+
+                                        <div class="td-student-info">
+                                            <h3 class="td-student-name">
+                                                {% if eval.student_name %}
+                                                    {{ eval.student_name }}
+                                                {% else %}
+                                                    {{ eval.student_id|default:"Anonymous student" }}
+                                                {% endif %}
+                                            </h3>
+
+                                            <p class="td-evaluation-date">
+                                                {{ eval.submitted_at|time_badge }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <span class="td-rating-badge td-rating-badge-green">
+                                        <span class="material-icons">star</span>
+                                        {{ eval.overall_rating|default:"N/A" }}
+                                    </span>
+                                </div>
+
+                                <div class="td-evaluation-body">
+                                    {% if eval.subject %}
+                                        <div class="td-evaluation-meta">
+                                            <span class="td-meta-chip">
+                                                <span class="material-icons">menu_book</span>
+                                                {{ eval.subject }}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+
+                                    <p class="td-feedback-label">Positive feedback</p>
+                                    <p class="td-feedback-text">{{ eval.commendable_features|capfirst }}</p>
+
+                                    <div class="td-evaluation-footer">
+                                        <span class="td-evaluation-id">
+                                            Evaluation #{{ eval.id }}
+                                        </span>
+
+                                        <a href="{% url 'evaluation_detail' eval.id %}"
+                                           class="td-view-link">
+                                            View full evaluation
+                                            <span class="material-icons">arrow_forward</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endif %}
+                    {% empty %}
+                        <div class="td-empty">
+                            <span class="td-empty-icon">
+                                <span class="material-icons">thumb_up</span>
+                            </span>
+                            <h3 class="td-empty-title">No commendable feedback yet</h3>
+                            <p class="td-empty-description">
+                                Positive comments from student evaluations will appear here.
+                            </p>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- SUGGESTIONS TAB -->
+        <div id="suggestionsContent"
+             class="td-tab-panel"
+             role="tabpanel"
+             aria-labelledby="suggestionsTab"
+             hidden>
+            <div class="td-panel-content">
+                <div class="td-evaluation-list">
+
+                    {% for eval in teacher.evaluations.all %}
+                        {% if eval.suggestions_improvement %}
+                            <article class="td-evaluation-card">
+
+                                <div class="td-evaluation-header"
+                                     style="background:linear-gradient(110deg,#fff7ef,#fff 80%);">
+                                    <div class="td-evaluation-identity">
+                                        <span class="td-student-avatar td-student-avatar-orange">
+                                            {% if eval.student_name %}
+                                                {{ eval.student_name|slice:":1"|upper }}
+                                            {% else %}
+                                                {{ eval.student_id|default:"S"|slice:":1"|upper }}
+                                            {% endif %}
+                                        </span>
+
+                                        <div class="td-student-info">
+                                            <h3 class="td-student-name">
+                                                {% if eval.student_name %}
+                                                    {{ eval.student_name }}
+                                                {% else %}
+                                                    {{ eval.student_id|default:"Anonymous student" }}
+                                                {% endif %}
+                                            </h3>
+
+                                            <p class="td-evaluation-date">
+                                                {{ eval.submitted_at|time_badge }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <span class="td-rating-badge td-rating-badge-blue">
+                                        <span class="material-icons">star</span>
+                                        {{ eval.overall_rating|default:"N/A" }}
+                                    </span>
+                                </div>
+
+                                <div class="td-evaluation-body">
+                                    {% if eval.subject %}
+                                        <div class="td-evaluation-meta">
+                                            <span class="td-meta-chip">
+                                                <span class="material-icons">menu_book</span>
+                                                {{ eval.subject }}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+
+                                    <p class="td-feedback-label">Suggestion for improvement</p>
+                                    <p class="td-feedback-text">{{ eval.suggestions_improvement|capfirst }}</p>
+
+                                    <div class="td-evaluation-footer">
+                                        <span class="td-evaluation-id">
+                                            Evaluation #{{ eval.id }}
+                                        </span>
+
+                                        <a href="{% url 'evaluation_detail' eval.id %}"
+                                           class="td-view-link">
+                                            View full evaluation
+                                            <span class="material-icons">arrow_forward</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endif %}
+                    {% empty %}
+                        <div class="td-empty">
+                            <span class="td-empty-icon">
+                                <span class="material-icons">lightbulb</span>
+                            </span>
+                            <h3 class="td-empty-title">No suggestions yet</h3>
+                            <p class="td-empty-description">
+                                Student recommendations will appear here.
+                            </p>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    "use strict";
+
+    const tabList = document.querySelector(
+        '.teacher-detail-page [role="tablist"]'
+    );
+
+    if (!tabList) return;
+
+    const tabs = Array.from(tabList.querySelectorAll('[role="tab"]'));
+
+    function activateTab(selectedTab, moveFocus) {
+        tabs.forEach(function (tab) {
+            const isSelected = tab === selectedTab;
+            const panelId = tab.getAttribute("aria-controls");
+            const panel = document.getElementById(panelId);
+
+            tab.setAttribute("aria-selected", String(isSelected));
+            tab.setAttribute("tabindex", isSelected ? "0" : "-1");
+
+            if (panel) {
+                panel.hidden = !isSelected;
+            }
+        });
+
+        if (moveFocus) {
+            selectedTab.focus();
+        }
+    }
+
+    tabs.forEach(function (tab, index) {
+        tab.addEventListener("click", function () {
+            activateTab(tab, false);
+        });
+
+        tab.addEventListener("keydown", function (event) {
+            let nextIndex = index;
+
+            if (event.key === "ArrowRight") {
+                nextIndex = (index + 1) % tabs.length;
+            } else if (event.key === "ArrowLeft") {
+                nextIndex = (index - 1 + tabs.length) % tabs.length;
+            } else if (event.key === "Home") {
+                nextIndex = 0;
+            } else if (event.key === "End") {
+                nextIndex = tabs.length - 1;
+            } else {
+                return;
+            }
+
+            event.preventDefault();
+            activateTab(tabs[nextIndex], true);
+        });
+    });
+
+    const initialTab = tabs.find(function (tab) {
+        return tab.getAttribute("aria-selected") === "true";
+    }) || tabs[0];
+
+    if (initialTab) {
+        activateTab(initialTab, false);
+    }
+})();
+</script>
+{% endblock %}
+

@@ -1,0 +1,1929 @@
+{% extends 'admins/base.html' %}
+{% load static %}
+
+{% block title %}Faculty Management{% endblock %}
+{% block page_title %}Faculty Management{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+
+<style>
+/* =========================================================
+   HIC FACULTY — MOBILE-FIRST SAAS UI
+========================================================= */
+.faculty-page {
+    --faculty-ink: #172033;
+    --faculty-muted: #758095;
+    --faculty-line: #e7ebf2;
+    --faculty-soft: #f7f9fc;
+    --faculty-brand: #2457c5;
+    --faculty-brand-soft: #edf3ff;
+    color: var(--faculty-ink);
+    width: 100%;
+    min-width: 0;
+}
+
+.faculty-page * { box-sizing: border-box; }
+
+.faculty-page .material-icons,
+.faculty-page .material-icons-outlined {
+    vertical-align: middle;
+}
+
+.faculty-page button,
+.faculty-page input,
+.faculty-page select {
+    font: inherit;
+}
+
+.faculty-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.faculty-heading {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.faculty-heading-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border: 1px solid #dce7ff;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #f2f6ff, #e8efff);
+    color: var(--faculty-brand);
+}
+
+.faculty-heading-icon .material-icons-outlined {
+    font-size: 25px;
+}
+
+.faculty-title {
+    margin: 0;
+    font-size: clamp(23px, 3vw, 29px);
+    line-height: 1.2;
+    font-weight: 750;
+    letter-spacing: -.8px;
+    color: var(--faculty-ink);
+}
+
+.faculty-subtitle {
+    margin: 5px 0 0;
+    color: var(--faculty-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.faculty-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    margin-top: 10px;
+    padding: 5px 9px;
+    border: 1px solid var(--faculty-line);
+    border-radius: 8px;
+    background: #fff;
+    color: #596579;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.faculty-count .material-icons-outlined {
+    font-size: 15px;
+    color: var(--faculty-brand);
+}
+
+.faculty-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.faculty-search {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.faculty-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    transform: translateY(-50%);
+    color: #8993a5;
+    font-size: 21px;
+    pointer-events: none;
+}
+
+.faculty-search-input {
+    width: 100%;
+    height: 46px;
+    padding: 0 42px 0 42px;
+    border: 1px solid #e1e6ef;
+    border-radius: 12px;
+    outline: none;
+    background: #fff;
+    color: var(--faculty-ink);
+    font-size: 14px;
+    transition: border-color .18s, box-shadow .18s;
+}
+
+.faculty-search-input::placeholder { color: #9aa3b2; }
+
+.faculty-search-input:focus {
+    border-color: #9ab5f4;
+    box-shadow: 0 0 0 3px rgba(36,87,197,.09);
+}
+
+.faculty-search-clear {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #788398;
+    cursor: pointer;
+}
+
+.faculty-search-clear:hover {
+    background: #f1f4f9;
+    color: var(--faculty-ink);
+}
+
+.faculty-search-clear .material-icons-outlined { font-size: 18px; }
+
+.faculty-filter {
+    position: relative;
+    width: 100%;
+}
+
+.faculty-filter .material-icons-outlined {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #788398;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.faculty-filter-select {
+    width: 100%;
+    height: 46px;
+    padding: 0 32px 0 39px;
+    border: 1px solid #e1e6ef;
+    border-radius: 12px;
+    outline: none;
+    appearance: auto;
+    background-color: #fff;
+    color: #39465a;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.faculty-filter-select:focus {
+    border-color: #9ab5f4;
+    box-shadow: 0 0 0 3px rgba(36,87,197,.09);
+}
+
+.faculty-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 0 17px;
+    border: 1px solid var(--faculty-brand);
+    border-radius: 12px;
+    background: var(--faculty-brand);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 3px 8px rgba(36,87,197,.14);
+    cursor: pointer;
+    transition: background .18s, transform .18s, box-shadow .18s;
+}
+
+.faculty-add-btn:hover {
+    background: #1946a3;
+    box-shadow: 0 5px 12px rgba(36,87,197,.19);
+    transform: translateY(-1px);
+}
+
+.faculty-add-btn .material-icons-outlined { font-size: 20px; }
+
+.faculty-results-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 42px;
+    margin-bottom: 10px;
+    color: var(--faculty-muted);
+    font-size: 12px;
+}
+
+.faculty-results-meta strong {
+    color: #475467;
+    font-weight: 700;
+}
+
+.faculty-loading {
+    display: none;
+    align-items: center;
+    gap: 7px;
+    color: var(--faculty-brand);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.faculty-loading.is-visible { display: inline-flex; }
+
+.faculty-loading .spinner-border {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+}
+
+.faculty-table-panel {
+    position: relative;
+    overflow: visible;
+    border: 1px solid var(--faculty-line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(23,32,51,.025);
+}
+
+.faculty-table-scroll {
+    max-height: min(68vh, 760px);
+    overflow: auto;
+    border-radius: 16px;
+}
+
+.faculty-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: var(--faculty-ink);
+    font-size: 13px;
+}
+
+.faculty-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--faculty-line);
+    background: #f8fafd;
+    color: #7a8497;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.faculty-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf0f5;
+    background: #fff;
+    vertical-align: middle;
+}
+
+.faculty-table tbody tr:last-child td { border-bottom: 0; }
+
+.faculty-table tbody tr:hover td { background: #fbfcff; }
+
+.faculty-person {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--faculty-ink);
+    text-decoration: none;
+}
+
+.faculty-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid #dce7ff;
+    border-radius: 12px;
+    background: #edf3ff;
+    color: #2457c5;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.faculty-person-name {
+    display: block;
+    overflow: hidden;
+    max-width: 240px;
+    color: #263248;
+    font-size: 13px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.faculty-person:hover .faculty-person-name { color: var(--faculty-brand); }
+
+.faculty-person-subtitle {
+    display: block;
+    margin-top: 3px;
+    color: #929bad;
+    font-size: 11px;
+}
+
+.faculty-course-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    max-width: 230px;
+    margin: 0 auto;
+}
+
+.faculty-tag {
+    display: inline-flex;
+    align-items: center;
+    max-width: 190px;
+    padding: 5px 8px;
+    border: 1px solid #e4eaf5;
+    border-radius: 7px;
+    background: #f6f8fc;
+    color: #526078;
+    font-size: 11px;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.faculty-tag--specialty {
+    border-color: #e6e1f7;
+    background: #f6f3ff;
+    color: #6b55a5;
+}
+
+.faculty-tag--muted {
+    border-color: #e9edf3;
+    background: #f8fafc;
+    color: #98a1b1;
+}
+
+.faculty-number {
+    color: #344054;
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.faculty-rating {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 63px;
+    padding: 7px 9px;
+    border: 1px solid #f3e7bd;
+    border-radius: 9px;
+    background: #fffaf0;
+    color: #8a6510;
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.faculty-rating .material-icons { font-size: 15px; }
+
+.faculty-rating-empty {
+    border-color: #e8ecf2;
+    background: #f8fafc;
+    color: #98a1b1;
+}
+
+.faculty-section-rating-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 32px;
+    margin-top: 7px;
+    padding: 0 9px;
+    border: 1px solid #dce6fb;
+    border-radius: 8px;
+    background: #f3f7ff;
+    color: #2457c5;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .16s, border-color .16s;
+}
+
+.faculty-section-rating-btn:hover {
+    border-color: #b8cdf9;
+    background: #e8efff;
+}
+
+.faculty-section-rating-btn .material-icons-outlined { font-size: 16px; }
+
+.faculty-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #e8ecf2;
+    border-radius: 10px;
+    background: #fff;
+    color: #69758a;
+    cursor: pointer;
+}
+
+.faculty-action-btn:hover {
+    border-color: #d6e1f8;
+    background: #f5f8ff;
+    color: var(--faculty-brand);
+}
+
+.faculty-action-btn .material-icons { font-size: 20px; }
+
+.faculty-dropdown .dropdown-menu {
+    min-width: 180px;
+    padding: 6px;
+    border: 1px solid var(--faculty-line);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(23,32,51,.12);
+}
+
+.faculty-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 39px;
+    border-radius: 8px;
+    color: #465267;
+    font-size: 13px;
+}
+
+.faculty-dropdown .dropdown-item:hover { background: #f4f7fc; }
+
+.faculty-dropdown .dropdown-item .material-icons-outlined {
+    font-size: 18px;
+    color: #7e899c;
+}
+
+.faculty-dropdown .dropdown-item.text-danger .material-icons-outlined { color: #dc3545; }
+
+.faculty-empty {
+    padding: 54px 20px;
+    text-align: center;
+}
+
+.faculty-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 14px;
+    border: 1px solid #e7ebf2;
+    border-radius: 17px;
+    background: #f7f9fc;
+    color: #8792a5;
+}
+
+.faculty-empty-icon .material-icons-outlined { font-size: 26px; }
+
+.faculty-empty h3 {
+    margin: 0;
+    color: #344054;
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.faculty-empty p {
+    margin: 6px 0 0;
+    color: #8b95a6;
+    font-size: 12px;
+}
+
+.faculty-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.faculty-mobile-card {
+    min-width: 0;
+    padding: 15px;
+    border: 1px solid var(--faculty-line);
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(23,32,51,.025);
+}
+
+.faculty-mobile-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+}
+
+.faculty-mobile-identity {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.faculty-mobile-identity .faculty-person-name {
+    max-width: 100%;
+    font-size: 14px;
+}
+
+.faculty-mobile-identity .faculty-person-subtitle { font-size: 11px; }
+
+.faculty-mobile-details {
+    margin: 13px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid #f0f2f6;
+}
+
+.faculty-mobile-detail-label {
+    margin-bottom: 7px;
+    color: #8a94a6;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.faculty-mobile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.faculty-mobile-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    margin-top: 13px;
+}
+
+.faculty-mobile-stat {
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid #edf0f5;
+    border-radius: 10px;
+    background: #fafbfe;
+}
+
+.faculty-mobile-stat-label {
+    display: block;
+    color: #8993a5;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.faculty-mobile-stat-value {
+    display: block;
+    margin-top: 4px;
+    color: #344054;
+    font-size: 16px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.faculty-mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.faculty-mobile-actions .faculty-section-rating-btn {
+    flex: 1;
+    min-height: 39px;
+    margin-top: 0;
+}
+
+.faculty-mobile-actions .faculty-dropdown { flex-shrink: 0; }
+
+.faculty-mobile-actions .faculty-action-btn {
+    width: 39px;
+    height: 39px;
+}
+
+.faculty-page .modal-content {
+    border: 1px solid #e7ebf2;
+    border-radius: 17px;
+    box-shadow: 0 20px 70px rgba(15,23,42,.15);
+}
+
+.faculty-page .modal-header {
+    padding: 20px 22px 14px;
+}
+
+.faculty-page .modal-body { padding: 18px 22px; }
+
+.faculty-page .modal-footer { padding: 14px 22px 20px; }
+
+.faculty-page .modal-title {
+    color: #172033;
+    font-size: 16px;
+    font-weight: 750;
+}
+
+.faculty-page .form-label {
+    margin-bottom: 6px;
+    color: #596579;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.faculty-page .form-control,
+.faculty-page .form-select {
+    min-height: 42px;
+    border-color: #dfe5ee;
+    border-radius: 9px;
+    font-size: 13px;
+    box-shadow: none;
+}
+
+.faculty-page .form-control:focus,
+.faculty-page .form-select:focus {
+    border-color: #9ab5f4;
+    box-shadow: 0 0 0 3px rgba(36,87,197,.09);
+}
+
+.faculty-course-options {
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 11px 12px;
+    border: 1px solid #e2e7ef;
+    border-radius: 10px;
+    background: #fbfcfe;
+}
+
+.faculty-course-options .form-check { margin-bottom: 8px; }
+.faculty-course-options .form-check:last-child { margin-bottom: 0; }
+
+.faculty-course-options .form-check-label {
+    color: #475467;
+    font-size: 13px;
+}
+
+.faculty-page .btn {
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.faculty-page .btn:focus { box-shadow: none; }
+
+.faculty-page .dropdown-toggle::after { display: none; }
+
+@media (min-width: 768px) {
+    .faculty-hero {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+    }
+
+    .faculty-toolbar {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 9px;
+        max-width: 690px;
+    }
+
+    .faculty-search { width: 245px; }
+    .faculty-filter { width: 190px; }
+    .faculty-add-btn { flex-shrink: 0; }
+}
+
+@media (min-width: 1200px) {
+    .faculty-search { width: 270px; }
+    .faculty-filter { width: 195px; }
+}
+
+@media (max-width: 767.98px) {
+    .faculty-page { padding-bottom: 8px; }
+    .faculty-hero { gap: 17px; margin-bottom: 18px; }
+    .faculty-heading-icon { flex-basis: 43px; width: 43px; height: 43px; border-radius: 13px; }
+    .faculty-title { font-size: 24px; }
+    .faculty-subtitle { font-size: 12px; }
+    .faculty-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+    .faculty-search { grid-column: 1 / -1; }
+    .faculty-filter { min-width: 0; }
+    .faculty-add-btn { padding-inline: 13px; }
+    .faculty-results-meta { margin-bottom: 9px; }
+    .faculty-table-panel { border: 0; background: transparent; box-shadow: none; }
+    .faculty-table-scroll { max-height: none; overflow: visible; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .faculty-page *,
+    .faculty-page *::before,
+    .faculty-page *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}
+
+
+/* Faculty division tabs */
+.faculty-division-tabs {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    border: 1px solid var(--faculty-line);
+    border-radius: 13px;
+    background: #f7f9fc;
+    scrollbar-width: none;
+}
+
+.faculty-division-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.faculty-division-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1 0 auto;
+    min-height: 42px;
+    padding: 0 15px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: #69758a;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color .18s, background .18s, box-shadow .18s;
+}
+
+.faculty-division-tab:hover {
+    background: #fff;
+    color: var(--faculty-ink);
+}
+
+.faculty-division-tab.is-active {
+    border-color: #e5eaf3;
+    background: #fff;
+    color: var(--faculty-brand);
+    box-shadow: 0 2px 5px rgba(23, 32, 51, .05);
+}
+
+.faculty-division-tab .material-icons-outlined {
+    font-size: 19px;
+}
+
+.faculty-division-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 23px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 7px;
+    background: #edf0f5;
+    color: #69758a;
+    font-size: 11px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+.faculty-division-tab.is-active .faculty-division-tab-count {
+    background: var(--faculty-brand-soft);
+    color: var(--faculty-brand);
+}
+
+@media (max-width: 767.98px) {
+    .faculty-division-tabs {
+        margin-bottom: 16px;
+    }
+
+    .faculty-division-tab {
+        min-height: 41px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="faculty-page">
+
+    <!-- Page header -->
+    <section class="faculty-hero">
+        <div>
+            <div class="faculty-heading">
+                <div class="faculty-heading-icon">
+                    <span class="material-icons-outlined">groups</span>
+                </div>
+                <div class="min-w-0">
+                    <h2 class="faculty-title">Faculty</h2>
+                    <p class="faculty-subtitle">Manage faculty profiles and evaluation performance.</p>
+                </div>
+            </div>
+
+            <div class="faculty-count">
+                <span class="material-icons-outlined">person_outline</span>
+                <span id="faculty-count">{{ teachers|length }} faculty member{{ teachers|length|pluralize }}</span>
+            </div>
+        </div>
+
+        <div class="faculty-toolbar">
+            <div class="faculty-search">
+                <span class="material-icons-outlined faculty-search-icon">search</span>
+                <input
+                    type="search"
+                    id="teacher-search"
+                    class="faculty-search-input"
+                    placeholder="Search faculty..."
+                    autocomplete="off"
+                    aria-label="Search faculty members">
+                <button
+                    type="button"
+                    id="teacher-search-clear"
+                    class="faculty-search-clear"
+                    aria-label="Clear search">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="faculty-filter">
+                <span class="material-icons-outlined">tune</span>
+                <select id="teacher-filter" class="faculty-filter-select" aria-label="Sort faculty">
+                    <option value="default">Default order</option>
+                    <option value="highest_rating">Highest rating</option>
+                    <option value="lowest_rating">Lowest rating</option>
+                    <option value="most_evaluations">Most evaluations</option>
+                </select>
+            </div>
+
+            <button
+                type="button"
+                class="faculty-add-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#addTeacherModal">
+                <span class="material-icons-outlined">add</span>
+                <span>Add Faculty</span>
+            </button>
+        </div>
+    </section>
+
+    
+    <!-- Faculty division tabs -->
+    <nav class="faculty-division-tabs" aria-label="Filter faculty by division">
+        <button
+            type="button"
+            class="faculty-division-tab is-active"
+            data-division="ALL"
+            aria-pressed="true"
+        >
+            <span class="material-icons-outlined">groups</span>
+            All Faculty
+            <span class="faculty-division-tab-count" id="division-count-all">
+                {{ teachers|length }}
+            </span>
+        </button>
+
+        <button
+            type="button"
+            class="faculty-division-tab"
+            data-division="COLLEGE"
+            aria-pressed="false"
+        >
+            <span class="material-icons-outlined">school</span>
+            College
+            <span class="faculty-division-tab-count" id="division-count-college">0</span>
+        </button>
+
+        <button
+            type="button"
+            class="faculty-division-tab"
+            data-division="BASIC"
+            aria-pressed="false"
+        >
+            <span class="material-icons-outlined">menu_book</span>
+            Basic Education
+            <span class="faculty-division-tab-count" id="division-count-basic">0</span>
+        </button>
+    </nav>
+
+
+    <!-- Search results status -->
+    <div class="faculty-results-meta">
+        <span id="faculty-results-label">Faculty directory</span>
+        <span id="faculty-loading" class="faculty-loading" role="status" aria-live="polite">
+            <span class="spinner-border" aria-hidden="true"></span>
+            Searching...
+        </span>
+    </div>
+
+    <!-- Desktop table -->
+    <section class="faculty-table-panel d-none d-md-block">
+        <div class="faculty-table-scroll" id="teachers-table">
+            <table class="faculty-table">
+                <thead>
+                    <tr>
+                        <th>Faculty member</th>
+                        <th class="text-center">Department</th>
+                        <th class="text-center">Division</th>
+                        <th class="text-center">Specialization</th>
+                        <th class="text-center">Evaluations</th>
+                        <th class="text-center">Performance</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="teachers-table-body">
+                {% if teachers %}
+                    {% for teacher in teachers %}
+                        {% if teacher.id %}
+                        <tr
+                            data-teacher-id="{{ teacher.id }}"
+                            data-education-level="{{ teacher.education_level|default:'COLLEGE' }}"
+                        >
+                            <td>
+                                <a href="{% url 'teacher_detail' teacher.id %}" class="faculty-person">
+                                    <span class="faculty-avatar">
+                                        {{ teacher.first_name|slice:":1" }}{{ teacher.last_name|slice:":1" }}
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="faculty-person-name">{{ teacher.first_name }} {{ teacher.last_name }}</span>
+                                        <span class="faculty-person-subtitle">Faculty profile</span>
+                                    </span>
+                                </a>
+                            </td>
+
+                            <td class="text-center">
+                                <div class="faculty-course-list">
+                                    {% for course in teacher.courses.all %}
+                                        <span class="faculty-tag">{{ course.name }}</span>
+                                    {% empty %}
+                                        <span class="faculty-tag faculty-tag--muted">No department</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+
+                            <td class="text-center">
+                                {% if teacher.education_level == "BASIC" %}
+                                    <span class="faculty-tag">Basic Education</span>
+                                {% else %}
+                                    <span class="faculty-tag">College</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {% if teacher.specialization %}
+                                    <span class="faculty-tag faculty-tag--specialty">{{ teacher.specialization }}</span>
+                                {% else %}
+                                    <span class="faculty-tag faculty-tag--muted">Not specified</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                <span class="faculty-number">{{ teacher.total_evaluations|default:0 }}</span>
+                            </td>
+
+                            <td class="text-center">
+                                <div>
+                                    {% if teacher.average_rating %}
+                                        <span class="faculty-rating">
+                                            <span class="material-icons">star</span>
+                                            {{ teacher.average_rating|floatformat:2 }}
+                                        </span>
+                                    {% else %}
+                                        <span class="faculty-rating faculty-rating-empty">No rating</span>
+                                    {% endif %}
+                                </div>
+                                <button
+                                    type="button"
+                                    class="faculty-section-rating-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#ratingModal{{ teacher.id }}">
+                                    <span class="material-icons-outlined">bar_chart</span>
+                                    Section ratings
+                                </button>
+                            </td>
+
+                            <td class="text-center">
+                                <div class="dropdown faculty-dropdown">
+                                    <button
+                                        type="button"
+                                        class="faculty-action-btn dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        data-bs-display="static"
+                                        aria-label="Actions for {{ teacher.first_name }} {{ teacher.last_name }}"
+                                        aria-expanded="false">
+                                        <span class="material-icons">more_horiz</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a href="{% url 'teacher_detail' teacher.id %}" class="dropdown-item">
+                                                <span class="material-icons-outlined">visibility</span>
+                                                View profile
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editTeacherModal{{ teacher.id }}">
+                                                <span class="material-icons-outlined">edit</span>
+                                                Edit faculty
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item text-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#confirmDeleteTeacherModal{{ teacher.id }}">
+                                                <span class="material-icons-outlined">delete</span>
+                                                Delete faculty
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="faculty-empty">
+                                <div class="faculty-empty-icon">
+                                    <span class="material-icons-outlined">group_off</span>
+                                </div>
+                                <h3>No faculty members yet</h3>
+                                <p>Add a faculty member to get started.</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Mobile faculty cards -->
+    <section id="teachers-mobile" class="faculty-mobile-list d-md-none">
+        {% if teachers %}
+            {% for teacher in teachers %}
+                {% if teacher.id %}
+                <article
+                    class="faculty-mobile-card"
+                    data-teacher-id="{{ teacher.id }}"
+                    data-education-level="{{ teacher.education_level|default:'COLLEGE' }}"
+                >
+                    <div class="faculty-mobile-top">
+                        <div class="faculty-mobile-identity">
+                            <span class="faculty-avatar">
+                                {{ teacher.first_name|slice:":1" }}{{ teacher.last_name|slice:":1" }}
+                            </span>
+                            <div class="min-w-0 flex-grow-1">
+                                <a href="{% url 'teacher_detail' teacher.id %}"
+                                   class="faculty-person-name text-decoration-none">
+                                    {{ teacher.first_name }} {{ teacher.last_name }}
+                                </a>
+                                <span class="faculty-person-subtitle">Faculty profile</span>
+                            </div>
+                        </div>
+
+                        <div class="dropdown faculty-dropdown">
+                            <button type="button"
+                                class="faculty-action-btn dropdown-toggle"
+                                data-bs-toggle="dropdown"
+                                data-bs-display="static"
+                                aria-label="Actions for {{ teacher.first_name }} {{ teacher.last_name }}"
+                                aria-expanded="false">
+                                <span class="material-icons">more_horiz</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a href="{% url 'teacher_detail' teacher.id %}" class="dropdown-item">
+                                        <span class="material-icons-outlined">visibility</span>
+                                        View profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editTeacherModal{{ teacher.id }}">
+                                        <span class="material-icons-outlined">edit</span>
+                                        Edit faculty
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item text-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#confirmDeleteTeacherModal{{ teacher.id }}">
+                                        <span class="material-icons-outlined">delete</span>
+                                        Delete faculty
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="faculty-mobile-details">
+                        <div class="faculty-mobile-detail-label">Department</div>
+                        <div class="faculty-mobile-tags">
+                            {% for course in teacher.courses.all %}
+                                <span class="faculty-tag">{{ course.name }}</span>
+                            {% empty %}
+                                <span class="faculty-tag faculty-tag--muted">No department</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="faculty-mobile-detail-label mt-3">Specialization</div>
+                        <div class="faculty-mobile-tags">
+                            {% if teacher.specialization %}
+                                <span class="faculty-tag faculty-tag--specialty">{{ teacher.specialization }}</span>
+                            {% else %}
+                                <span class="faculty-tag faculty-tag--muted">Not specified</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="faculty-mobile-stats">
+                        <div class="faculty-mobile-stat">
+                            <span class="faculty-mobile-stat-label">Evaluations</span>
+                            <span class="faculty-mobile-stat-value">{{ teacher.total_evaluations|default:0 }}</span>
+                        </div>
+                        <div class="faculty-mobile-stat">
+                            <span class="faculty-mobile-stat-label">Average rating</span>
+                            <span class="faculty-mobile-stat-value">
+                                {% if teacher.average_rating %}
+                                    {{ teacher.average_rating|floatformat:2 }} <span style="color:#d49b20;">★</span>
+                                {% else %}
+                                    <span style="color:#98a1b1;font-size:13px;">No rating</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="faculty-mobile-actions">
+                        <button type="button"
+                            class="faculty-section-rating-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#ratingModal{{ teacher.id }}">
+                            <span class="material-icons-outlined">bar_chart</span>
+                            View section ratings
+                        </button>
+                    </div>
+                </article>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="faculty-empty">
+                <div class="faculty-empty-icon">
+                    <span class="material-icons-outlined">group_off</span>
+                </div>
+                <h3>No faculty members yet</h3>
+                <p>Add a faculty member to get started.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+
+<!-- Add faculty modal -->
+<div class="modal fade faculty-page" id="addTeacherModal" tabindex="-1"
+    aria-labelledby="addTeacherModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <form method="POST" action="{% url 'teacher_add' %}" class="modal-content">
+            {% csrf_token %}
+
+            <div class="modal-header border-0">
+                <div>
+                    <h5 class="modal-title" id="addTeacherModalTitle">Add faculty member</h5>
+                    <p class="small text-muted mb-0 mt-1">Enter the faculty member's details.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label for="addFirstName" class="form-label">First name</label>
+                        <input id="addFirstName" name="first_name" class="form-control"
+                            placeholder="e.g. John" autocomplete="given-name">
+                    </div>
+                    <div class="col-6">
+                        <label for="addLastName" class="form-label">Last name</label>
+                        <input id="addLastName" name="last_name" class="form-control"
+                            placeholder="e.g. Doe" autocomplete="family-name">
+                    </div>
+                    
+                    <div class="col-12">
+                        <label for="addEducationLevel" class="form-label">
+                            Division
+                        </label>
+                        <select
+                            id="addEducationLevel"
+                            name="education_level"
+                            class="form-select"
+                            required
+                        >
+                            <option value="COLLEGE" selected>College</option>
+                            <option value="BASIC">Basic Education</option>
+                        </select>
+                        <div class="form-text">
+                            Choose the division where this faculty member teaches.
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Department / Courses</label>
+                        <div class="faculty-course-options">
+                            {% for course in courses %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="courses"
+                                    value="{{ course.id }}" id="addCourse{{ course.id }}">
+                                <label class="form-check-label" for="addCourse{{ course.id }}">
+                                    {{ course.name }}
+                                </label>
+                            </div>
+                            {% empty %}
+                            <p class="small text-muted mb-0">No courses are available yet.</p>
+                            {% endfor %}
+                        </div>
+                        <div class="form-text">Select all applicable courses.</div>
+                    </div>
+                    <div class="col-12">
+                        <label for="addSpecialization" class="form-label">Specialization</label>
+                        <input id="addSpecialization" name="specialization" class="form-control"
+                            placeholder="e.g. Physical Education">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary px-4">
+                    <span class="material-icons-outlined me-1" style="font-size:17px;">person_add</span>
+                    Save faculty
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit faculty modals -->
+{% for teacher in teachers %}
+    {% if teacher.id %}
+    <div class="modal fade faculty-page" id="editTeacherModal{{ teacher.id }}" tabindex="-1"
+        aria-labelledby="editTeacherModalTitle{{ teacher.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <form method="POST" action="{% url 'teacher_edit' teacher.id %}" class="modal-content">
+                {% csrf_token %}
+
+                <div class="modal-header border-0">
+                    <div>
+                        <h5 class="modal-title" id="editTeacherModalTitle{{ teacher.id }}">Edit faculty member</h5>
+                        <p class="small text-muted mb-0 mt-1">Update faculty information and course assignments.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label for="editFirstName{{ teacher.id }}" class="form-label">First name</label>
+                            <input id="editFirstName{{ teacher.id }}" name="first_name"
+                                value="{{ teacher.first_name }}" class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label for="editLastName{{ teacher.id }}" class="form-label">Last name</label>
+                            <input id="editLastName{{ teacher.id }}" name="last_name"
+                                value="{{ teacher.last_name }}" class="form-control">
+                        </div>
+                        
+                        <div class="col-12">
+                            <label
+                                for="editEducationLevel{{ teacher.id }}"
+                                class="form-label"
+                            >
+                                Division
+                            </label>
+                            <select
+                                id="editEducationLevel{{ teacher.id }}"
+                                name="education_level"
+                                class="form-select"
+                                required
+                            >
+                                <option
+                                    value="COLLEGE"
+                                    {% if teacher.education_level == "COLLEGE" %}selected{% endif %}
+                                >
+                                    College
+                                </option>
+                                <option
+                                    value="BASIC"
+                                    {% if teacher.education_level == "BASIC" %}selected{% endif %}
+                                >
+                                    Basic Education
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Department / Courses</label>
+                            <div class="faculty-course-options">
+                                {% for course in courses %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="courses"
+                                        value="{{ course.id }}"
+                                        id="editCourse{{ teacher.id }}{{ course.id }}"
+                                        {% if course in teacher.courses.all %}checked{% endif %}>
+                                    <label class="form-check-label"
+                                        for="editCourse{{ teacher.id }}{{ course.id }}">
+                                        {{ course.name }}
+                                    </label>
+                                </div>
+                                {% empty %}
+                                <p class="small text-muted mb-0">No courses are available yet.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label for="editSpecialization{{ teacher.id }}" class="form-label">Specialization</label>
+                            <input id="editSpecialization{{ teacher.id }}" name="specialization"
+                                value="{{ teacher.specialization }}" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <span class="material-icons-outlined me-1" style="font-size:17px;">save</span>
+                        Save changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+<!-- Delete confirmation modals -->
+{% for teacher in teachers %}
+    {% if teacher.id %}
+    <div class="modal fade faculty-page" id="confirmDeleteTeacherModal{{ teacher.id }}" tabindex="-1"
+        aria-labelledby="deleteTeacherTitle{{ teacher.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form method="POST" action="{% url 'teacher_delete' teacher.id %}" class="modal-content">
+                {% csrf_token %}
+                <div class="modal-header border-0">
+                    <div>
+                        <h5 class="modal-title text-danger" id="deleteTeacherTitle{{ teacher.id }}">Delete faculty member?</h5>
+                        <p class="small text-muted mb-0 mt-1">This action cannot be undone.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0 text-secondary">
+                        Are you sure you want to delete
+                        <strong>{{ teacher.first_name }} {{ teacher.last_name }}</strong>?
+                    </p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger px-4">
+                        <span class="material-icons-outlined me-1" style="font-size:17px;">delete</span>
+                        Delete faculty
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+<!-- URL helper used by the search results -->
+<div id="faculty-url-helper"
+    data-teacher-url="{% url 'teacher_detail' 0 %}"
+    hidden></div>
+
+<!-- Search and sorting -->
+<script>
+(function () {
+    "use strict";
+
+    const searchInput = document.getElementById("teacher-search");
+    const clearButton = document.getElementById("teacher-search-clear");
+    const filterSelect = document.getElementById("teacher-filter");
+    const tableBody = document.getElementById("teachers-table-body");
+    const mobileContainer = document.getElementById("teachers-mobile");
+    const loadingIndicator = document.getElementById("faculty-loading");
+    const countLabel = document.getElementById("faculty-count");
+    const resultsLabel = document.getElementById("faculty-results-label");
+    const urlHelper = document.getElementById("faculty-url-helper");
+
+    const divisionTabs = document.querySelectorAll(".faculty-division-tab");
+    const divisionCountAll = document.getElementById("division-count-all");
+    const divisionCountCollege = document.getElementById("division-count-college");
+    const divisionCountBasic = document.getElementById("division-count-basic");
+
+
+    let selectedDivision = "ALL";
+    let latestTeachers = null;
+
+    if (!searchInput || !filterSelect || !tableBody || !mobileContainer || !urlHelper) {
+        return;
+    }
+
+    const baseUrl = urlHelper.dataset.teacherUrl;
+    let debounceTimer = null;
+    let activeController = null;
+    let requestNumber = 0;
+
+    function showToastSafely(message, type) {
+        if (typeof window.showToast === "function") {
+            window.showToast(message, type || "error");
+        } else {
+            console.error(message);
+        }
+    }
+
+    function escapeHTML(value) {
+        return String(value ?? "").replace(/[&<>"']/g, function (character) {
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            }[character];
+        });
+    }
+
+    function getInitials(teacher) {
+        return escapeHTML(
+            (teacher.first_name?.charAt(0) || "") +
+            (teacher.last_name?.charAt(0) || "")
+        );
+    }
+
+    function detailUrl(id) {
+        const encodedId = encodeURIComponent(String(id));
+    
+        // Replace the placeholder ID wherever it appears as a URL path segment.
+        const generatedUrl = baseUrl.replace(
+            /\/0(?=\/|$)/,
+            `/${encodedId}`
+        );
+    
+        // Prevent navigating to a URL that still contains the placeholder.
+        if (generatedUrl === baseUrl && /\/0(?=\/|$)/.test(baseUrl)) {
+            console.error("Could not generate faculty detail URL:", baseUrl);
+            return "#";
+        }
+    
+        return generatedUrl;
+    }
+
+
+    function teacherName(teacher) {
+        return escapeHTML(
+            [teacher.first_name, teacher.last_name].filter(Boolean).join(" ") || "Unnamed faculty"
+        );
+    }
+
+    function courseNames(teacher) {
+        return Array.isArray(teacher.courses)
+            ? teacher.courses.map(course => {
+                if (typeof course === "string") return course;
+                return course.name || course.title || "";
+            }).filter(Boolean)
+            : [];
+    }
+
+    function courseTags(teacher) {
+        const courses = courseNames(teacher);
+
+        if (!courses.length) {
+            return '<span class="faculty-tag faculty-tag--muted">No department</span>';
+        }
+
+        return courses.map(course =>
+            `<span class="faculty-tag">${escapeHTML(course)}</span>`
+        ).join("");
+    }
+
+    function specializationTag(teacher) {
+        return teacher.specialization
+            ? `<span class="faculty-tag faculty-tag--specialty">${escapeHTML(teacher.specialization)}</span>`
+            : '<span class="faculty-tag faculty-tag--muted">Not specified</span>';
+    }
+
+    function ratingValue(teacher) {
+        const value = Number(teacher.average_rating);
+        return Number.isFinite(value) ? value : 0;
+    }
+
+    function evaluationValue(teacher) {
+        const value = Number(teacher.total_evaluations);
+        return Number.isFinite(value) ? value : 0;
+    }
+
+    function ratingMarkup(teacher) {
+        const rating = ratingValue(teacher);
+
+        return rating > 0
+            ? `<span class="faculty-rating"><span class="material-icons">star</span>${rating.toFixed(2)}</span>`
+            : '<span class="faculty-rating faculty-rating-empty">No rating</span>';
+    }
+
+    function emptyState() {
+        return `
+            <div class="faculty-empty">
+                <div class="faculty-empty-icon">
+                    <span class="material-icons-outlined">person_search</span>
+                </div>
+                <h3>No faculty members found</h3>
+                <p>Try another search term or change the sorting option.</p>
+            </div>
+        `;
+    }
+
+    function desktopRow(teacher) {
+        const name = teacherName(teacher);
+        const url = escapeHTML(detailUrl(teacher.id));
+        const id = escapeHTML(teacher.id);
+        const evaluations = evaluationValue(teacher);
+
+        return `
+            <tr
+                data-teacher-id="${id}"
+                data-education-level="${escapeHTML(
+                    String(teacher.education_level || "COLLEGE").toUpperCase()
+                )}"
+            >
+                <td>
+                    <a href="${url}" class="faculty-person">
+                        <span class="faculty-avatar">${getInitials(teacher)}</span>
+                        <span class="min-w-0">
+                            <span class="faculty-person-name">${name}</span>
+                            <span class="faculty-person-subtitle">Faculty profile</span>
+                        </span>
+                    </a>
+                </td>
+                <td class="text-center">
+                    <div class="faculty-course-list">${courseTags(teacher)}</div>
+                </td>
+                <td class="text-center">${specializationTag(teacher)}</td>
+                <td class="text-center"><span class="faculty-number">${evaluations}</span></td>
+                <td class="text-center">
+                    <div>${ratingMarkup(teacher)}</div>
+                    <button type="button" class="faculty-section-rating-btn"
+                        data-bs-toggle="modal" data-bs-target="#ratingModal${id}">
+                        <span class="material-icons-outlined">bar_chart</span>
+                        Section ratings
+                    </button>
+                </td>
+                <td class="text-center">
+                    <div class="dropdown faculty-dropdown">
+                        <button type="button" class="faculty-action-btn dropdown-toggle"
+                            data-bs-toggle="dropdown" data-bs-display="static"
+                            aria-label="Actions for ${name}">
+                            <span class="material-icons">more_horiz</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a href="${url}" class="dropdown-item">
+                                <span class="material-icons-outlined">visibility</span>View profile
+                            </a></li>
+                            <li><button type="button" class="dropdown-item"
+                                data-bs-toggle="modal" data-bs-target="#editTeacherModal${id}">
+                                <span class="material-icons-outlined">edit</span>Edit faculty
+                            </button></li>
+                            <li><button type="button" class="dropdown-item text-danger"
+                                data-bs-toggle="modal" data-bs-target="#confirmDeleteTeacherModal${id}">
+                                <span class="material-icons-outlined">delete</span>Delete faculty
+                            </button></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    function mobileCard(teacher) {
+        const name = teacherName(teacher);
+        const url = escapeHTML(detailUrl(teacher.id));
+        const id = escapeHTML(teacher.id);
+        const evaluations = evaluationValue(teacher);
+        const rating = ratingValue(teacher);
+        const ratingText = rating > 0
+            ? `${rating.toFixed(2)} <span style="color:#d49b20;">★</span>`
+            : '<span style="color:#98a1b1;font-size:13px;">No rating</span>';
+
+        return `
+            <article
+                class="faculty-mobile-card"
+                data-teacher-id="${id}"
+                data-education-level="${escapeHTML(
+                    String(teacher.education_level || "COLLEGE").toUpperCase()
+                )}"
+            >
+                <div class="faculty-mobile-top">
+                    <div class="faculty-mobile-identity">
+                        <span class="faculty-avatar">${getInitials(teacher)}</span>
+                        <div class="min-w-0 flex-grow-1">
+                            <a href="${url}" class="faculty-person-name text-decoration-none">${name}</a>
+                            <span class="faculty-person-subtitle">Faculty profile</span>
+                        </div>
+                    </div>
+
+                    <div class="dropdown faculty-dropdown">
+                        <button type="button" class="faculty-action-btn dropdown-toggle"
+                            data-bs-toggle="dropdown" data-bs-display="static"
+                            aria-label="Actions for ${name}">
+                            <span class="material-icons">more_horiz</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a href="${url}" class="dropdown-item">
+                                <span class="material-icons-outlined">visibility</span>View profile
+                            </a></li>
+                            <li><button type="button" class="dropdown-item"
+                                data-bs-toggle="modal" data-bs-target="#editTeacherModal${id}">
+                                <span class="material-icons-outlined">edit</span>Edit faculty
+                            </button></li>
+                            <li><button type="button" class="dropdown-item text-danger"
+                                data-bs-toggle="modal" data-bs-target="#confirmDeleteTeacherModal${id}">
+                                <span class="material-icons-outlined">delete</span>Delete faculty
+                            </button></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faculty-mobile-details">
+                    <div class="faculty-mobile-detail-label">Department</div>
+                    <div class="faculty-mobile-tags">${courseTags(teacher)}</div>
+                    <div class="faculty-mobile-detail-label mt-3">Specialization</div>
+                    <div class="faculty-mobile-tags">${specializationTag(teacher)}</div>
+                </div>
+
+                <div class="faculty-mobile-stats">
+                    <div class="faculty-mobile-stat">
+                        <span class="faculty-mobile-stat-label">Evaluations</span>
+                        <span class="faculty-mobile-stat-value">${evaluations}</span>
+                    </div>
+                    <div class="faculty-mobile-stat">
+                        <span class="faculty-mobile-stat-label">Average rating</span>
+                        <span class="faculty-mobile-stat-value">${ratingText}</span>
+                    </div>
+                </div>
+
+                <div class="faculty-mobile-actions">
+                    <button type="button" class="faculty-section-rating-btn"
+                        data-bs-toggle="modal" data-bs-target="#ratingModal${id}">
+                        <span class="material-icons-outlined">bar_chart</span>
+                        View section ratings
+                    </button>
+                </div>
+            </article>
+        `;
+    }
+
+    function updateCount(count) {
+        countLabel.textContent = `${count} faculty member${count === 1 ? "" : "s"}`;
+        resultsLabel.textContent = searchInput.value.trim()
+            ? `Search results (${count})`
+            : `Faculty directory (${count})`;
+    }
+
+    
+function matchesDivision(teacher) {
+    if (selectedDivision === "ALL") return true;
+
+    const level = String(teacher.education_level || "COLLEGE").toUpperCase();
+    return level === selectedDivision;
+}
+
+function updateDivisionCounts(teachers) {
+    const all = teachers.length;
+    const college = teachers.filter(teacher =>
+        String(teacher.education_level || "COLLEGE").toUpperCase() === "COLLEGE"
+    ).length;
+    const basic = teachers.filter(teacher =>
+        String(teacher.education_level || "COLLEGE").toUpperCase() === "BASIC"
+    ).length;
+
+    divisionCountAll.textContent = all;
+    divisionCountCollege.textContent = college;
+    divisionCountBasic.textContent = basic;
+}
+
+function filterInitialFaculty() {
+    const rows = document.querySelectorAll(
+        "#teachers-table-body tr[data-teacher-id]"
+    );
+    const cards = document.querySelectorAll(
+        "#teachers-mobile .faculty-mobile-card[data-teacher-id]"
+    );
+
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const level = String(
+            row.dataset.educationLevel || "COLLEGE"
+        ).toUpperCase();
+
+        const visible =
+            selectedDivision === "ALL" || level === selectedDivision;
+
+        row.hidden = !visible;
+        if (visible) visibleCount++;
+    });
+
+    cards.forEach(card => {
+        const level = String(
+            card.dataset.educationLevel || "COLLEGE"
+        ).toUpperCase();
+
+        card.hidden =
+            selectedDivision !== "ALL" && level !== selectedDivision;
+    });
+
+    const hasRows = rows.length > 0;
+
+    if (hasRows && visibleCount === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7">${emptyState()}</td>
+            </tr>
+        `;
+    }
+
+    updateCount(visibleCount);
+}
+
+function applyDivisionFilter() {
+    divisionTabs.forEach(tab => {
+        const active = tab.dataset.division === selectedDivision;
+
+        tab.classList.toggle("is-active", active);
+        tab.setAttribute("aria-pressed", String(active));
+    });
+
+    if (latestTeachers !== null) {
+        renderTeachers({ teachers: latestTeachers });
+    } else {
+        filterInitialFaculty();
+    }
+}
+
+
+    
+    function renderTeachers(data) {
+        latestTeachers = Array.isArray(data.teachers) ? data.teachers : [];
+
+        updateDivisionCounts(latestTeachers);
+
+        const teachers = latestTeachers.filter(matchesDivision);
+
+        if (!teachers.length) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7">${emptyState()}</td>
+                </tr>
+            `;
+
+            mobileContainer.innerHTML = emptyState();
+            updateCount(0);
+            return;
+        }
+
+        tableBody.innerHTML = teachers.map(desktopRow).join("");
+        mobileContainer.innerHTML = teachers.map(mobileCard).join("");
+
+        updateCount(teachers.length);
+    }
+
+
+    function setLoading(isLoading) {
+        loadingIndicator.classList.toggle("is-visible", isLoading);
+        searchInput.setAttribute("aria-busy", String(isLoading));
+    }
+
+    function fetchTeachers() {
+        const query = searchInput.value.trim();
+        const filter = filterSelect.value;
+        const currentRequest = ++requestNumber;
+
+        if (activeController) activeController.abort();
+        activeController = new AbortController();
+
+        setLoading(true);
+        clearButton.style.display = query ? "inline-flex" : "none";
+
+        fetch(`/teachers/search/?q=${encodeURIComponent(query)}&filter=${encodeURIComponent(filter)}`, {
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            signal: activeController.signal
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Unable to load faculty search results.");
+            return response.json();
+        })
+        .then(data => {
+            if (currentRequest !== requestNumber) return;
+
+            if (!data || !Array.isArray(data.teachers)) {
+                throw new Error("The faculty search response has an unexpected format.");
+            }
+
+            renderTeachers(data);
+        })
+        .catch(error => {
+            if (error.name === "AbortError") return;
+            console.error("Faculty search error:", error);
+            showToastSafely("Unable to search faculty. Please try again.", "error");
+        })
+        .finally(() => {
+            if (currentRequest === requestNumber) setLoading(false);
+        });
+    }
+
+    searchInput.addEventListener("input", function () {
+        clearButton.style.display = searchInput.value.trim() ? "inline-flex" : "none";
+        window.clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(fetchTeachers, 300);
+    });
+
+    clearButton.addEventListener("click", function () {
+        searchInput.value = "";
+        clearButton.style.display = "none";
+        searchInput.focus();
+        window.clearTimeout(debounceTimer);
+        fetchTeachers();
+    });
+
+    filterSelect.addEventListener("change", fetchTeachers);
+
+    divisionTabs.forEach(tab => {
+    tab.addEventListener("click", function () {
+        const division = this.dataset.division;
+
+        if (selectedDivision === division) return;
+
+        selectedDivision = division;
+        applyDivisionFilter();
+    });
+});
+
+    clearButton.style.display = "none";
+})();
+</script>
+
+<!-- Section rating modals -->
+{% for teacher in teachers %}
+    {% if teacher.id %}
+        {% include "admins/partials/rating_modal.html" with teacher=teacher sections=sections %}
+    {% endif %}
+{% endfor %}
+
+{% endblock %}
+

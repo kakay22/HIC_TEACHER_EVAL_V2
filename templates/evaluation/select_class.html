@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Evaluate Classes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+<div class="max-w-5xl mx-auto py-12 px-6">
+
+    <!-- HEADER -->
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-bold tracking-tight">Evaluate Your Classes</h1>
+        <p class="text-gray-500 mt-2">Select your class step by step</p>
+    </div>
+
+    <!-- STEP INDICATOR -->
+    <div class="flex justify-center mb-10 gap-4 text-sm">
+        <span id="indicator1" class="px-3 py-1 rounded-full bg-blue-600 text-white">Course</span>
+        <span id="indicator2" class="px-3 py-1 rounded-full bg-gray-200">Subject</span>
+        <span id="indicator3" class="px-3 py-1 rounded-full bg-gray-200">Year</span>
+        <span id="indicator4" class="px-3 py-1 rounded-full bg-gray-200">Teacher</span>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="step1">
+        <h2 class="text-lg font-semibold mb-4">Select Course</h2>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {% for course in courses %}
+            <div class="course-card group bg-white p-6 rounded-2xl border cursor-pointer transition hover:shadow-lg hover:-translate-y-1"
+                 data-id="{{ course.id }}">
+                <h3 class="font-semibold text-lg group-hover:text-blue-600 transition">
+                    {{ course.name }}
+                </h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" class="hidden mt-10 fade-in">
+        <h2 class="text-lg font-semibold mb-4">Select Subject</h2>
+        <div id="subjectContainer" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" class="hidden mt-10 fade-in">
+        <h2 class="text-lg font-semibold mb-4">Select Year Level</h2>
+        <div id="yearContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-5"></div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div id="step4" class="hidden mt-10 fade-in">
+        <h2 class="text-lg font-semibold mb-4">Select Teacher</h2>
+        <div id="teacherContainer" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </div>
+
+</div>
+
+<script>
+const subjects = {{ subjects_mapping|safe }};
+const years = {{ years_mapping|safe }};
+const teachers = {{ teachers_mapping|safe }};
+
+let selectedCourse, selectedSubject, selectedYear;
+
+// STEP INDICATOR FUNCTION
+function updateStep(step) {
+    const ids = ['indicator1','indicator2','indicator3','indicator4'];
+
+    ids.forEach((id, index) => {
+        const el = document.getElementById(id);
+        if (index < step) {
+            el.className = "px-3 py-1 rounded-full bg-blue-600 text-white";
+        } else {
+            el.className = "px-3 py-1 rounded-full bg-gray-200";
+        }
+    });
+}
+
+// STEP 1
+document.querySelectorAll('.course-card').forEach(card => {
+    card.onclick = () => {
+
+        document.querySelectorAll('.course-card').forEach(c => c.classList.remove('ring-2','ring-blue-500'));
+        card.classList.add('ring-2','ring-blue-500');
+
+        selectedCourse = card.dataset.id;
+
+        const container = document.getElementById('subjectContainer');
+        container.innerHTML = '';
+
+        subjects[selectedCourse]?.forEach(s => {
+            const div = document.createElement('div');
+            div.className = "subject-card bg-white p-6 rounded-2xl border cursor-pointer hover:shadow-md transition";
+            div.dataset.id = s.id;
+            div.innerHTML = `<h3 class="font-medium">${s.name}</h3>`;
+            container.appendChild(div);
+        });
+
+        document.getElementById('step2').classList.remove('hidden');
+        document.getElementById('step3').classList.add('hidden');
+        document.getElementById('step4').classList.add('hidden');
+
+        updateStep(1);
+    };
+});
+
+// STEP 2
+document.getElementById('subjectContainer').onclick = (e) => {
+    const card = e.target.closest('.subject-card');
+    if (!card) return;
+
+    document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('ring-2','ring-green-500'));
+    card.classList.add('ring-2','ring-green-500');
+
+    selectedSubject = card.dataset.id;
+
+    const key = selectedCourse + "_" + selectedSubject;
+    const container = document.getElementById('yearContainer');
+    container.innerHTML = '';
+
+    years[key]?.forEach(y => {
+        const div = document.createElement('div');
+        div.className = "year-card bg-white p-6 rounded-2xl border text-center cursor-pointer hover:shadow-md transition";
+        div.dataset.id = y;
+        div.innerHTML = `<h3 class="font-semibold">Year ${y}</h3>`;
+        container.appendChild(div);
+    });
+
+    document.getElementById('step3').classList.remove('hidden');
+    document.getElementById('step4').classList.add('hidden');
+
+    updateStep(2);
+};
+
+// STEP 3
+document.getElementById('yearContainer').onclick = (e) => {
+    const card = e.target.closest('.year-card');
+    if (!card) return;
+
+    document.querySelectorAll('.year-card').forEach(c => c.classList.remove('ring-2','ring-yellow-500'));
+    card.classList.add('ring-2','ring-yellow-500');
+
+    selectedYear = card.dataset.id;
+
+    const key = selectedCourse + "_" + selectedSubject + "_" + selectedYear;
+    const container = document.getElementById('teacherContainer');
+    container.innerHTML = '';
+
+    teachers[key]?.forEach(t => {
+        const div = document.createElement('div');
+        div.className = "bg-white p-6 rounded-2xl border hover:shadow-lg transition flex flex-col gap-3";
+
+        div.innerHTML = `
+            <div class="flex items-center gap-3">
+                <img src="https://ui-avatars.com/api/?name=${t.name}&background=4F46E5&color=fff"
+                     class="w-12 h-12 rounded-full">
+                <div>
+                    <p class="font-semibold">${t.name}</p>
+                    <p class="text-sm text-gray-500">Year ${selectedYear}</p>
+                </div>
+            </div>
+
+            <a href="/home/?teacher=${t.id}&course=${selectedCourse}&subject=${selectedSubject}&year=${selectedYear}"
+               class="mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-center transition">
+               Evaluate
+            </a>
+        `;
+
+        container.appendChild(div);
+    });
+
+    document.getElementById('step4').classList.remove('hidden');
+
+    updateStep(3);
+};
+</script>
+
+</body>
+</html>
