@@ -1,8 +1,8 @@
+
 {% load static %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,7 +14,8 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Material Icons -->
+    <!-- Fonts and Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
@@ -32,6 +33,9 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"]
+                    },
                     colors: {
                         hic: {
                             ink: "#172033",
@@ -69,6 +73,7 @@
         html {
             min-height: 100%;
             background: var(--hic-canvas);
+            scroll-behavior: smooth;
         }
 
         body {
@@ -81,15 +86,11 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        button,
-        input,
-        select,
-        textarea {
+        button, input, select, textarea {
             font: inherit;
         }
 
-        button,
-        a {
+        button, a {
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -110,6 +111,7 @@
             min-height: 100vh;
         }
 
+        /* Desktop sidebar */
         .app-sidebar {
             width: var(--sidebar-width);
             flex: 0 0 var(--sidebar-width);
@@ -135,15 +137,17 @@
             padding-inline: 0;
         }
 
-        .app-sidebar.is-collapsed .sidebar-link .material-icons-outlined {
+        .app-sidebar.is-collapsed .sidebar-link .material-icons-outlined,
+        .app-sidebar.is-collapsed .sidebar-link .material-icons {
             margin: 0;
         }
 
         .sidebar-link {
-            min-height: 44px;
+            position: relative;
             display: flex;
             align-items: center;
             gap: 12px;
+            min-height: 44px;
             padding: 10px 12px;
             border-radius: 10px;
             color: #596579;
@@ -154,8 +158,8 @@
 
         .sidebar-link .material-icons-outlined,
         .sidebar-link .material-icons {
-            font-size: 21px;
             flex: 0 0 22px;
+            font-size: 21px;
         }
 
         .sidebar-link:hover {
@@ -183,17 +187,17 @@
             position: absolute;
             left: calc(100% + 10px);
             top: 50%;
-            transform: translateY(-50%);
             z-index: 100;
+            padding: 6px 9px;
             border-radius: 7px;
             background: #172033;
-            color: white;
-            padding: 6px 9px;
+            color: #fff;
             font-size: 12px;
             white-space: nowrap;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
+            transform: translateY(-50%);
         }
 
         .app-sidebar.is-collapsed .sidebar-link:hover .sidebar-tooltip {
@@ -220,72 +224,258 @@
             padding: 26px 28px 40px;
         }
 
-        .mobile-bottom-nav {
-            padding-bottom: max(6px, env(safe-area-inset-bottom));
-            background: rgba(255, 255, 255, .96);
-            border: 1px solid rgba(231, 235, 241, .95);
-            box-shadow: 0 8px 30px rgba(23, 32, 51, .12);
-            backdrop-filter: blur(18px);
-        }
-
-        .mobile-nav-link {
-            display: flex;
-            min-width: 0;
-            flex: 1;
-            min-height: 52px;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-            border-radius: 10px;
-            color: #778195;
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .mobile-nav-link .material-icons,
-        .mobile-nav-link .material-icons-outlined {
-            font-size: 22px;
-            line-height: 1;
-        }
-
-        .mobile-nav-link.is-active {
-            color: #2457c5;
-            background: #edf3ff;
-        }
-
-        .more-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            color: #344054;
-            font-size: 14px;
-        }
-
-        .more-menu-item:hover {
-            background: #f6f8fb;
-            color: #2457c5;
-        }
-
+        /* Mobile drawer */
         .mobile-drawer-backdrop {
             background: rgba(15, 23, 42, .42);
             backdrop-filter: blur(2px);
         }
 
-        .mobile-drawer {
-            padding-bottom: max(16px, env(safe-area-inset-bottom));
+        @media (max-width: 767.98px) {
+            .app-sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                width: min(300px, 86vw);
+                flex-basis: auto;
+                transform: translateX(-105%);
+                box-shadow: 20px 0 50px rgba(15, 23, 42, .12);
+            }
+
+            .app-sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .app-sidebar.is-collapsed {
+                width: min(300px, 86vw);
+            }
+
+            .app-sidebar.is-collapsed .sidebar-copy,
+            .app-sidebar.is-collapsed .brand-copy,
+            .app-sidebar.is-collapsed .nav-section-label {
+                display: initial;
+            }
+
+            .app-sidebar.is-collapsed .sidebar-link {
+                justify-content: flex-start;
+                padding: 10px 12px;
+            }
+
+            .app-sidebar.is-collapsed .sidebar-tooltip {
+                display: none;
+            }
+
+            .page-content {
+                padding: 18px 14px calc(112px + env(safe-area-inset-bottom));
+            }
+
+            .app-topbar {
+                min-height: 62px;
+            }
         }
 
-        .modal-content {
+        @media (min-width: 768px) {
+            #mobileDrawerBackdrop {
+                display: none !important;
+            }
+        }
+
+        /* ==========================================
+           Native-style mobile app navigation
+        ========================================== */
+
+        .mobile-bottom-nav {
+            position: fixed;
+            inset: auto 0 0;
+            z-index: 50;
+            display: flex;
+            align-items: stretch;
+            gap: 3px;
+            padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+            border-top: 1px solid #e7ebf1;
+            background: rgba(255, 255, 255, .97);
+            box-shadow: 0 -8px 30px rgba(15, 23, 42, .055);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .mobile-nav-link {
+            position: relative;
+            display: flex;
+            flex: 1 1 0;
+            min-width: 0;
+            min-height: 58px;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 4px;
+            padding: 3px 2px;
             border: 0;
-            border-radius: 18px;
-            overflow: hidden;
+            border-radius: 14px;
+            background: transparent;
+            color: #8791a2;
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 1.2;
+            text-decoration: none;
+            transition: color .18s ease, background .18s ease;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .modal-footer .btn,
-        .modal-header .btn-close {
-            box-shadow: none !important;
+        .mobile-nav-link > span:first-child {
+            display: flex;
+            width: 48px;
+            height: 29px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 23px;
+            transition: background .18s ease, color .18s ease;
+        }
+
+        .mobile-nav-link.is-active {
+            color: #2457c5;
+            font-weight: 700;
+        }
+
+        .mobile-nav-link.is-active > span:first-child {
+            background: #eaf0ff;
+            color: #2457c5;
+        }
+
+        .mobile-nav-link:active {
+            background: #f4f6fa;
+        }
+
+        .mobile-nav-link:focus-visible {
+            outline: 2px solid #2457c5;
+            outline-offset: -2px;
+        }
+
+        /* More sheet backdrop */
+        .mobile-more-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 70;
+            background: rgba(15, 23, 42, .38);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .2s ease, visibility .2s ease;
+        }
+
+        .mobile-more-backdrop.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* More options bottom sheet */
+        .mobile-more-sheet {
+            position: fixed;
+            inset: auto 0 0;
+            z-index: 80;
+            max-height: min(78dvh, 620px);
+            overflow-y: auto;
+            padding: 10px 20px calc(20px + env(safe-area-inset-bottom));
+            border-radius: 24px 24px 0 0;
+            background: #fff;
+            box-shadow: 0 -16px 50px rgba(15, 23, 42, .16);
+            transform: translateY(105%);
+            visibility: hidden;
+            transition: transform .26s cubic-bezier(.2, .8, .2, 1),
+                        visibility .26s ease;
+            overscroll-behavior: contain;
+        }
+
+        .mobile-more-sheet.is-open {
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .mobile-sheet-handle {
+            width: 38px;
+            height: 4px;
+            margin: 0 auto 18px;
+            border-radius: 999px;
+            background: #d9dee7;
+        }
+
+        .mobile-sheet-heading {
+            margin-bottom: 0;
+            color: #172033;
+            font-size: 18px;
+            font-weight: 750;
+            letter-spacing: -.025em;
+        }
+
+        .mobile-sheet-subtitle {
+            margin: 4px 0 0;
+            color: #8791a2;
+            font-size: 12px;
+            font-weight: 400;
+        }
+
+        .mobile-sheet-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .mobile-sheet-item {
+            display: flex;
+            min-width: 0;
+            min-height: 94px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 12px 5px;
+            border: 1px solid #edf0f5;
+            border-radius: 16px;
+            background: #fff;
+            color: #475467;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: background .15s ease, border-color .15s ease;
+        }
+
+        .mobile-sheet-item .material-icons-outlined,
+        .mobile-sheet-item .material-icons {
+            font-size: 25px;
+            color: #52617a;
+        }
+
+        .mobile-sheet-item:active {
+            background: #f4f6fa;
+        }
+
+        .mobile-sheet-logout {
+            display: flex;
+            width: 100%;
+            min-height: 48px;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 0;
+            border-radius: 12px;
+            background: #fff5f5;
+            color: #dc2626;
+            font-size: 14px;
+            font-weight: 650;
+            text-align: left;
+        }
+
+        .mobile-sheet-logout .material-icons-outlined {
+            font-size: 21px;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-bottom-nav,
+            .mobile-more-backdrop,
+            .mobile-more-sheet {
+                display: none !important;
+            }
         }
 
         /* ==========================================
@@ -299,14 +489,13 @@
             min-width: min(300px, calc(100vw - 28px));
             max-width: min(400px, calc(100vw - 28px));
             margin: 10px;
-            padding: 14px 14px;
+            padding: 14px;
             border: 1px solid #e7ebf1;
             border-radius: 16px;
             background: #fff;
             color: #172033;
-            box-shadow:
-                0 12px 32px rgba(15, 23, 42, .10),
-                0 3px 8px rgba(15, 23, 42, .035);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .10),
+                        0 3px 8px rgba(15, 23, 42, .035);
             font-family: Inter, ui-sans-serif, system-ui, sans-serif;
             font-size: 13px;
             font-weight: 500;
@@ -385,7 +574,6 @@
             color: #344054;
         }
 
-        /* Success */
         .hic-toast--success {
             border-color: #d1fae5 !important;
         }
@@ -395,7 +583,6 @@
             background: #dcfce7;
         }
 
-        /* Error */
         .hic-toast--error {
             border-color: #fee2e2 !important;
         }
@@ -405,7 +592,6 @@
             background: #fee2e2;
         }
 
-        /* Warning */
         .hic-toast--warning {
             border-color: #fef3c7 !important;
         }
@@ -415,7 +601,6 @@
             background: #fef3c7;
         }
 
-        /* Information */
         .hic-toast--info {
             border-color: #dbeafe !important;
         }
@@ -430,7 +615,6 @@
                 opacity: 0;
                 transform: translate3d(14px, -5px, 0) scale(.98);
             }
-
             to {
                 opacity: 1;
                 transform: translate3d(0, 0, 0) scale(1);
@@ -438,46 +622,6 @@
         }
 
         @media (max-width: 767.98px) {
-            .app-sidebar {
-                position: fixed;
-                inset: 0 auto 0 0;
-                width: min(300px, 86vw);
-                flex-basis: auto;
-                transform: translateX(-105%);
-                box-shadow: 20px 0 50px rgba(15, 23, 42, .12);
-            }
-
-            .app-sidebar.mobile-open {
-                transform: translateX(0);
-            }
-
-            .app-sidebar.is-collapsed {
-                width: min(300px, 86vw);
-            }
-
-            .app-sidebar.is-collapsed .sidebar-copy,
-            .app-sidebar.is-collapsed .brand-copy,
-            .app-sidebar.is-collapsed .nav-section-label {
-                display: initial;
-            }
-
-            .app-sidebar.is-collapsed .sidebar-link {
-                justify-content: flex-start;
-                padding: 10px 12px;
-            }
-
-            .app-sidebar.is-collapsed .sidebar-tooltip {
-                display: none;
-            }
-
-            .page-content {
-                padding: 18px 14px 108px;
-            }
-
-            .app-topbar {
-                min-height: 62px;
-            }
-
             .toastify.hic-toast {
                 width: calc(100vw - 24px);
                 min-width: 0;
@@ -494,14 +638,7 @@
             }
         }
 
-        @media (min-width: 768px) {
-            #mobileDrawerBackdrop {
-                display: none !important;
-            }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-
             *,
             *::before,
             *::after {
@@ -516,539 +653,641 @@
 </head>
 
 <body>
-    {% with current=request.resolver_match.url_name %}
-    <div class="app-shell flex">
+{% with current=request.resolver_match.url_name %}
+<div class="app-shell flex">
 
-        <!-- Mobile drawer backdrop -->
-        <div id="mobileDrawerBackdrop" class="mobile-drawer-backdrop fixed inset-0 z-[55] hidden" aria-hidden="true">
-        </div>
+    <!-- Mobile drawer backdrop -->
+    <div id="mobileDrawerBackdrop"
+         class="mobile-drawer-backdrop fixed inset-0 z-[55] hidden"
+         aria-hidden="true"></div>
 
-        <!-- Sidebar -->
-        <aside id="sidebar" class="app-sidebar flex min-h-screen flex-col">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="app-sidebar flex min-h-screen flex-col">
 
-            <div class="flex h-[74px] items-center gap-3 border-b border-[#e7ebf1] px-4">
-                <a href="{% url 'dashboard_home' %}" class="flex min-w-0 flex-1 items-center gap-3">
-                    <img src="{% static 'HIC_LOGO_TRANSPARENT.png' %}" alt="Holy Infant College logo"
-                        class="h-10 w-10 shrink-0 object-contain">
+        <div class="flex h-[74px] items-center gap-3 border-b border-[#e7ebf1] px-4">
+            <a href="{% url 'dashboard_home' %}" class="flex min-w-0 flex-1 items-center gap-3">
+                <img src="{% static 'HIC_LOGO_TRANSPARENT.png' %}"
+                     alt="Holy Infant College logo"
+                     class="h-10 w-10 shrink-0 object-contain">
 
-                    <div class="brand-copy min-w-0">
-                        <p class="truncate text-[14px] font-bold tracking-tight text-[#172033]">
-                            HIC Faculty Eval
-                        </p>
-                        <p class="mt-0.5 truncate text-[11px] text-[#8791a2]">
-                            Faculty Evaluation System
-                        </p>
-                    </div>
-                </a>
+                <div class="brand-copy min-w-0">
+                    <p class="truncate text-[14px] font-bold tracking-tight text-[#172033]">
+                        HIC Faculty Eval
+                    </p>
+                    <p class="mt-0.5 truncate text-[11px] text-[#8791a2]">
+                        Faculty Evaluation System
+                    </p>
+                </div>
+            </a>
 
-                <button type="button" id="sidebarToggle"
+            <button type="button"
+                    id="sidebarToggle"
                     class="hidden rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 md:inline-flex"
-                    aria-label="Collapse sidebar" title="Collapse sidebar">
-                    <span id="sidebarToggleIcon" class="material-icons-outlined text-[20px]">
-                        chevron_left
-                    </span>
-                </button>
+                    aria-label="Collapse sidebar"
+                    title="Collapse sidebar">
+                <span id="sidebarToggleIcon" class="material-icons-outlined text-[20px]">chevron_left</span>
+            </button>
 
-                <button type="button" id="mobileDrawerClose"
+            <button type="button"
+                    id="mobileDrawerClose"
                     class="ml-auto rounded-lg p-2 text-slate-500 hover:bg-slate-100 md:hidden"
                     aria-label="Close navigation">
-                    <span class="material-icons-outlined">close</span>
-                </button>
-            </div>
-
-            <nav class="flex-1 overflow-y-auto px-3 py-5">
-                <p class="nav-section-label mb-2 px-3 text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">
-                    Workspace
-                </p>
-
-                <a href="{% url 'dashboard_home' %}"
-                    class="sidebar-link group relative {% if current == 'dashboard_home' %}is-active{% endif %}">
-                    <span class="material-icons-outlined">space_dashboard</span>
-                    <span class="sidebar-copy">Dashboard</span>
-                    <span class="sidebar-tooltip">Dashboard</span>
-                </a>
-
-                <a href="{% url 'sections_list' %}"
-                    class="sidebar-link group relative {% if current == 'sections_list' %}is-active{% endif %}">
-                    <span class="material-icons-outlined">view_quilt</span>
-                    <span class="sidebar-copy">Sections</span>
-                    <span class="sidebar-tooltip">Sections</span>
-                </a>
-
-                <a href="{% url 'teachers_list' %}"
-                    class="sidebar-link group relative {% if current == 'teachers_list' %}is-active{% endif %}">
-                    <span class="material-icons-outlined">groups</span>
-                    <span class="sidebar-copy">Faculty</span>
-                    <span class="sidebar-tooltip">Faculty</span>
-                </a>
-
-                <a href="{% url 'courses_list' %}"
-                    class="sidebar-link group relative {% if current == 'courses_list' %}is-active{% endif %}">
-                    <span class="material-icons-outlined">school</span>
-                    <span class="sidebar-copy">Courses</span>
-                    <span class="sidebar-tooltip">Courses</span>
-                </a>
-
-                <a href="{% url 'subjects_list' %}"
-                    class="sidebar-link group relative {% if current == 'subjects_list' %}is-active{% endif %}">
-                    <span class="material-icons-outlined">menu_book</span>
-                    <span class="sidebar-copy">Subjects</span>
-                    <span class="sidebar-tooltip">Subjects</span>
-                </a>
-
-                <a href="{% url 'evaluation_periods_list' %}"
-                    class="sidebar-link group relative {% if current == 'evaluation_periods_list' %}is-active{% endif %}">
-                    <span class="material-icons-outlined">event_available</span>
-                    <span class="sidebar-copy">Evaluation Periods</span>
-                    <span class="sidebar-tooltip">Evaluation Periods</span>
-                </a>
-
-                <a href="{% url 'evaluations_list' %}"
-                    class="sidebar-link group relative {% if current == 'evaluations_list' %}is-active{% endif %}">
-                    <span class="material-icons-outlined">fact_check</span>
-                    <span class="sidebar-copy">Evaluations</span>
-                    <span class="sidebar-tooltip">Evaluations</span>
-                </a>
-            </nav>
-
-            <div class="border-t border-[#e7ebf1] p-3">
-                <button type="button" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal"
-                    class="sidebar-link group relative w-full text-rose-600 hover:bg-rose-50 hover:text-rose-700">
-                    <span class="material-icons-outlined">logout</span>
-                    <span class="sidebar-copy">Sign out</span>
-                    <span class="sidebar-tooltip">Sign out</span>
-                </button>
-
-                <div class="brand-copy px-3 pb-1 pt-3 text-[10px] text-slate-400">
-                    HIC · Faculty Evaluation
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main application -->
-        <div class="app-main flex min-h-screen min-w-0 flex-col">
-
-            <!-- Topbar -->
-            <header class="app-topbar sticky top-0 z-40 flex items-center justify-between gap-3 px-4 md:px-7">
-                <div class="flex min-w-0 items-center gap-3">
-                    <button type="button" id="mobileDrawerOpen"
-                        class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm md:hidden"
-                        aria-label="Open navigation" aria-expanded="false">
-                        <span class="material-icons-outlined">menu</span>
-                    </button>
-
-                    <div class="min-w-0">
-                        <p class="truncate text-[10px] font-bold uppercase tracking-[.13em] text-slate-400">
-                            Holy Infant College of Tacloban City
-                        </p>
-                        <h1 class="truncate text-[17px] font-bold tracking-tight text-[#172033] md:text-[19px]">
-                            {% block page_title %}Dashboard Overview{% endblock %}
-                        </h1>
-                    </div>
-                </div>
-
-                <div class="flex shrink-0 items-center gap-2">
-                    <span class="hidden text-right sm:block">
-                        <span class="block max-w-[180px] truncate text-[13px] font-semibold text-slate-700">
-                            {{ request.user.get_full_name|default:request.user.username }}
-                        </span>
-                        <span class="block text-[11px] text-slate-400">
-                            Administrator
-                        </span>
-                    </span>
-
-                    <button type="button" id="profileButton"
-                        class="flex h-10 w-10 items-center justify-center rounded-full bg-[#eaf0ff] text-[14px] font-bold text-[#2457c5] ring-1 ring-[#d7e3ff]"
-                        aria-label="Account options" aria-expanded="false">
-                        {{ request.user.username|slice:":1"|upper }}
-                    </button>
-
-                    <div id="profileMenu"
-                        class="absolute right-4 top-[60px] z-50 hidden w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl md:right-7">
-                        <div class="border-b border-slate-100 px-4 py-3">
-                            <p class="truncate text-sm font-semibold text-slate-800">
-                                {{ request.user.get_full_name|default:request.user.username }}
-                            </p>
-                            <p class="truncate text-xs text-slate-500">
-                                {{ request.user.username }}
-                            </p>
-                        </div>
-
-                        <button type="button" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal"
-                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-rose-600 hover:bg-rose-50">
-                            <span class="material-icons-outlined text-[19px]">logout</span>
-                            Sign out
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Page content -->
-            <main id="mainContent" class="min-w-0 flex-1">
-                <div class="page-content">
-                    {% block content %}{% endblock %}
-                </div>
-            </main>
+                <span class="material-icons-outlined">close</span>
+            </button>
         </div>
+
+        <nav class="flex-1 overflow-y-auto px-3 py-5">
+            <p class="nav-section-label mb-2 px-3 text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">
+                Workspace
+            </p>
+
+            <a href="{% url 'dashboard_home' %}"
+               class="sidebar-link group relative {% if current == 'dashboard_home' %}is-active{% endif %}"
+               {% if current == 'dashboard_home' %}aria-current="page"{% endif %}>
+                <span class="material-icons-outlined">space_dashboard</span>
+                <span class="sidebar-copy">Dashboard</span>
+                <span class="sidebar-tooltip">Dashboard</span>
+            </a>
+
+            <a href="{% url 'sections_list' %}"
+               class="sidebar-link group relative {% if current == 'sections_list' %}is-active{% endif %}"
+               {% if current == 'sections_list' %}aria-current="page"{% endif %}>
+                <span class="material-icons-outlined">view_quilt</span>
+                <span class="sidebar-copy">Sections</span>
+                <span class="sidebar-tooltip">Sections</span>
+            </a>
+
+            <a href="{% url 'teachers_list' %}"
+               class="sidebar-link group relative {% if current == 'teachers_list' %}is-active{% endif %}"
+               {% if current == 'teachers_list' %}aria-current="page"{% endif %}>
+                <span class="material-icons-outlined">groups</span>
+                <span class="sidebar-copy">Faculty</span>
+                <span class="sidebar-tooltip">Faculty</span>
+            </a>
+
+            <a href="{% url 'courses_list' %}"
+               class="sidebar-link group relative {% if current == 'courses_list' %}is-active{% endif %}"
+               {% if current == 'courses_list' %}aria-current="page"{% endif %}>
+                <span class="material-icons-outlined">school</span>
+                <span class="sidebar-copy">Courses</span>
+                <span class="sidebar-tooltip">Courses</span>
+            </a>
+
+            <a href="{% url 'subjects_list' %}"
+               class="sidebar-link group relative {% if current == 'subjects_list' %}is-active{% endif %}"
+               {% if current == 'subjects_list' %}aria-current="page"{% endif %}>
+                <span class="material-icons-outlined">menu_book</span>
+                <span class="sidebar-copy">Subjects</span>
+                <span class="sidebar-tooltip">Subjects</span>
+            </a>
+
+            <a href="{% url 'evaluation_periods_list' %}"
+               class="sidebar-link group relative {% if current == 'evaluation_periods_list' %}is-active{% endif %}"
+               {% if current == 'evaluation_periods_list' %}aria-current="page"{% endif %}>
+                <span class="material-icons-outlined">event_available</span>
+                <span class="sidebar-copy">Evaluation Periods</span>
+                <span class="sidebar-tooltip">Evaluation Periods</span>
+            </a>
+
+            <a href="{% url 'evaluations_list' %}"
+               class="sidebar-link group relative {% if current == 'evaluations_list' %}is-active{% endif %}"
+               {% if current == 'evaluations_list' %}aria-current="page"{% endif %}>
+                <span class="material-icons-outlined">fact_check</span>
+                <span class="sidebar-copy">Evaluations</span>
+                <span class="sidebar-tooltip">Evaluations</span>
+            </a>
+        </nav>
+
+        <div class="border-t border-[#e7ebf1] p-3">
+            <button type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#logoutConfirmModal"
+                    class="sidebar-link group relative w-full text-rose-600 hover:bg-rose-50 hover:text-rose-700">
+                <span class="material-icons-outlined">logout</span>
+                <span class="sidebar-copy">Sign out</span>
+                <span class="sidebar-tooltip">Sign out</span>
+            </button>
+
+            <div class="brand-copy px-3 pb-1 pt-3 text-[10px] text-slate-400">
+                HIC · Faculty Evaluation
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main application -->
+    <div class="app-main flex min-h-screen min-w-0 flex-col">
+
+        <!-- Topbar -->
+        <header class="app-topbar sticky top-0 z-40 flex items-center justify-between gap-3 px-4 md:px-7">
+            <div class="flex min-w-0 items-center gap-3">
+                <button type="button"
+                        id="mobileDrawerOpen"
+                        class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm md:hidden"
+                        aria-label="Open navigation"
+                        aria-expanded="false">
+                    <span class="material-icons-outlined">menu</span>
+                </button>
+
+                <div class="min-w-0">
+                    <p class="truncate text-[10px] font-bold uppercase tracking-[.13em] text-slate-400">
+                        Holy Infant College of Tacloban City
+                    </p>
+                    <h1 class="truncate text-[17px] font-bold tracking-tight text-[#172033] md:text-[19px]">
+                        {% block page_title %}Dashboard Overview{% endblock %}
+                    </h1>
+                </div>
+            </div>
+
+            <div class="flex shrink-0 items-center gap-2">
+                <span class="hidden text-right sm:block">
+                    <span class="block max-w-[180px] truncate text-[13px] font-semibold text-slate-700">
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </span>
+                    <span class="block text-[11px] text-slate-400">Administrator</span>
+                </span>
+
+                <button type="button"
+                        id="profileButton"
+                        class="flex h-10 w-10 items-center justify-center rounded-full bg-[#eaf0ff] text-[14px] font-bold text-[#2457c5] ring-1 ring-[#d7e3ff]"
+                        aria-label="Account options"
+                        aria-expanded="false">
+                    {{ request.user.username|slice:":1"|upper }}
+                </button>
+
+                <div id="profileMenu"
+                     class="absolute right-4 top-[60px] z-50 hidden w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl md:right-7">
+                    <div class="border-b border-slate-100 px-4 py-3">
+                        <p class="truncate text-sm font-semibold text-slate-800">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </p>
+                        <p class="truncate text-xs text-slate-500">{{ request.user.username }}</p>
+                    </div>
+
+                    <button type="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#logoutConfirmModal"
+                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-rose-600 hover:bg-rose-50">
+                        <span class="material-icons-outlined text-[19px]">logout</span>
+                        Sign out
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page content -->
+        <main id="mainContent" class="min-w-0 flex-1">
+            <div class="page-content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
     </div>
-    {% endwith %}
+</div>
 
-    <!-- Mobile bottom navigation -->
-    <nav class="mobile-bottom-nav fixed bottom-2 left-2 right-2 z-50 flex rounded-2xl p-1.5 md:hidden"
-        aria-label="Primary navigation">
+<!-- Mobile app navigation -->
+<nav class="mobile-bottom-nav md:hidden" aria-label="Primary navigation">
 
-        <a href="{% url 'dashboard_home' %}"
-            class="mobile-nav-link {% if current == 'dashboard_home' %}is-active{% endif %}">
-            <span class="material-icons-outlined">space_dashboard</span>
-            <span>Home</span>
+    <a href="{% url 'dashboard_home' %}"
+       class="mobile-nav-link {% if current == 'dashboard_home' %}is-active{% endif %}"
+       {% if current == 'dashboard_home' %}aria-current="page"{% endif %}>
+        <span class="material-icons-outlined">home</span>
+        <span>Home</span>
+    </a>
+
+    <a href="{% url 'teachers_list' %}"
+       class="mobile-nav-link {% if current == 'teachers_list' %}is-active{% endif %}"
+       {% if current == 'teachers_list' %}aria-current="page"{% endif %}>
+        <span class="material-icons-outlined">groups</span>
+        <span>Faculty</span>
+    </a>
+
+    <a href="{% url 'courses_list' %}"
+       class="mobile-nav-link {% if current == 'courses_list' %}is-active{% endif %}"
+       {% if current == 'courses_list' %}aria-current="page"{% endif %}>
+        <span class="material-icons-outlined">school</span>
+        <span>Courses</span>
+    </a>
+
+    <a href="{% url 'evaluations_list' %}"
+       class="mobile-nav-link {% if current == 'evaluations_list' %}is-active{% endif %}"
+       {% if current == 'evaluations_list' %}aria-current="page"{% endif %}>
+        <span class="material-icons-outlined">fact_check</span>
+        <span>Evaluations</span>
+    </a>
+
+    <button type="button"
+            id="mobileMoreButton"
+            class="mobile-nav-link"
+            aria-expanded="false"
+            aria-controls="mobileMoreSheet">
+        <span class="material-icons-outlined">apps</span>
+        <span>More</span>
+    </button>
+</nav>
+
+<!-- More sheet backdrop -->
+<div id="mobileMoreBackdrop"
+     class="mobile-more-backdrop"
+     aria-hidden="true"></div>
+
+<!-- More options bottom sheet -->
+<section id="mobileMoreSheet"
+         class="mobile-more-sheet"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="mobileMoreTitle"
+         aria-hidden="true"
+         inert>
+
+    <div class="mobile-sheet-handle"></div>
+
+    <div class="mb-4 flex items-start justify-between gap-4">
+        <div>
+            <h2 id="mobileMoreTitle" class="mobile-sheet-heading">More options</h2>
+            <p class="mobile-sheet-subtitle">Other areas of your faculty workspace</p>
+        </div>
+
+        <button type="button"
+                id="mobileMoreClose"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600"
+                aria-label="Close more options">
+            <span class="material-icons-outlined">close</span>
+        </button>
+    </div>
+
+    <div class="mobile-sheet-grid">
+        <a href="{% url 'sections_list' %}"
+           class="mobile-sheet-item"
+           {% if current == 'sections_list' %}aria-current="page"{% endif %}>
+            <span class="material-icons-outlined">view_quilt</span>
+            <span>Sections</span>
         </a>
 
-        <a href="{% url 'teachers_list' %}"
-            class="mobile-nav-link {% if current == 'teachers_list' %}is-active{% endif %}">
-            <span class="material-icons-outlined">groups</span>
-            <span>Faculty</span>
-        </a>
-
-        <a href="{% url 'courses_list' %}"
-            class="mobile-nav-link {% if current == 'courses_list' %}is-active{% endif %}">
-            <span class="material-icons-outlined">school</span>
-            <span>Courses</span>
+        <a href="{% url 'subjects_list' %}"
+           class="mobile-sheet-item"
+           {% if current == 'subjects_list' %}aria-current="page"{% endif %}>
+            <span class="material-icons-outlined">menu_book</span>
+            <span>Subjects</span>
         </a>
 
         <a href="{% url 'evaluation_periods_list' %}"
-            class="mobile-nav-link {% if current == 'evaluation_periods_list' %}is-active{% endif %}">
+           class="mobile-sheet-item"
+           {% if current == 'evaluation_periods_list' %}aria-current="page"{% endif %}>
             <span class="material-icons-outlined">event_available</span>
-            <span>Periods</span>
+            <span>Evaluation Periods</span>
         </a>
+    </div>
 
-        <a href="{% url 'evaluations_list' %}"
-            class="mobile-nav-link {% if current == 'evaluations_list' %}is-active{% endif %}">
-            <span class="material-icons-outlined">fact_check</span>
-            <span>Evaluations</span>
-        </a>
+    <div class="mobile-sheet-divider"></div>
 
-        <div class="relative flex min-w-0 flex-1">
-            <button type="button" id="mobileMoreButton" class="mobile-nav-link" aria-expanded="false"
-                aria-controls="mobileMoreMenu">
-                <span class="material-icons-outlined">more_horiz</span>
-                <span>More</span>
-            </button>
+    <button type="button"
+            class="mobile-sheet-logout"
+            data-bs-toggle="modal"
+            data-bs-target="#logoutConfirmModal">
+        <span class="material-icons-outlined">logout</span>
+        <span>Sign out</span>
+        <span class="material-icons-outlined ml-auto">chevron_right</span>
+    </button>
 
-            <div id="mobileMoreMenu"
-                class="absolute bottom-[62px] right-0 hidden w-60 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+    <p class="mt-5 text-center text-[11px] font-medium text-slate-400">
+        HIC · Faculty Evaluation System
+    </p>
+</section>
+{% endwith %}
 
-                <a href="{% url 'sections_list' %}" class="more-menu-item">
-                    <span class="material-icons-outlined text-[20px]">view_quilt</span>
-                    Sections
-                </a>
+<!-- Logout confirmation modal -->
+<div class="modal fade"
+     id="logoutConfirmModal"
+     tabindex="-1"
+     aria-labelledby="logoutConfirmTitle"
+     aria-hidden="true">
 
-                <a href="{% url 'subjects_list' %}" class="more-menu-item">
-                    <span class="material-icons-outlined text-[20px]">menu_book</span>
-                    Subjects
-                </a>
+    <div class="modal-dialog modal-dialog-centered mx-3 mx-sm-auto">
+        <div class="modal-content">
 
-                <button type="button" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal"
-                    class="more-menu-item w-full text-left text-rose-600">
-                    <span class="material-icons-outlined text-[20px]">logout</span>
-                    Sign out
-                </button>
-            </div>
-        </div>
-    </nav>
+            <div class="modal-header border-0 px-4 pb-2 pt-4">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+                        <span class="material-icons-outlined">logout</span>
+                    </span>
 
-    <!-- Logout confirmation modal -->
-    <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmTitle"
-        aria-hidden="true">
-
-        <div class="modal-dialog modal-dialog-centered mx-3 mx-sm-auto">
-            <div class="modal-content">
-
-                <div class="modal-header border-0 px-4 pb-2 pt-4">
-                    <div class="flex items-center gap-3">
-                        <span class="flex h-11 w-11 items-center justify-center rounded-full bg-rose-50 text-rose-600">
-                            <span class="material-icons-outlined">logout</span>
-                        </span>
-
-                        <div>
-                            <h2 class="modal-title text-base font-bold text-slate-900" id="logoutConfirmTitle">
-                                Sign out?
-                            </h2>
-                            <p class="mt-1 text-xs text-slate-500">
-                                You can sign in again at any time.
-                            </p>
-                        </div>
+                    <div>
+                        <h2 class="modal-title text-base font-bold text-slate-900" id="logoutConfirmTitle">
+                            Sign out?
+                        </h2>
+                        <p class="mt-1 text-xs text-slate-500">
+                            You can sign in again at any time.
+                        </p>
                     </div>
-
-                    <button type="button" class="btn-close ms-auto self-start" data-bs-dismiss="modal"
-                        aria-label="Close">
-                    </button>
                 </div>
 
-                <div class="px-4 pb-2 pt-3 text-sm leading-6 text-slate-600">
-                    Are you sure you want to end your current session?
-                </div>
+                <button type="button"
+                        class="btn-close ms-auto self-start"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
 
-                <div class="modal-footer border-0 px-4 pb-4 pt-3">
-                    <button type="button" class="btn btn-light rounded-3 px-4 py-2 text-sm" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
+            <div class="px-4 pb-2 pt-3 text-sm leading-6 text-slate-600">
+                Are you sure you want to end your current session?
+            </div>
 
-                    <a href="{% url 'admin_logout' %}"
-                        class="btn rounded-3 bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">
-                        Sign out
-                    </a>
-                </div>
+            <div class="modal-footer border-0 px-4 pb-4 pt-3">
+                <button type="button"
+                        class="btn btn-light rounded-3 px-4 py-2 text-sm"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <a href="{% url 'admin_logout' %}"
+                   class="btn rounded-3 bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700">
+                    Sign out
+                </a>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Toastify library -->
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<!-- Toastify -->
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <!-- Centralized SaaS Toast helper -->
-    <script>
-        (function () {
-            "use strict";
+<!-- Centralized SaaS Toast helper -->
+<script>
+(function () {
+    "use strict";
 
-            const toastConfig = {
-                success: {
-                    title: "Success",
-                    icon: "check_circle",
-                    className: "hic-toast--success"
-                },
-                error: {
-                    title: "Something went wrong",
-                    icon: "error",
-                    className: "hic-toast--error"
-                },
-                warning: {
-                    title: "Attention",
-                    icon: "warning",
-                    className: "hic-toast--warning"
-                },
-                info: {
-                    title: "Notification",
-                    icon: "info",
-                    className: "hic-toast--info"
-                }
-            };
+    const toastConfig = {
+        success: {
+            title: "Success",
+            icon: "check_circle",
+            className: "hic-toast--success"
+        },
+        error: {
+            title: "Something went wrong",
+            icon: "error",
+            className: "hic-toast--error"
+        },
+        warning: {
+            title: "Attention",
+            icon: "warning",
+            className: "hic-toast--warning"
+        },
+        info: {
+            title: "Notification",
+            icon: "info",
+            className: "hic-toast--info"
+        }
+    };
 
-            window.showToast = function (
-                message,
-                type = "success",
-                duration = 3500
-            ) {
-                if (typeof Toastify !== "function") {
-                    console.error("Toastify failed to load.");
-                    return;
-                }
+    window.showToast = function (message, type = "success", duration = 3500) {
+        if (typeof Toastify !== "function") {
+            console.error("Toastify failed to load.");
+            return;
+        }
 
-                const normalizedType = Object.prototype.hasOwnProperty.call(
-                    toastConfig,
-                    type
-                ) ? type : "info";
+        const normalizedType = Object.prototype.hasOwnProperty.call(toastConfig, type)
+            ? type
+            : "info";
 
-                const config = toastConfig[normalizedType];
+        const config = toastConfig[normalizedType];
 
-                const layout = document.createElement("div");
-                layout.className = "hic-toast__layout";
+        const layout = document.createElement("div");
+        layout.className = "hic-toast__layout";
 
-                const icon = document.createElement("span");
-                icon.className = "hic-toast__icon material-icons-outlined";
-                icon.textContent = config.icon;
-                icon.setAttribute("aria-hidden", "true");
+        const icon = document.createElement("span");
+        icon.className = "hic-toast__icon material-icons-outlined";
+        icon.textContent = config.icon;
+        icon.setAttribute("aria-hidden", "true");
 
-                const content = document.createElement("div");
-                content.className = "hic-toast__content";
+        const content = document.createElement("div");
+        content.className = "hic-toast__content";
 
-                const title = document.createElement("span");
-                title.className = "hic-toast__title";
-                title.textContent = config.title;
+        const title = document.createElement("span");
+        title.className = "hic-toast__title";
+        title.textContent = config.title;
 
-                const body = document.createElement("span");
-                body.className = "hic-toast__message";
-                body.textContent = String(message ?? "");
+        const body = document.createElement("span");
+        body.className = "hic-toast__message";
+        body.textContent = String(message ?? "");
 
-                content.append(title, body);
-                layout.append(icon, content);
+        content.append(title, body);
+        layout.append(icon, content);
 
-                Toastify({
-                    node: layout,
-                    duration: Math.max(0, Number(duration) || 3500),
-                    gravity: "top",
-                    position: "right",
-                    close: true,
-                    stopOnFocus: true,
-                    className: "hic-toast " + config.className,
-                    escapeMarkup: false,
-                    style: {
-                        background: "#ffffff",
-                        color: "#172033"
-                    },
-                    onClick: function () { }
-                }).showToast();
-            };
+        Toastify({
+            node: layout,
+            duration: Math.max(0, Number(duration) || 3500),
+            gravity: "top",
+            position: "right",
+            close: true,
+            stopOnFocus: true,
+            className: "hic-toast " + config.className,
+            escapeMarkup: false,
+            style: {
+                background: "#ffffff",
+                color: "#172033"
+            }
+        }).showToast();
+    };
 
-            // Display Django messages with the same SaaS toast design.
-            {% for message in messages %}
-            window.showToast(
-                "{{ message|escapejs }}",
-                "{% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}",
-                3500
+    // Display Django messages using the shared toast design.
+    {% for message in messages %}
+    window.showToast(
+        "{{ message|escapejs }}",
+        "{% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}",
+        3500
+    );
+    {% endfor %}
+})();
+</script>
+
+<!-- Sidebar, mobile navigation, and profile menu -->
+<script>
+(function () {
+    "use strict";
+
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarToggleIcon = document.getElementById("sidebarToggleIcon");
+    const drawerBackdrop = document.getElementById("mobileDrawerBackdrop");
+    const drawerOpen = document.getElementById("mobileDrawerOpen");
+    const drawerClose = document.getElementById("mobileDrawerClose");
+
+    const profileButton = document.getElementById("profileButton");
+    const profileMenu = document.getElementById("profileMenu");
+
+    const moreButton = document.getElementById("mobileMoreButton");
+    const moreSheet = document.getElementById("mobileMoreSheet");
+    const moreBackdrop = document.getElementById("mobileMoreBackdrop");
+    const moreClose = document.getElementById("mobileMoreClose");
+
+    function setSidebarCollapsed(collapsed) {
+        sidebar.classList.toggle("is-collapsed", collapsed);
+
+        if (sidebarToggleIcon) {
+            sidebarToggleIcon.textContent = collapsed
+                ? "chevron_right"
+                : "chevron_left";
+        }
+
+        if (sidebarToggle) {
+            sidebarToggle.setAttribute(
+                "aria-label",
+                collapsed ? "Expand sidebar" : "Collapse sidebar"
             );
-            {% endfor %}
-        })();
-    </script>
 
-    <!-- Sidebar, mobile navigation, and profile menu -->
-    <script>
-        (function () {
-            "use strict";
+            sidebarToggle.title = collapsed
+                ? "Expand sidebar"
+                : "Collapse sidebar";
+        }
 
-            const sidebar = document.getElementById("sidebar");
-            const sidebarToggle = document.getElementById("sidebarToggle");
-            const sidebarToggleIcon = document.getElementById("sidebarToggleIcon");
-            const drawerBackdrop = document.getElementById("mobileDrawerBackdrop");
-            const drawerOpen = document.getElementById("mobileDrawerOpen");
-            const drawerClose = document.getElementById("mobileDrawerClose");
-            const profileButton = document.getElementById("profileButton");
-            const profileMenu = document.getElementById("profileMenu");
-            const moreButton = document.getElementById("mobileMoreButton");
-            const moreMenu = document.getElementById("mobileMoreMenu");
+        try {
+            localStorage.setItem("hicSidebarCollapsed", String(collapsed));
+        } catch (error) {
+            // Storage may be unavailable in private browsing.
+        }
+    }
 
-            function setSidebarCollapsed(collapsed) {
-                sidebar.classList.toggle("is-collapsed", collapsed);
+    try {
+        if (window.matchMedia("(min-width: 768px)").matches) {
+            setSidebarCollapsed(
+                localStorage.getItem("hicSidebarCollapsed") === "true"
+            );
+        }
+    } catch (error) {
+        setSidebarCollapsed(false);
+    }
 
-                if (sidebarToggleIcon) {
-                    sidebarToggleIcon.textContent = collapsed
-                        ? "chevron_right"
-                        : "chevron_left";
-                }
+    sidebarToggle?.addEventListener("click", function () {
+        setSidebarCollapsed(!sidebar.classList.contains("is-collapsed"));
+    });
 
-                if (sidebarToggle) {
-                    sidebarToggle.setAttribute(
-                        "aria-label",
-                        collapsed ? "Expand sidebar" : "Collapse sidebar"
-                    );
+    function openDrawer() {
+        closeMoreSheet();
 
-                    sidebarToggle.title = collapsed
-                        ? "Expand sidebar"
-                        : "Collapse sidebar";
-                }
+        sidebar.classList.add("mobile-open");
+        drawerBackdrop.classList.remove("hidden");
+        drawerOpen?.setAttribute("aria-expanded", "true");
+        document.body.classList.add("overflow-hidden");
+    }
 
-                try {
-                    localStorage.setItem(
-                        "hicSidebarCollapsed",
-                        String(collapsed)
-                    );
-                } catch (error) { }
-            }
+    function closeDrawer() {
+        sidebar.classList.remove("mobile-open");
+        drawerBackdrop.classList.add("hidden");
+        drawerOpen?.setAttribute("aria-expanded", "false");
 
-            try {
-                if (window.matchMedia("(min-width: 768px)").matches) {
-                    setSidebarCollapsed(
-                        localStorage.getItem("hicSidebarCollapsed") === "true"
-                    );
-                }
-            } catch (error) {
-                setSidebarCollapsed(false);
-            }
+        if (!moreSheet?.classList.contains("is-open")) {
+            document.body.classList.remove("overflow-hidden");
+        }
+    }
 
-            sidebarToggle?.addEventListener("click", function () {
-                setSidebarCollapsed(
-                    !sidebar.classList.contains("is-collapsed")
-                );
-            });
+    drawerOpen?.addEventListener("click", openDrawer);
+    drawerClose?.addEventListener("click", closeDrawer);
+    drawerBackdrop?.addEventListener("click", closeDrawer);
 
-            function openDrawer() {
-                sidebar.classList.add("mobile-open");
-                drawerBackdrop.classList.remove("hidden");
-                drawerOpen?.setAttribute("aria-expanded", "true");
-                document.body.classList.add("overflow-hidden");
-            }
+    function openMoreSheet() {
+        if (!moreSheet || !moreBackdrop || !moreButton) return;
 
-            function closeDrawer() {
-                sidebar.classList.remove("mobile-open");
-                drawerBackdrop.classList.add("hidden");
-                drawerOpen?.setAttribute("aria-expanded", "false");
-                document.body.classList.remove("overflow-hidden");
-            }
+        profileMenu?.classList.add("hidden");
+        profileButton?.setAttribute("aria-expanded", "false");
 
-            drawerOpen?.addEventListener("click", openDrawer);
-            drawerClose?.addEventListener("click", closeDrawer);
-            drawerBackdrop?.addEventListener("click", closeDrawer);
+        closeDrawer();
 
-            document.addEventListener("keydown", function (event) {
-                if (event.key !== "Escape") return;
+        moreSheet.classList.add("is-open");
+        moreBackdrop.classList.add("is-open");
 
-                closeDrawer();
+        moreSheet.inert = false;
+        moreSheet.setAttribute("aria-hidden", "false");
+        moreBackdrop.setAttribute("aria-hidden", "false");
+        moreButton.setAttribute("aria-expanded", "true");
 
-                profileMenu?.classList.add("hidden");
-                moreMenu?.classList.add("hidden");
+        document.body.classList.add("overflow-hidden");
 
-                profileButton?.setAttribute("aria-expanded", "false");
-                moreButton?.setAttribute("aria-expanded", "false");
-            });
+        window.setTimeout(function () {
+            moreClose?.focus();
+        }, 50);
+    }
 
-            window.addEventListener("resize", function () {
-                if (window.matchMedia("(min-width: 768px)").matches) {
-                    closeDrawer();
-                }
-            });
+    function closeMoreSheet() {
+        if (!moreSheet || !moreBackdrop || !moreButton) return;
 
-            profileButton?.addEventListener("click", function (event) {
-                event.stopPropagation();
+        moreSheet.classList.remove("is-open");
+        moreBackdrop.classList.remove("is-open");
 
-                const willOpen = profileMenu.classList.contains("hidden");
+        moreSheet.inert = true;
+        moreSheet.setAttribute("aria-hidden", "true");
+        moreBackdrop.setAttribute("aria-hidden", "true");
+        moreButton.setAttribute("aria-expanded", "false");
 
-                profileMenu.classList.toggle("hidden", !willOpen);
-                profileButton.setAttribute(
-                    "aria-expanded",
-                    String(willOpen)
-                );
+        if (!sidebar?.classList.contains("mobile-open")) {
+            document.body.classList.remove("overflow-hidden");
+        }
+    }
 
-                moreMenu?.classList.add("hidden");
-                moreButton?.setAttribute("aria-expanded", "false");
-            });
+    moreButton?.addEventListener("click", function () {
+        if (moreSheet?.classList.contains("is-open")) {
+            closeMoreSheet();
+        } else {
+            openMoreSheet();
+        }
+    });
 
-            moreButton?.addEventListener("click", function (event) {
-                event.stopPropagation();
+    moreClose?.addEventListener("click", closeMoreSheet);
+    moreBackdrop?.addEventListener("click", closeMoreSheet);
 
-                const willOpen = moreMenu.classList.contains("hidden");
+    moreSheet?.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", closeMoreSheet);
+    });
 
-                moreMenu.classList.toggle("hidden", !willOpen);
-                moreButton.setAttribute(
-                    "aria-expanded",
-                    String(willOpen)
-                );
+    // Profile dropdown.
+    profileButton?.addEventListener("click", function (event) {
+        event.stopPropagation();
 
-                profileMenu?.classList.add("hidden");
-                profileButton?.setAttribute("aria-expanded", "false");
-            });
+        const willOpen = profileMenu.classList.contains("hidden");
 
-            document.addEventListener("click", function (event) {
-                if (
-                    profileMenu &&
-                    !profileMenu.contains(event.target) &&
-                    !profileButton?.contains(event.target)
-                ) {
-                    profileMenu.classList.add("hidden");
-                    profileButton?.setAttribute("aria-expanded", "false");
-                }
+        profileMenu.classList.toggle("hidden", !willOpen);
+        profileButton.setAttribute("aria-expanded", String(willOpen));
 
-                if (
-                    moreMenu &&
-                    !moreMenu.contains(event.target) &&
-                    !moreButton?.contains(event.target)
-                ) {
-                    moreMenu.classList.add("hidden");
-                    moreButton?.setAttribute("aria-expanded", "false");
-                }
-            });
-        })();
-    </script>
+        closeMoreSheet();
+    });
 
-    {% block extra_js %}{% endblock %}
+    // Close menus with Escape and close them when clicking outside.
+    document.addEventListener("keydown", function (event) {
+        if (event.key !== "Escape") return;
+
+        closeDrawer();
+        closeMoreSheet();
+
+        profileMenu?.classList.add("hidden");
+        profileButton?.setAttribute("aria-expanded", "false");
+    });
+
+    document.addEventListener("click", function (event) {
+        if (
+            profileMenu &&
+            !profileMenu.contains(event.target) &&
+            !profileButton?.contains(event.target)
+        ) {
+            profileMenu.classList.add("hidden");
+            profileButton?.setAttribute("aria-expanded", "false");
+        }
+    });
+
+    window.addEventListener("resize", function () {
+        if (window.matchMedia("(min-width: 768px)").matches) {
+            closeDrawer();
+            closeMoreSheet();
+        }
+    });
+
+    // Restore focus to More when the bottom sheet closes.
+    moreClose?.addEventListener("click", function () {
+        moreButton?.focus();
+    });
+
+    moreBackdrop?.addEventListener("click", function () {
+        moreButton?.focus();
+    });
+})();
+</script>
+
+{% block extra_js %}{% endblock %}
 </body>
-
 </html>

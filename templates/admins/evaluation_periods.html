@@ -553,63 +553,6 @@
         </div>
     </div>
 
-    <!-- Currently open periods (one card per open period, so College and Basic can both show) -->
-    {% for active_period in open_periods %}
-    <section class="ep-current mb-4">
-        <div class="ep-current-decoration"></div>
-
-        <div class="ep-current-content position-relative p-4" style="z-index:1">
-            <div class="d-flex flex-column flex-sm-row align-items-sm-start justify-content-between gap-3">
-                <div class="d-flex align-items-start gap-3">
-                    <div class="ep-current-icon">
-                        <span class="material-icons-outlined" style="font-size:25px">event_available</span>
-                    </div>
-
-                    <div class="min-w-0">
-                        <div class="ep-eyebrow ep-current-muted mb-2">
-                            Currently active semester
-                        </div>
-
-                        <h2 class="ep-current-title mb-1">
-                            {{ active_period.get_semester_display }}
-                        </h2>
-
-                        <div class="ep-current-muted d-flex align-items-center flex-wrap gap-2">
-                            <span class="ep-current-division">
-                                {{ active_period.get_education_level_display }}
-                            </span>
-                            <span>Academic Year {{ active_period.academic_year }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <span class="ep-current-badge align-self-start">
-                    Accepting evaluations
-                </span>
-            </div>
-
-            <div class="ep-divider" style="background:rgb(255 255 255 / 14%)"></div>
-
-            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
-                <div class="d-flex align-items-center gap-2 ep-current-muted">
-                    <span class="material-icons-outlined" style="font-size:18px">calendar_today</span>
-                    <span class="small">
-                        {{ active_period.start_date|date:"M d, Y" }}
-                        – {{ active_period.end_date|date:"M d, Y" }}
-                    </span>
-                </div>
-
-                <a href="{% url 'evaluation_period_edit' active_period.pk %}"
-                    class="btn btn-sm text-white rounded-3 align-self-start align-self-sm-center"
-                    style="border:1px solid rgb(255 255 255 / 25%);background:rgb(255 255 255 / 9%);font-weight:700;padding:8px 12px">
-                    <span class="material-icons-outlined align-middle me-1" style="font-size:16px">edit</span>
-                    Edit period
-                </a>
-            </div>
-        </div>
-    </section>
-    {% endfor %}
-
     {% if not open_periods %}
     <section class="ep-alert mb-4">
         <div class="d-flex align-items-start gap-3">

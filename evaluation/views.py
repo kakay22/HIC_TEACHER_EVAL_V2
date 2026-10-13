@@ -33,24 +33,24 @@ def evaluation_form(request, division):
     if division not in EducationLevel.values:
         return redirect("home")
 
+    is_college = division == EducationLevel.COLLEGE
+
     form_url_name = (
         "college_evaluation"
-        if division == EducationLevel.COLLEGE
+        if is_college
         else "basic_education_evaluation"
     )
 
     template_name = (
         "evaluation/home.html"
-        if division == EducationLevel.COLLEGE
+        if is_college
         else "evaluation/basic_education.html"
     )
 
     # --------------------------------------------------
     # PAGE DATA
     # --------------------------------------------------
-    sections = Section.objects.prefetch_related(
-        "questions"
-    ).all()
+    sections = Section.objects.prefetch_related("questions").all()
 
     teachers = Teacher.objects.filter(
         education_level=division
@@ -64,31 +64,16 @@ def evaluation_form(request, division):
         is_open=True,
     ).first()
 
-    current_date = timezone.localdate()
-
     if division == EducationLevel.BASIC:
         year_levels = [
             "Kindergarten",
-            "Grade 1",
-            "Grade 2",
-            "Grade 3",
-            "Grade 4",
-            "Grade 5",
-            "Grade 6",
-            "Grade 7",
-            "Grade 8",
-            "Grade 9",
-            "Grade 10",
-            "Grade 11",
-            "Grade 12",
+            "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6",
+            "Grade 7", "Grade 8", "Grade 9", "Grade 10",
+            "Grade 11", "Grade 12",
         ]
     else:
         year_levels = [
-            "1st Year",
-            "2nd Year",
-            "3rd Year",
-            "4th Year",
-            "5th Year",
+            "1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year",
         ]
 
     # --------------------------------------------------
@@ -96,7 +81,6 @@ def evaluation_form(request, division):
     # --------------------------------------------------
     if request.method == "POST":
 
-        # Always get the open period for THIS division.
         active_period = EvaluationPeriod.objects.filter(
             education_level=division,
             is_open=True,
@@ -113,25 +97,11 @@ def evaluation_form(request, division):
         # --------------------------------------------------
         # READ AND NORMALIZE FORM DATA
         # --------------------------------------------------
-        student_id = request.POST.get(
-            "student_id", ""
-        ).strip()
-
-        student_name = request.POST.get(
-            "student_name", ""
-        ).strip()
-
-        teacher_id = request.POST.get(
-            "teacher", ""
-        ).strip()
-
-        course_id = request.POST.get(
-            "course", ""
-        ).strip()
-
-        year_level = request.POST.get(
-            "year_level", ""
-        ).strip()
+        student_id = request.POST.get("student_id", "").strip()
+        student_name = request.POST.get("student_name", "").strip()
+        teacher_id = request.POST.get("teacher", "").strip()
+        course_id = request.POST.get("course", "").strip()
+        year_level = request.POST.get("year_level", "").strip()
 
         subject_name = " ".join(
             request.POST.get("subject", "").strip().split()
@@ -146,15 +116,19 @@ def evaluation_form(request, division):
         ).strip()
 
         # --------------------------------------------------
-        # REQUIRED FIELDS
+        # REQUIRED FIELDS (course only required for College)
         # --------------------------------------------------
-        if not all([
+        required_fields = [
             student_id,
             teacher_id,
-            course_id,
             year_level,
             subject_name,
-        ]):
+        ]
+
+        if is_college:
+            required_fields.append(course_id)
+
+        if not all(required_fields):
             messages.error(
                 request,
                 "Please complete all required fields.",
@@ -164,11 +138,7 @@ def evaluation_form(request, division):
         # --------------------------------------------------
         # REGISTERED STUDENT VALIDATION
         # --------------------------------------------------
-        student_exists = Student.objects.filter(
-            student_id=student_id
-        ).exists()
-
-        if not student_exists:
+        if not Student.objects.filter(student_id=student_id).exists():
             messages.error(
                 request,
                 "Your student ID is not registered in the system. "
@@ -193,19 +163,20 @@ def evaluation_form(request, division):
             return redirect(form_url_name)
 
         # --------------------------------------------------
-        # VALIDATE COURSE
+        # VALIDATE COURSE (College only)
         # --------------------------------------------------
-        course = Course.objects.filter(
-            pk=course_id
-        ).first()
+        course = None
 
-        if course is None:
-            messages.error(
-                request,
-                "The selected course is invalid. "
-                "Please refresh the page and select a course again.",
-            )
-            return redirect(form_url_name)
+        if is_college:
+            course = Course.objects.filter(pk=course_id).first()
+
+            if course is None:
+                messages.error(
+                    request,
+                    "The selected course is invalid. "
+                    "Please refresh the page and select a course again.",
+                )
+                return redirect(form_url_name)
 
         # --------------------------------------------------
         # VALIDATE ALL QUESTION RATINGS
@@ -229,9 +200,7 @@ def evaluation_form(request, division):
 
         for section, question in question_list:
             field_name = f"q_{section.prefix}_{question.order}"
-            rating = request.POST.get(
-                field_name, ""
-            ).strip()
+            rating = request.POST.get(field_name, "").strip()
 
             if rating not in allowed_ratings:
                 messages.error(
@@ -250,7 +219,6 @@ def evaluation_form(request, division):
         try:
             with transaction.atomic():
 
-                # Recheck the open period for this division.
                 current_period = EvaluationPeriod.objects.filter(
                     education_level=division,
                     is_open=True,
@@ -270,9 +238,7 @@ def evaluation_form(request, division):
                 semester = current_period.semester
                 academic_year = current_period.academic_year
 
-                # --------------------------------------------------
                 # DUPLICATE SUBMISSION CHECK
-                # --------------------------------------------------
                 subject = Subject.objects.filter(
                     name__iexact=subject_name
                 ).first()
@@ -293,17 +259,12 @@ def evaluation_form(request, division):
                     )
                     return redirect(form_url_name)
 
-                # Create or retrieve the subject after the duplicate
-                # check. This avoids creating unused subjects when
-                # a duplicate submission is rejected.
                 if subject is None:
                     subject, _ = Subject.objects.get_or_create(
                         name=subject_name
                     )
 
-                # --------------------------------------------------
-                # CREATE EVALUATION
-                # --------------------------------------------------
+                # CREATE EVALUATION (course is None for Basic Education)
                 evaluation = TeacherEvaluation.objects.create(
                     education_level=division,
                     student_id=student_id,
@@ -318,9 +279,7 @@ def evaluation_form(request, division):
                     suggestions_improvement=suggestions_improvement,
                 )
 
-                # --------------------------------------------------
                 # SAVE QUESTION RATINGS AND SECTION TOTALS
-                # --------------------------------------------------
                 numeric_ratings = []
                 section_data = defaultdict(list)
 
@@ -333,46 +292,28 @@ def evaluation_form(request, division):
                         rating=rating,
                     )
 
-                    # "N" is valid but excluded from numeric averages.
                     if rating in {"1", "2", "3", "4", "5"}:
                         rating_value = int(rating)
                         numeric_ratings.append(rating_value)
+                        section_data[section.pk].append(rating_value)
 
-                        section_data[section.pk].append(
-                            rating_value
-                        )
-
-                # --------------------------------------------------
                 # OVERALL RATING
-                # --------------------------------------------------
                 if numeric_ratings:
                     evaluation.overall_rating = round(
                         sum(numeric_ratings) / len(numeric_ratings),
                         2,
                     )
+                    evaluation.save(update_fields=["overall_rating"])
 
-                    evaluation.save(
-                        update_fields=["overall_rating"]
-                    )
-
-                # --------------------------------------------------
                 # SECTION EVALUATION RECORDS
-                # --------------------------------------------------
-                sections_by_id = {
-                    section.pk: section
-                    for section in sections
-                }
+                sections_by_id = {section.pk: section for section in sections}
 
                 for section_id, values in section_data.items():
                     if not values:
                         continue
 
                     total_score = sum(values)
-
-                    average_rating = round(
-                        total_score / len(values),
-                        2,
-                    )
+                    average_rating = round(total_score / len(values), 2)
 
                     SectionEvaluation.objects.update_or_create(
                         evaluation=evaluation,
@@ -415,9 +356,7 @@ def evaluation_form(request, division):
         "subjects": subjects,
         "education_level": division,
         "current_academic_year": (
-            active_period.academic_year
-            if active_period
-            else ""
+            active_period.academic_year if active_period else ""
         ),
         "active_period": active_period,
         "year_levels": year_levels,
@@ -649,39 +588,76 @@ def dashboard_home(request):
     semester = request.GET.get('semester')
     academic_year = request.GET.get('academic_year')
     teacher_id = request.GET.get('teacher')
+    division = request.GET.get('division', '').strip().upper()
+
+    # Only accept known divisions; empty string means "All"
+    if division not in EducationLevel.values:
+        division = ''
 
     # AUTO DETECT ACADEMIC YEAR
-    current_year = datetime.now().year
-    current_month = datetime.now().month
-
-    if current_month >= 6:
-        default_academic_year = f"{current_year}-{current_year + 1}"
+    now = datetime.now()
+    if now.month >= 6:
+        default_academic_year = f"{now.year}-{now.year + 1}"
     else:
-        default_academic_year = f"{current_year - 1}-{current_year}"
+        default_academic_year = f"{now.year - 1}-{now.year}"
 
-    # DEFAULT ONLY ON FIRST LOAD
+    # Default only on first load (param missing entirely)
     if academic_year is None:
         academic_year = default_academic_year
 
-    # Only use default on first page load
-    if academic_year is None:
-        academic_year = default_academic_year
-
-    evaluations_qs = TeacherEvaluation.objects.select_related(
+    # ===============================
+    # BASE QUERYSET (all filters except division)
+    # ===============================
+    base_qs = TeacherEvaluation.objects.select_related(
         'teacher', 'subject', 'course'
     )
 
     if semester:
-        evaluations_qs = evaluations_qs.filter(semester=semester)
+        base_qs = base_qs.filter(semester=semester)
     if academic_year:
-        evaluations_qs = evaluations_qs.filter(academic_year=academic_year)
+        base_qs = base_qs.filter(academic_year=academic_year)
     if teacher_id:
-        evaluations_qs = evaluations_qs.filter(teacher_id=teacher_id)
+        base_qs = base_qs.filter(teacher_id=teacher_id)
+
+    # Division-aware queryset used by the main metrics
+    evaluations_qs = (
+        base_qs.filter(education_level=division) if division else base_qs
+    )
+
+    # ===============================
+    # DIVISION BREAKDOWN (always shows both divisions)
+    # ===============================
+    open_periods = {
+        p.education_level: p
+        for p in EvaluationPeriod.objects.filter(is_open=True)
+    }
+    overall_total = base_qs.count()
+
+    division_stats = []
+    for value, label in EducationLevel.choices:
+        d_qs = base_qs.filter(education_level=value)
+        agg = d_qs.aggregate(avg=Avg('overall_rating'), total=Count('id'))
+        total = agg['total'] or 0
+
+        division_stats.append({
+            'value': value,
+            'label': label,
+            'total': total,
+            'students': d_qs.values('student_id').distinct().count(),
+            'teachers': Teacher.objects.filter(education_level=value).count(),
+            'avg': round(agg['avg'], 2) if agg['avg'] is not None else 0,
+            'share': round(total / overall_total * 100) if overall_total else 0,
+            'period': open_periods.get(value),
+        })
 
     # ===============================
     # BASIC SUMMARY COUNTS
     # ===============================
-    total_teachers = Teacher.objects.count()
+    teachers_qs = Teacher.objects.all()
+    if division:
+        teachers_qs = teachers_qs.filter(education_level=division)
+
+    total_teachers = teachers_qs.count()
     total_evaluations = evaluations_qs.count()
     total_students = evaluations_qs.values('student_id').distinct().count()
 
@@ -718,19 +694,20 @@ def dashboard_home(request):
     response_rate = round(total_evaluations / total_students, 2) if total_students else 0
 
     # ===============================
-    # WEEKLY GROWTH RATE
+    # WEEKLY GROWTH RATE (division-aware)
     # ===============================
     today = timezone.now()
     last_7_days = today - timedelta(days=7)
     previous_7_days = today - timedelta(days=14)
 
-    recent_count = TeacherEvaluation.objects.filter(
-        submitted_at__gte=last_7_days
-    ).count()
+    growth_base = TeacherEvaluation.objects.all()
+    if division:
+        growth_base = growth_base.filter(education_level=division)
 
-    previous_count = TeacherEvaluation.objects.filter(
+    recent_count = growth_base.filter(submitted_at__gte=last_7_days).count()
+    previous_count = growth_base.filter(
         submitted_at__gte=previous_7_days,
-        submitted_at__lt=last_7_days
+        submitted_at__lt=last_7_days,
     ).count()
 
     growth_rate = round(
@@ -757,17 +734,19 @@ def dashboard_home(request):
     # ===============================
     # QUICK STATS
     # ===============================
-    start_of_month = today.replace(day=1)
+    start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     monthly_evaluations = evaluations_qs.filter(submitted_at__gte=start_of_month).count()
     active_teachers = evaluations_qs.values('teacher').distinct().count()
-    highest_rating = 5.0
 
     # ===============================
-    # STATUS COUNTS
+    # TEACHER DROPDOWN (grouped by division in the template)
     # ===============================
-    completed_count = total_evaluations
-    pending_count = 0   # ❗ requires expected submissions to calculate
-    inprogress_count = 0
+    teachers_for_filter = Teacher.objects.all()
+    if division:
+        teachers_for_filter = teachers_for_filter.filter(education_level=division)
+    teachers_for_filter = teachers_for_filter.order_by(
+        'education_level', 'last_name', 'first_name'
+    )
 
     # ===============================
     # CONTEXT
@@ -786,19 +765,24 @@ def dashboard_home(request):
         'top_teacher': top_teacher,
         'top_teacher_avg': top_teacher_avg,
 
-        'completed_count': completed_count,
-        'pending_count': pending_count,
-        'inprogress_count': inprogress_count,
+        'completed_count': total_evaluations,
+        'pending_count': 0,
+        'inprogress_count': 0,
 
         'monthly_evaluations': monthly_evaluations,
         'active_teachers': active_teachers,
-        'highest_rating': highest_rating,
+        'highest_rating': 5.0,
         'response_rate': response_rate,
 
+        # Filters
         'selected_semester': semester or '',
         'selected_academic_year': academic_year,
         'selected_teacher': teacher_id or '',
-        'teachers': Teacher.objects.all(),
+        'selected_division': division,
+
+        # Division UI
+        'division_stats': division_stats,
+        'teachers': teachers_for_filter,
     }
 
     return render(request, 'admins/dashboard_home.html', context)
@@ -1925,15 +1909,16 @@ from django.views.decorators.http import require_POST
 
 @login_required(login_url="admin_login")
 def evaluation_periods_list(request):
-    periods = EvaluationPeriod.objects.all()
-
-    open_periods = EvaluationPeriod.objects.filter(
-        is_open=True
+    periods = EvaluationPeriod.objects.order_by(
+        "education_level", "-start_date", "-id"
     )
+
+    open_periods = periods.filter(is_open=True)
 
     context = {
         "periods": periods,
         "open_periods": open_periods,
+        "open_count": open_periods.count(),
         "active_period": open_periods.first(),
         "form": EvaluationPeriodForm(),
     }

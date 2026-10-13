@@ -25,6 +25,20 @@
     .evaluation-avatar { display: flex; width: 40px; height: 40px; flex: 0 0 40px; align-items: center; justify-content: center; border: 1px solid #dbe6ff; border-radius: 13px; background: #edf3ff; color: #2457c5; font-size: 12px; font-weight: 750; }
     .empty-state { display: flex; min-height: 240px; flex-direction: column; align-items: center; justify-content: center; padding: 28px 20px; text-align: center; }
     .filter-label { display: block; margin-bottom: 7px; color: #667085; font-size: 12px; font-weight: 650; }
+
+    /* Division segmented control (mobile first: full width, 3 equal tabs) */
+    .segmented { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 12px; background: #f1f4f9; }
+    .segmented label { position: relative; margin: 0; cursor: pointer; }
+    .segmented input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    .segmented .seg { display: flex; min-height: 40px; align-items: center; justify-content: center; gap: 6px; border-radius: 9px; padding: 0 8px; color: #667085; font-size: 12px; font-weight: 650; text-align: center; transition: background .15s ease, color .15s ease, box-shadow .15s ease; }
+    .segmented input:checked + .seg { background: #fff; color: #172033; box-shadow: 0 1px 3px rgba(23,32,51,.12); }
+    .segmented input:focus-visible + .seg { outline: 2px solid #2457c5; outline-offset: 1px; }
+
+    /* Division badges */
+    .division-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 2px 8px; font-size: 10px; font-weight: 700; line-height: 1.5; }
+    .division-badge.is-college { background: #edf3ff; color: #2457c5; }
+    .division-badge.is-basic { background: #e9f8f0; color: #168454; }
+
     @media (max-width: 639px) {
         .metric-card { padding: 15px; }
         .metric-icon { height: 40px; width: 40px; flex-basis: 40px; border-radius: 12px; }
@@ -37,32 +51,33 @@
 {% block content %}
 <div class="dashboard-page space-y-5 md:space-y-6">
 
-    <!-- Page introduction -->
-    <section class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-            <p class="dashboard-eyebrow">Overview</p>
-            <h2 class="mt-1 text-[23px] font-bold tracking-tight text-[#172033] sm:text-[26px]">Faculty evaluation at a glance</h2>
-            <p class="mt-1.5 max-w-2xl text-[13px] leading-5 text-slate-500">Review faculty participation and evaluation ratings using the filters below.</p>
-        </div>
-        <button type="button" onclick="window.location.reload()" class="inline-flex min-h-[40px] w-fit items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-[13px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50">
-            <span class="material-icons-outlined text-[18px]">refresh</span>
-            Refresh data
-        </button>
-    </section>
-
     <!-- Filters -->
     <section class="dashboard-card p-4 sm:p-5">
-        <div class="mb-4 flex items-center gap-2.5">
-            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#edf3ff] text-[#2457c5]">
-                <span class="material-icons-outlined text-[20px]">tune</span>
-            </span>
-            <div>
-                <h3 class="text-[14px] font-bold text-slate-800">Filter dashboard</h3>
-                <p class="mt-0.5 text-[11px] text-slate-400">Choose a semester, academic year, or faculty member.</p>
-            </div>
-        </div>
 
         <form id="filterForm" method="GET" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+
+            <!-- Division -->
+            <div class="sm:col-span-2 xl:col-span-4">
+                <span class="filter-label">Division</span>
+                <div class="segmented" role="radiogroup" aria-label="Education division">
+                    <label>
+                        <input type="radio" name="division" value="" {% if not selected_division %}checked{% endif %}>
+                        <span class="seg">All</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="division" value="COLLEGE" {% if selected_division == "COLLEGE" %}checked{% endif %}>
+                        <span class="seg">College</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="division" value="BASIC" {% if selected_division == "BASIC" %}checked{% endif %}>
+                        <span class="seg">
+                            <span class="sm:hidden">Basic Ed</span>
+                            <span class="hidden sm:inline">Basic Education</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
             <div>
                 <label for="semesterFilter" class="filter-label">Semester</label>
                 <div class="dashboard-select-wrap">
@@ -92,8 +107,13 @@
                 <div class="dashboard-select-wrap">
                     <select id="teacherFilter" name="teacher" class="dashboard-select">
                         <option value="">All faculty</option>
-                        {% for t in teachers %}
-                        <option value="{{ t.id }}" {% if selected_teacher == t.id|stringformat:"s" %}selected{% endif %}>{{ t.first_name }} {{ t.last_name }}</option>
+                        {% regroup teachers by get_education_level_display as teacher_groups %}
+                        {% for group in teacher_groups %}
+                        <optgroup label="{{ group.grouper }}">
+                            {% for t in group.list %}
+                            <option value="{{ t.id }}" {% if selected_teacher == t.id|stringformat:"s" %}selected{% endif %}>{{ t.first_name }} {{ t.last_name }}</option>
+                            {% endfor %}
+                        </optgroup>
                         {% endfor %}
                     </select>
                     <span class="material-icons-outlined">expand_more</span>
@@ -170,7 +190,7 @@
                 </div>
                 <span class="inline-flex w-fit items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-500">
                     <span class="h-2 w-2 rounded-full bg-[#2457c5]"></span>
-                    {% if selected_semester or selected_academic_year or selected_teacher %}Filtered results{% else %}All available data{% endif %}
+                    {% if selected_semester or selected_academic_year or selected_teacher or selected_division %}Filtered results{% else %}All available data{% endif %}
                 </span>
             </div>
             <div class="relative mt-5 h-[270px] w-full sm:h-[310px]">
@@ -180,8 +200,8 @@
             <div class="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 sm:grid-cols-5">
                 <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Unsatisfactory</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.1|default:0 }}</p></div>
                 <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Needs improvement</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.2|default:0 }}</p></div>
-                <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Satisfactory</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.3|default:0 }}</p></div>
-                <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Very satisfactory</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.4|default:0 }}</p></div>
+                <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Average</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.3|default:0 }}</p></div>
+                <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Good</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.4|default:0 }}</p></div>
                 <div class="rounded-lg bg-slate-50 px-3 py-2"><p class="text-[10px] text-slate-500">Outstanding</p><p class="mt-1 text-sm font-bold text-slate-800">{{ rating_data.5|default:0 }}</p></div>
             </div>
         </div>
@@ -202,7 +222,12 @@
                     <span class="evaluation-avatar">{{ eval.teacher.first_name|slice:":1" }}{{ eval.teacher.last_name|slice:":1" }}</span>
                     <span class="min-w-0 flex-1">
                         <span class="block truncate text-[13px] font-semibold text-slate-800 transition group-hover:text-[#2457c5]">{{ eval.teacher.first_name }} {{ eval.teacher.last_name }}</span>
-                        <span class="mt-1 block text-[11px] text-slate-400">{{ eval.submitted_at|time_badge }}</span>
+                        <span class="mt-1 flex items-center gap-2 text-[11px] text-slate-400">
+                            <span class="division-badge {% if eval.education_level == 'COLLEGE' %}is-college{% else %}is-basic{% endif %}">
+                                {% if eval.education_level == 'COLLEGE' %}College{% else %}Basic Ed{% endif %}
+                            </span>
+                            <span class="truncate">{{ eval.submitted_at|time_badge }}</span>
+                        </span>
                     </span>
                     <span class="material-icons-outlined text-[19px] text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#2457c5]">chevron_right</span>
                 </a>
@@ -228,8 +253,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Submit filters when a value changes; the form remains usable without JavaScript.
     const filterForm = document.getElementById("filterForm");
     if (filterForm) {
-        filterForm.querySelectorAll("select").forEach(function (select) {
-            select.addEventListener("change", function () {
+        filterForm.querySelectorAll("select, input[type='radio']").forEach(function (control) {
+            control.addEventListener("change", function () {
                 filterForm.requestSubmit ? filterForm.requestSubmit() : filterForm.submit();
             });
         });
@@ -255,7 +280,7 @@ document.addEventListener("DOMContentLoaded", function () {
     new Chart(canvas, {
         type: "bar",
         data: {
-            labels: ["Unsatisfactory", "Needs Improvement", "Satisfactory", "Very Satisfactory", "Outstanding"],
+            labels: ["Unsatisfactory", "Needs Improvement", "Average", "Good", "Outstanding"],
             datasets: [{
                 label: "Evaluations",
                 data: ratingValues,
@@ -311,8 +336,8 @@ document.addEventListener("DOMContentLoaded", function () {
                                 const shortLabels = {
                                     "Unsatisfactory": "Unsat.",
                                     "Needs Improvement": "Needs imp.",
-                                    "Satisfactory": "Satisfactory",
-                                    "Very Satisfactory": "Very sat.",
+                                    "Average": "Average",
+                                    "Good": "Good",
                                     "Outstanding": "Outstanding"
                                 };
                                 return shortLabels[label] || label;
