@@ -51,82 +51,144 @@
 {% block content %}
 <div class="dashboard-page space-y-5 md:space-y-6">
 
-    <!-- Filters -->
-    <section class="dashboard-card p-4 sm:p-5">
-
-        <form id="filterForm" method="GET" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <!-- Compact Filters -->
+    <section class="dashboard-card p-3 sm:p-4">
+        <form id="filterForm" method="GET"
+            class="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
 
             <!-- Division -->
-            <div class="sm:col-span-2 xl:col-span-4">
-                <span class="filter-label">Division</span>
-                <div class="segmented" role="radiogroup" aria-label="Education division">
-                    <label>
-                        <input type="radio" name="division" value="" {% if not selected_division %}checked{% endif %}>
-                        <span class="seg">All</span>
+            <div class="col-span-2 xl:col-span-4">
+                <span class="filter-label mb-1.5 block text-xs">Division</span>
+
+                <div class="segmented grid grid-cols-3 gap-1" role="radiogroup"
+                    aria-label="Education division">
+
+                    <label class="min-w-0">
+                        <input type="radio" name="division" value=""
+                            {% if not selected_division %}checked{% endif %}>
+                        <span class="seg justify-center text-xs sm:text-sm">All</span>
                     </label>
-                    <label>
-                        <input type="radio" name="division" value="COLLEGE" {% if selected_division == "COLLEGE" %}checked{% endif %}>
-                        <span class="seg">College</span>
+
+                    <label class="min-w-0">
+                        <input type="radio" name="division" value="COLLEGE"
+                            {% if selected_division == "COLLEGE" %}checked{% endif %}>
+                        <span class="seg justify-center text-xs sm:text-sm">College</span>
                     </label>
-                    <label>
-                        <input type="radio" name="division" value="BASIC" {% if selected_division == "BASIC" %}checked{% endif %}>
-                        <span class="seg">
+
+                    <label class="min-w-0">
+                        <input type="radio" name="division" value="BASIC"
+                            {% if selected_division == "BASIC" %}checked{% endif %}>
+                        <span class="seg justify-center text-xs sm:text-sm">
                             <span class="sm:hidden">Basic Ed</span>
                             <span class="hidden sm:inline">Basic Education</span>
                         </span>
                     </label>
+
                 </div>
             </div>
 
-            <div>
-                <label for="semesterFilter" class="filter-label">Semester</label>
+            <!-- Semester -->
+            <div class="min-w-0">
+                <label for="semesterFilter" class="filter-label mb-1 block text-xs">
+                    Semester
+                </label>
+
                 <div class="dashboard-select-wrap">
-                    <select id="semesterFilter" name="semester" class="dashboard-select">
+                    <select id="semesterFilter" name="semester"
+                            class="dashboard-select w-full min-w-0 text-sm">
                         <option value="">All Semesters</option>
-                        <option value="1st" {% if selected_semester == "1st" %}selected{% endif %}>1st Semester</option>
-                        <option value="2nd" {% if selected_semester == "2nd" %}selected{% endif %}>2nd Semester</option>
+                        <option value="1st"
+                            {% if selected_semester == "1st" %}selected{% endif %}>
+                            1st Semester
+                        </option>
+                        <option value="2nd"
+                            {% if selected_semester == "2nd" %}selected{% endif %}>
+                            2nd Semester
+                        </option>
                     </select>
                     <span class="material-icons-outlined">expand_more</span>
                 </div>
             </div>
-            <div>
-                <label for="academicYearFilter" class="filter-label">Academic year</label>
+
+            <!-- Academic Year -->
+            <div class="min-w-0">
+                <label for="academicYearFilter"
+                    class="filter-label mb-1 block text-xs">
+                    Academic year
+                </label>
+
                 <div class="dashboard-select-wrap">
-                    <select id="academicYearFilter" name="academic_year" class="dashboard-select">
-                        <option value="" {% if selected_academic_year == "" %}selected{% endif %}>All academic years</option>
-                        <option value="2024-2025" {% if selected_academic_year == "2024-2025" %}selected{% endif %}>2024–2025</option>
-                        <option value="2025-2026" {% if selected_academic_year == "2025-2026" %}selected{% endif %}>2025–2026</option>
-                        <option value="2026-2027" {% if selected_academic_year == "2026-2027" %}selected{% endif %}>2026–2027</option>
-                        <option value="2027-2028" {% if selected_academic_year == "2027-2028" %}selected{% endif %}>2027–2028</option>
+                    <select id="academicYearFilter" name="academic_year"
+                            class="dashboard-select w-full min-w-0 text-sm">
+                        <option value=""
+                            {% if selected_academic_year == "" %}selected{% endif %}>
+                            All years
+                        </option>
+                        <option value="2024-2025"
+                            {% if selected_academic_year == "2024-2025" %}selected{% endif %}>
+                            2024–2025
+                        </option>
+                        <option value="2025-2026"
+                            {% if selected_academic_year == "2025-2026" %}selected{% endif %}>
+                            2025–2026
+                        </option>
+                        <option value="2026-2027"
+                            {% if selected_academic_year == "2026-2027" %}selected{% endif %}>
+                            2026–2027
+                        </option>
+                        <option value="2027-2028"
+                            {% if selected_academic_year == "2027-2028" %}selected{% endif %}>
+                            2027–2028
+                        </option>
                     </select>
                     <span class="material-icons-outlined">expand_more</span>
                 </div>
             </div>
-            <div>
-                <label for="teacherFilter" class="filter-label">Faculty member</label>
+
+            <!-- Faculty Member -->
+            <div class="col-span-2 min-w-0 xl:col-span-1">
+                <label for="teacherFilter"
+                    class="filter-label mb-1 block text-xs">
+                    Faculty member
+                </label>
+
                 <div class="dashboard-select-wrap">
-                    <select id="teacherFilter" name="teacher" class="dashboard-select">
+                    <select id="teacherFilter" name="teacher"
+                            class="dashboard-select w-full min-w-0 text-sm">
                         <option value="">All faculty</option>
+
                         {% regroup teachers by get_education_level_display as teacher_groups %}
                         {% for group in teacher_groups %}
-                        <optgroup label="{{ group.grouper }}">
-                            {% for t in group.list %}
-                            <option value="{{ t.id }}" {% if selected_teacher == t.id|stringformat:"s" %}selected{% endif %}>{{ t.first_name }} {{ t.last_name }}</option>
-                            {% endfor %}
-                        </optgroup>
+                            <optgroup label="{{ group.grouper }}">
+                                {% for t in group.list %}
+                                    <option value="{{ t.id }}"
+                                        {% if selected_teacher == t.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ t.first_name }} {{ t.last_name }}
+                                    </option>
+                                {% endfor %}
+                            </optgroup>
                         {% endfor %}
                     </select>
                     <span class="material-icons-outlined">expand_more</span>
                 </div>
             </div>
-            <div class="flex items-end gap-2">
-                <button type="submit" class="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#2457c5] px-4 text-[13px] font-semibold text-white transition hover:bg-[#1946a3]">
-                    <span class="material-icons-outlined text-[18px]">filter_alt</span> Apply filters
+
+            <!-- Actions -->
+            <div class="col-span-2 flex items-end gap-2 xl:col-span-1">
+                <button type="submit"
+                        class="inline-flex min-h-[42px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#2457c5] px-3 text-sm font-semibold text-white transition hover:bg-[#1946a3]">
+                    <span class="material-icons-outlined text-lg">filter_alt</span>
+                    Apply filters
                 </button>
-                <a href="{% url 'dashboard_home' %}" class="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-[13px] font-semibold text-slate-600 transition hover:bg-slate-50" aria-label="Clear filters" title="Clear filters">
-                    <span class="material-icons-outlined text-[19px]">restart_alt</span>
+
+                <a href="{% url 'dashboard_home' %}"
+                class="inline-flex min-h-[42px] min-w-[42px] items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 text-slate-600 transition hover:bg-slate-50"
+                aria-label="Clear filters"
+                title="Clear filters">
+                    <span class="material-icons-outlined text-xl">restart_alt</span>
                 </a>
             </div>
+
         </form>
     </section>
 

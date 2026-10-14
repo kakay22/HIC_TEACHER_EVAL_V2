@@ -866,11 +866,6 @@
                     <p class="faculty-subtitle">Manage faculty profiles and evaluation performance.</p>
                 </div>
             </div>
-
-            <div class="faculty-count">
-                <span class="material-icons-outlined">person_outline</span>
-                <span id="faculty-count">{{ teachers|length }} faculty member{{ teachers|length|pluralize }}</span>
-            </div>
         </div>
 
         <div class="faculty-toolbar">
@@ -923,7 +918,7 @@
             aria-pressed="true"
         >
             <span class="material-icons-outlined">groups</span>
-            All Faculty
+            All
             <span class="faculty-division-tab-count" id="division-count-all">
                 {{ teachers|length }}
             </span>
@@ -955,7 +950,7 @@
 
     <!-- Search results status -->
     <div class="faculty-results-meta">
-        <span id="faculty-results-label">Faculty directory</span>
+        <span id="faculty-results-label"></span>
         <span id="faculty-loading" class="faculty-loading" role="status" aria-live="polite">
             <span class="spinner-border" aria-hidden="true"></span>
             Searching...
@@ -1091,7 +1086,7 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="6">
+                        <td colspan="7">
                             <div class="faculty-empty">
                                 <div class="faculty-empty-icon">
                                     <span class="material-icons-outlined">group_off</span>
@@ -1458,7 +1453,6 @@
     const tableBody = document.getElementById("teachers-table-body");
     const mobileContainer = document.getElementById("teachers-mobile");
     const loadingIndicator = document.getElementById("faculty-loading");
-    const countLabel = document.getElementById("faculty-count");
     const resultsLabel = document.getElementById("faculty-results-label");
     const urlHelper = document.getElementById("faculty-url-helper");
 
@@ -1729,10 +1723,27 @@
     }
 
     function updateCount(count) {
-        countLabel.textContent = `${count} faculty member${count === 1 ? "" : "s"}`;
         resultsLabel.textContent = searchInput.value.trim()
             ? `Search results (${count})`
             : `Faculty directory (${count})`;
+    }
+
+    function initDivisionCounts() {
+        const rows = document.querySelectorAll(
+            "#teachers-table-body tr[data-teacher-id]"
+        );
+        let college = 0;
+        let basic = 0;
+
+        rows.forEach(row => {
+            const level = String(row.dataset.educationLevel || "COLLEGE").toUpperCase();
+            if (level === "BASIC") basic++;
+            else college++;
+        });
+
+        divisionCountAll.textContent = rows.length;
+        divisionCountCollege.textContent = college;
+        divisionCountBasic.textContent = basic;
     }
 
     
@@ -1768,34 +1779,28 @@ function filterInitialFaculty() {
     let visibleCount = 0;
 
     rows.forEach(row => {
-        const level = String(
-            row.dataset.educationLevel || "COLLEGE"
-        ).toUpperCase();
-
-        const visible =
-            selectedDivision === "ALL" || level === selectedDivision;
-
+        const level = String(row.dataset.educationLevel || "COLLEGE").toUpperCase();
+        const visible = selectedDivision === "ALL" || level === selectedDivision;
         row.hidden = !visible;
         if (visible) visibleCount++;
     });
 
     cards.forEach(card => {
-        const level = String(
-            card.dataset.educationLevel || "COLLEGE"
-        ).toUpperCase();
-
-        card.hidden =
-            selectedDivision !== "ALL" && level !== selectedDivision;
+        const level = String(card.dataset.educationLevel || "COLLEGE").toUpperCase();
+        card.hidden = selectedDivision !== "ALL" && level !== selectedDivision;
     });
 
-    const hasRows = rows.length > 0;
+    document.querySelectorAll(".faculty-empty-filter").forEach(el => el.remove());
 
-    if (hasRows && visibleCount === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7">${emptyState()}</td>
-            </tr>
-        `;
+    if (rows.length && visibleCount === 0) {
+        tableBody.insertAdjacentHTML(
+            "beforeend",
+            `<tr class="faculty-empty-filter"><td colspan="7">${emptyState()}</td></tr>`
+        );
+        mobileContainer.insertAdjacentHTML(
+            "beforeend",
+            `<div class="faculty-empty-filter">${emptyState()}</div>`
+        );
     }
 
     updateCount(visibleCount);
@@ -1915,6 +1920,8 @@ function applyDivisionFilter() {
 });
 
     clearButton.style.display = "none";
+    initDivisionCounts();
+    filterInitialFaculty();
 })();
 </script>
 
